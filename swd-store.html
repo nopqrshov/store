@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SWD Store – Shovon Web Developer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
+  <style>
+    /* কাস্টম স্টাইল (index.html থেকে কপি) */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Inter', sans-serif; background: #f2f4f7; color: #1c1c1e; }
+    .glass { background: rgba(255,255,255,0.6); backdrop-filter: blur(20px); border:1px solid rgba(255,255,255,0.6); }
+    .btn-primary { background: linear-gradient(135deg,#007AFF,#5856D6); color:#fff; padding:12px 28px; border-radius:60px; font-weight:600; border:none; cursor:pointer; transition:0.3s; }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(0,122,255,0.35); }
+    .gradient-text { background: linear-gradient(135deg,#007AFF,#AF52DE); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .nav-link { position:relative; font-weight:500; color:#3a3a3c; transition:0.2s; cursor:pointer; }
+    .nav-link:hover { color:#007AFF; }
+    /* ড্রপডাউন */
+    .dropdown-menu { display:none; position:absolute; right:0; top:100%; background:white; border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,0.1); min-width:200px; padding:8px 0; border:1px solid rgba(0,0,0,0.04); z-index:100; }
+    .dropdown-menu a { display:block; padding:10px 20px; color:#1c1c1e; text-decoration:none; font-size:0.9rem; transition:0.2s; }
+    .dropdown-menu a:hover { background:#f0f0f5; }
+    .dropdown-menu.show { display:block; }
+    .profile-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#007AFF,#5856D6); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; cursor:pointer; }
+    /* কার্ড */
+    .glass-card { background:rgba(255,255,255,0.72); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.7); border-radius:16px; padding:1.5rem; transition:0.3s; }
+    .glass-card:hover { transform:translateY(-4px); box-shadow:0 20px 60px rgba(0,0,0,0.06); }
+  </style>
+</head>
+<body>
+
+<!-- নেভবার -->
+<nav class="fixed top-0 left-0 w-full glass z-50 h-16 md:h-20 flex items-center px-6 sm:px-8 lg:px-12">
+  <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
+    <a href="swd-store.html" class="text-xl md:text-2xl font-bold text-gray-900">
+      SWD <span class="gradient-text">Store</span>
+    </a>
+    <div class="flex items-center gap-4">
+      <!-- লগইন / সাইনআপ (ডিফল্ট) -->
+      <div id="auth-buttons" class="flex items-center gap-3">
+        <a href="#" onclick="openAuthModal('signin')" class="nav-link text-sm">Sign In</a>
+        <a href="#" onclick="openAuthModal('signup')" class="btn-primary text-sm py-2 px-5">Get Started</a>
+      </div>
+      <!-- প্রোফাইল (লগইন পর) -->
+      <div id="profile-section" class="relative hidden">
+        <div class="profile-avatar" id="profileAvatar">S</div>
+        <div class="dropdown-menu" id="dropdownMenu">
+          <a href="#" onclick="navigateTo('my-profile')"><i class="fas fa-user mr-2"></i> My Profile</a>
+          <a href="#" onclick="navigateTo('my-orders')"><i class="fas fa-box mr-2"></i> My Orders</a>
+          <a href="#" onclick="navigateTo('settings')"><i class="fas fa-cog mr-2"></i> Settings</a>
+          <a href="#" onclick="handleLogout()"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- হিরো সেকশন -->
+<section class="pt-32 pb-20 px-6 min-h-screen flex items-center">
+  <div class="max-w-7xl mx-auto text-center">
+    <h1 class="text-5xl md:text-7xl font-bold text-gray-900 leading-tight">
+      Build Your <span class="gradient-text">Dream Website</span>
+    </h1>
+    <p class="text-xl text-gray-500 mt-4 max-w-2xl mx-auto">
+      Choose from our ready-made packages or get a fully custom solution. Fast, reliable, and modern.
+    </p>
+    <div class="mt-10 flex flex-wrap justify-center gap-4">
+      <a href="get-new-website.html" class="btn-primary"><i class="fas fa-shopping-cart"></i> Explore Store</a>
+      <a href="fix-website.html" class="btn-outline"><i class="fas fa-wrench"></i> Fix My Site</a>
+    </div>
+    <!-- ফিচার্ড পণ্যের প্রিভিউ -->
+    <div class="mt-16 grid md:grid-cols-3 gap-6 text-left">
+      <div class="glass-card">
+        <i class="fas fa-file-code text-3xl text-blue-500"></i>
+        <h3 class="font-bold mt-2">Static Website</h3>
+        <p class="text-sm text-gray-500">Perfect for portfolios and small business.</p>
+        <span class="block mt-2 font-bold text-gray-800">$60</span>
+      </div>
+      <div class="glass-card">
+        <i class="fas fa-layer-group text-3xl text-blue-500"></i>
+        <h3 class="font-bold mt-2">Single Page App</h3>
+        <p class="text-sm text-gray-500">Interactive & dynamic SPA with React/Vue.</p>
+        <span class="block mt-2 font-bold text-gray-800">$120</span>
+      </div>
+      <div class="glass-card">
+        <i class="fas fa-database text-3xl text-blue-500"></i>
+        <h3 class="font-bold mt-2">Dynamic Website</h3>
+        <p class="text-sm text-gray-500">Full CMS, blog, e‑commerce ready.</p>
+        <span class="block mt-2 font-bold text-gray-800">$250</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- অথ মডাল (Sign In / Sign Up) -->
+<div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+    <div class="flex justify-between items-center mb-4">
+      <h3 id="authModalTitle" class="text-2xl font-bold">Sign In</h3>
+      <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="authForm" class="space-y-4">
+      <input type="email" id="authEmail" placeholder="Email" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
+      <input type="password" id="authPassword" placeholder="Password" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
+      <button type="submit" class="btn-primary w-full justify-center">Continue</button>
+    </form>
+    <p class="mt-4 text-sm text-gray-500 text-center">
+      <span id="authToggleText">Don't have an account?</span>
+      <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
+    </p>
+    <div id="authError" class="text-red-500 text-sm mt-2 hidden"></div>
+  </div>
+</div>
+
+<script type="module">
+import { auth, db, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, doc, setDoc, getDoc } from './firebase-config.js';
+
+// DOM এলিমেন্ট
+const authBtns = document.getElementById('auth-buttons');
+const profileSection = document.getElementById('profile-section');
+const profileAvatar = document.getElementById('profileAvatar');
+const dropdownMenu = document.getElementById('dropdownMenu');
+const authModal = document.getElementById('authModal');
+const authForm = document.getElementById('authForm');
+const authEmail = document.getElementById('authEmail');
+const authPassword = document.getElementById('authPassword');
+const authModalTitle = document.getElementById('authModalTitle');
+const authToggleLink = document.getElementById('authToggleLink');
+const authToggleText = document.getElementById('authToggleText');
+const authError = document.getElementById('authError');
+
+let currentAuthMode = 'signin'; // 'signin' বা 'signup'
+
+window.openAuthModal = (mode) => {
+  currentAuthMode = mode;
+  authModalTitle.textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
+  authToggleText.textContent = mode === 'signin' ? "Don't have an account?" : "Already have an account?";
+  authToggleLink.textContent = mode === 'signin' ? 'Sign Up' : 'Sign In';
+  authError.classList.add('hidden');
+  authModal.classList.remove('hidden');
+};
+
+window.closeAuthModal = () => authModal.classList.add('hidden');
+
+authToggleLink.addEventListener('click', (e) => {
+  e.preventDefault();
+  currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
+  openAuthModal(currentAuthMode);
+});
+
+authForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = authEmail.value.trim();
+  const password = authPassword.value.trim();
+  if (!email || !password) {
+    authError.textContent = 'দয়া করে ইমেইল ও পাসওয়ার্ড দিন।';
+    authError.classList.remove('hidden');
+    return;
+  }
+  authError.classList.add('hidden');
+  try {
+    let userCred;
+    if (currentAuthMode === 'signin') {
+      userCred = await signInWithEmailAndPassword(auth, email, password);
+    } else {
+      userCred = await createUserWithEmailAndPassword(auth, email, password);
+      // ইউজার ডকুমেন্ট তৈরি
+      await setDoc(doc(db, 'users', userCred.user.uid), {
+        email: email,
+        displayName: email.split('@')[0],
+        createdAt: new Date().toISOString(),
+        role: 'user'
+      });
+    }
+    closeAuthModal();
+    authForm.reset();
+  } catch (error) {
+    authError.textContent = error.message;
+    authError.classList.remove('hidden');
+  }
+});
+
+// অথ স্টেট মনিটর
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    authBtns.classList.add('hidden');
+    profileSection.classList.remove('hidden');
+    // ইউজারের নাম
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    const name = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
+    profileAvatar.textContent = name.charAt(0).toUpperCase();
+  } else {
+    authBtns.classList.remove('hidden');
+    profileSection.classList.add('hidden');
+  }
+});
+
+// ড্রপডাউন টগল
+profileAvatar.addEventListener('click', () => {
+  dropdownMenu.classList.toggle('show');
+});
+document.addEventListener('click', (e) => {
+  if (!profileSection.contains(e.target)) dropdownMenu.classList.remove('show');
+});
+
+window.handleLogout = async () => {
+  await signOut(auth);
+  dropdownMenu.classList.remove('show');
+};
+
+// নেভিগেট (পেজ রিডাইরেক্ট বা মডাল)
+window.navigateTo = (page) => {
+  dropdownMenu.classList.remove('show');
+  if (page === 'my-profile') alert('প্রোফাইল পেজ শীঘ্রই আসছে');
+  else if (page === 'my-orders') alert('আপনার অর্ডার তালিকা');
+  else if (page === 'settings') alert('সেটিংস পেজ');
+};
+</script>
+
+</body>
+</html>

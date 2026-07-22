@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel – SWD Store</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    /* বেসিক স্টাইল */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Inter', sans-serif; background: #f2f4f7; color: #1c1c1e; }
+    .glass { background: rgba(255,255,255,0.6); backdrop-filter: blur(20px); border:1px solid rgba(255,255,255,0.6); }
+    .btn-primary { background: linear-gradient(135deg,#007AFF,#5856D6); color:#fff; padding:10px 20px; border-radius:60px; font-weight:600; border:none; cursor:pointer; transition:0.3s; }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(0,122,255,0.35); }
+    .sidebar { width:260px; height:100vh; position:fixed; top:0; left:0; background:white; border-right:1px solid rgba(0,0,0,0.04); padding:1.5rem; overflow-y:auto; }
+    .main { margin-left:260px; padding:2rem; }
+    .nav-item { display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:12px; cursor:pointer; transition:0.2s; color:#3a3a3c; }
+    .nav-item:hover, .nav-item.active { background:#f0f0f5; color:#007AFF; }
+    .glass-card { background:rgba(255,255,255,0.72); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.7); border-radius:16px; padding:1.5rem; }
+    .form-input { width:100%; padding:12px 16px; border:1.5px solid rgba(60,60,67,0.08); border-radius:12px; font-size:1rem; background:rgba(255,255,255,0.8); }
+    .form-input:focus { outline:none; border-color:#007AFF; }
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+  </style>
+</head>
+<body>
+
+<!-- সাইডবার -->
+<div class="sidebar">
+  <h2 class="text-xl font-bold text-gray-900 mb-6">SWD Admin</h2>
+  <div class="space-y-1">
+    <div class="nav-item active" data-tab="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</div>
+    <div class="nav-item" data-tab="products"><i class="fas fa-box"></i> Products</div>
+    <div class="nav-item" data-tab="orders"><i class="fas fa-shopping-cart"></i> Orders</div>
+    <div class="nav-item" data-tab="users"><i class="fas fa-users"></i> Users</div>
+    <div class="nav-item" data-tab="messages"><i class="fas fa-envelope"></i> Messages</div>
+    <div class="nav-item" data-tab="fixrequests"><i class="fas fa-wrench"></i> Fix Requests</div>
+    <div class="nav-item" data-tab="settings"><i class="fas fa-cog"></i> Settings</div>
+  </div>
+  <div class="absolute bottom-6 left-6">
+    <button onclick="logoutAdmin()" class="text-red-500 hover:text-red-700"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
+</div>
+
+<!-- মূল কন্টেন্ট -->
+<div class="main">
+  <!-- ড্যাশবোর্ড -->
+  <div id="tab-dashboard" class="tab-content active">
+    <h2 class="text-2xl font-bold">Dashboard</h2>
+    <div class="grid grid-cols-4 gap-4 mt-6">
+      <div class="glass-card"><span class="text-gray-500">Total Orders</span><div id="totalOrders" class="text-2xl font-bold">0</div></div>
+      <div class="glass-card"><span class="text-gray-500">Products</span><div id="totalProducts" class="text-2xl font-bold">0</div></div>
+      <div class="glass-card"><span class="text-gray-500">Messages</span><div id="totalMessages" class="text-2xl font-bold">0</div></div>
+      <div class="glass-card"><span class="text-gray-500">Fix Requests</span><div id="totalFixRequests" class="text-2xl font-bold">0</div></div>
+    </div>
+  </div>
+
+  <!-- পণ্য ব্যবস্থাপনা -->
+  <div id="tab-products" class="tab-content">
+    <div class="flex justify-between items-center">
+      <h2 class="text-2xl font-bold">Products</h2>
+      <button onclick="openProductModal()" class="btn-primary"><i class="fas fa-plus"></i> Add Product</button>
+    </div>
+    <div id="productList" class="grid grid-cols-3 gap-4 mt-4"></div>
+    <!-- মডাল -->
+    <div id="productModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+      <div class="bg-white rounded-2xl p-8 max-w-md w-full">
+        <h3 id="productModalTitle" class="text-xl font-bold">Add Product</h3>
+        <form id="productForm" class="mt-4 space-y-3">
+          <input type="text" id="prodName" placeholder="Product Name" required class="form-input" />
+          <input type="text" id="prodDesc" placeholder="Description" class="form-input" />
+          <input type="number" id="prodPrice" placeholder="Price" required class="form-input" />
+          <input type="text" id="prodCategory" placeholder="Category (static/spa/dynamic)" class="form-input" />
+          <input type="hidden" id="prodId" />
+          <button type="submit" class="btn-primary w-full">Save</button>
+        </form>
+        <button onclick="closeProductModal()" class="mt-2 text-gray-500">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- অর্ডার -->
+  <div id="tab-orders" class="tab-content">
+    <h2 class="text-2xl font-bold">Orders</h2>
+    <div id="orderList" class="space-y-4 mt-4"></div>
+  </div>
+
+  <!-- ইউজার -->
+  <div id="tab-users" class="tab-content">
+    <h2 class="text-2xl font-bold">Users</h2>
+    <div id="userList" class="grid grid-cols-3 gap-4 mt-4"></div>
+  </div>
+
+  <!-- মেসেজ (পোর্টফোলিও কন্টাক্ট) -->
+  <div id="tab-messages" class="tab-content">
+    <h2 class="text-2xl font-bold">Contact Messages</h2>
+    <div id="messageList" class="space-y-3 mt-4"></div>
+  </div>
+
+  <!-- ফিক্স রিকোয়েস্ট -->
+  <div id="tab-fixrequests" class="tab-content">
+    <h2 class="text-2xl font-bold">Fix Requests</h2>
+    <div id="fixRequestList" class="space-y-3 mt-4"></div>
+  </div>
+
+  <!-- সেটিংস -->
+  <div id="tab-settings" class="tab-content">
+    <h2 class="text-2xl font-bold">Settings</h2>
+    <form id="settingsForm" class="mt-4 space-y-3 max-w-md">
+      <label class="block">BKASH Number</label>
+      <input type="text" id="bkashNumber" class="form-input" />
+      <label class="block">NAGAD Number</label>
+      <input type="text" id="nagadNumber" class="form-input" />
+      <label class="block">USDT Address</label>
+      <input type="text" id="usdtAddress" class="form-input" />
+      <button type="submit" class="btn-primary">Save Settings</button>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+import { auth, db, collection, doc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, where } from './firebase-config.js';
+
+// চেক অ্যাডমিন
+import { onAuthStateChanged } from './firebase-config.js';
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = 'admin-login.html';
+    return;
+  }
+  const userDoc = await getDoc(doc(db, 'users', user.uid));
+  if (!userDoc.exists() || userDoc.data().role !== 'admin') {
+    alert('Unauthorized');
+    auth.signOut();
+    window.location.href = 'admin-login.html';
+  }
+});
+
+// ট্যাব সুইচ
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    item.classList.add('active');
+    const tab = item.dataset.tab;
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-'+tab).classList.add('active');
+  });
+});
+
+// পণ্য লোড
+const productList = document.getElementById('productList');
+onSnapshot(collection(db, 'products'), (snapshot) => {
+  let html = '';
+  snapshot.forEach(doc => {
+    const p = doc.data();
+    html += `<div class="glass-card">
+      <h3 class="font-bold">${p.name}</h3>
+      <p class="text-sm text-gray-500">$${p.price}</p>
+      <button onclick="editProduct('${doc.id}')" class="text-blue-600 text-sm"><i class="fas fa-edit"></i></button>
+      <button onclick="deleteProduct('${doc.id}')" class="text-red-500 text-sm ml-2"><i class="fas fa-trash"></i></button>
+    </div>`;
+  });
+  productList.innerHTML = html || '<p class="text-gray-500">No products yet.</p>';
+});
+
+// পণ্য অ্যাড/এডিট
+window.openProductModal = (id) => {
+  document.getElementById('productModal').classList.remove('hidden');
+  if (id) {
+    // এডিট মোড
+  }
+};
+window.closeProductModal = () => {
+  document.getElementById('productModal').classList.add('hidden');
+  document.getElementById('productForm').reset();
+};
+document.getElementById('productForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('prodName').value.trim();
+  const desc = document.getElementById('prodDesc').value.trim();
+  const price = parseFloat(document.getElementById('prodPrice').value);
+  const category = document.getElementById('prodCategory').value.trim();
+  const id = document.getElementById('prodId').value;
+  if (!name || !price) return alert('Name and price required.');
+  try {
+    if (id) {
+      await updateDoc(doc(db, 'products', id), { name, desc, price, category });
+    } else {
+      await addDoc(collection(db, 'products'), { name, desc, price, category });
+    }
+    closeProductModal();
+  } catch (err) { alert(err.message); }
+});
+window.deleteProduct = async (id) => {
+  if (confirm('Delete this product?')) await deleteDoc(doc(db, 'products', id));
+};
+
+// অর্ডার লোড
+const orderList = document.getElementById('orderList');
+onSnapshot(collection(db, 'orders'), (snapshot) => {
+  let html = '';
+  snapshot.forEach(doc => {
+    const o = doc.data();
+    html += `<div class="glass-card flex justify-between items-center">
+      <div><span class="font-bold">${o.userId}</span> - $${o.total} - <span class="text-sm text-gray-500">${o.status}</span></div>
+      <div>
+        <select onchange="updateOrderStatus('${doc.id}', this.value)" class="border rounded p-1">
+          <option value="pending" ${o.status==='pending'?'selected':''}>Pending</option>
+          <option value="processing" ${o.status==='processing'?'selected':''}>Processing</option>
+          <option value="completed" ${o.status==='completed'?'selected':''}>Completed</option>
+        </select>
+      </div>
+    </div>`;
+  });
+  orderList.innerHTML = html || '<p class="text-gray-500">No orders.</p>';
+});
+window.updateOrderStatus = async (id, status) => {
+  await updateDoc(doc(db, 'orders', id), { status });
+};
+
+// ইউজার লোড
+const userList = document.getElementById('userList');
+onSnapshot(collection(db, 'users'), (snapshot) => {
+  let html = '';
+  snapshot.forEach(doc => {
+    const u = doc.data();
+    html += `<div class="glass-card"><p class="font-bold">${u.displayName || u.email}</p><p class="text-sm text-gray-500">${u.email}</p><p class="text-xs text-gray-400">${u.role || 'user'}</p></div>`;
+  });
+  userList.innerHTML = html;
+});
+
+// মেসেজ লোড (পোর্টফোলিও কন্টাক্ট)
+const messageList = document.getElementById('messageList');
+onSnapshot(collection(db, 'contactMessages'), (snapshot) => {
+  let html = '';
+  snapshot.forEach(doc => {
+    const m = doc.data();
+    html += `<div class="glass-card"><p><strong>${m.name}</strong> (${m.email})</p><p class="text-sm">${m.message}</p><p class="text-xs text-gray-400">${m.timestamp?.toDate?.()?.toLocaleString() || ''}</p></div>`;
+  });
+  messageList.innerHTML = html || '<p class="text-gray-500">No messages.</p>';
+});
+
+// ফিক্স রিকোয়েস্ট লোড
+const fixRequestList = document.getElementById('fixRequestList');
+onSnapshot(collection(db, 'fixRequests'), (snapshot) => {
+  let html = '';
+  snapshot.forEach(doc => {
+    const f = doc.data();
+    html += `<div class="glass-card"><p><strong>${f.name}</strong> (${f.email})</p><p class="text-sm">${f.problem}</p><p class="text-xs text-gray-400">${f.imageLink ? 'Image: '+f.imageLink : ''}</p></div>`;
+  });
+  fixRequestList.innerHTML = html || '<p class="text-gray-500">No fix requests.</p>';
+});
+
+// সেটিংস
+document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const bkash = document.getElementById('bkashNumber').value.trim();
+  const nagad = document.getElementById('nagadNumber').value.trim();
+  const usdt = document.getElementById('usdtAddress').value.trim();
+  await setDoc(doc(db, 'settings', 'payment'), { bkash, nagad, usdt });
+  alert('Settings saved!');
+});
+
+// লগআউট
+window.logoutAdmin = () => { auth.signOut(); window.location.href = 'admin-login.html'; };
+
+// ড্যাশবোর্ড কাউন্ট
+// (সংক্ষেপে)
+</script>
+
+</body>
+</html>

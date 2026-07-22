@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    body { background: #f2f4f7; font-family: 'Inter', sans-serif; }
+    .glass { background: rgba(255,255,255,0.6); backdrop-filter: blur(20px); border:1px solid rgba(255,255,255,0.6); }
+    .btn-primary { background: linear-gradient(135deg,#007AFF,#5856D6); color:#fff; padding:12px 28px; border-radius:60px; font-weight:600; border:none; cursor:pointer; transition:0.3s; }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(0,122,255,0.35); }
+  </style>
+</head>
+<body>
+<div class="min-h-screen flex items-center justify-center px-4">
+  <div class="glass rounded-2xl p-8 max-w-md w-full shadow-2xl">
+    <h2 class="text-2xl font-bold text-center text-gray-900">Admin Login</h2>
+    <form id="adminLoginForm" class="mt-6 space-y-4">
+      <input type="email" id="adminEmail" placeholder="Admin Email" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
+      <input type="password" id="adminPassword" placeholder="Password" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
+      <button type="submit" class="btn-primary w-full justify-center">Login</button>
+      <div id="adminLoginError" class="text-red-500 text-sm hidden"></div>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+import { auth, signInWithEmailAndPassword, onAuthStateChanged } from './firebase-config.js';
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // চেক করি এই ইউজার অ্যাডমিন কিনা
+    import('./firebase-config.js').then(({ db, doc, getDoc }) => {
+      getDoc(doc(db, 'users', user.uid)).then((docSnap) => {
+        if (docSnap.exists() && docSnap.data().role === 'admin') {
+          window.location.href = 'admin-panel.html';
+        } else {
+          alert('আপনার অ্যাডমিন অনুমতি নেই।');
+          auth.signOut();
+        }
+      });
+    });
+  }
+});
+
+document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('adminEmail').value.trim();
+  const password = document.getElementById('adminPassword').value.trim();
+  const errorDiv = document.getElementById('adminLoginError');
+  errorDiv.classList.add('hidden');
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    // onAuthStateChanged হ্যান্ডেল করবে
+  } catch (err) {
+    errorDiv.textContent = err.message;
+    errorDiv.classList.remove('hidden');
+  }
+});
+</script>
+</body>
+</html>

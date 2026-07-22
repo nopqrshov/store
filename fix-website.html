@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fix My Website – SWD Store</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
+  <style>
+    /* পূর্বের স্টাইল */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Inter', sans-serif; background: #f2f4f7; color: #1c1c1e; }
+    .glass { background: rgba(255,255,255,0.6); backdrop-filter: blur(20px); border:1px solid rgba(255,255,255,0.6); }
+    .btn-primary { background: linear-gradient(135deg,#007AFF,#5856D6); color:#fff; padding:12px 28px; border-radius:60px; font-weight:600; border:none; cursor:pointer; transition:0.3s; }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(0,122,255,0.35); }
+    .gradient-text { background: linear-gradient(135deg,#007AFF,#AF52DE); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .form-input { width:100%; padding:14px 18px; border:1.5px solid rgba(60,60,67,0.08); border-radius:14px; font-size:1rem; background:rgba(255,255,255,0.8); }
+    .form-input:focus { outline:none; border-color:#007AFF; box-shadow:0 0 0 4px rgba(0,122,255,0.08); }
+  </style>
+</head>
+<body>
+
+<nav class="fixed top-0 left-0 w-full glass z-50 h-16 md:h-20 flex items-center px-6">
+  <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
+    <a href="swd-store.html" class="text-xl md:text-2xl font-bold text-gray-900">
+      SWD <span class="gradient-text">Fix</span>
+    </a>
+    <a href="swd-store.html" class="text-sm text-blue-600 hover:underline">Back to Store</a>
+  </div>
+</nav>
+
+<section class="pt-28 pb-16 px-6 max-w-3xl mx-auto">
+  <h1 class="text-3xl font-bold text-gray-900">Fix My Website</h1>
+  <p class="text-gray-500 mt-2">Describe your issue in detail. We'll get back to you within 24 hours.</p>
+
+  <form id="fixForm" class="mt-8 space-y-5">
+    <div>
+      <label class="block text-sm font-semibold text-gray-700">Your Name *</label>
+      <input type="text" id="fixName" required class="form-input" />
+    </div>
+    <div>
+      <label class="block text-sm font-semibold text-gray-700">Email *</label>
+      <input type="email" id="fixEmail" required class="form-input" />
+    </div>
+    <div>
+      <label class="block text-sm font-semibold text-gray-700">Phone</label>
+      <input type="tel" id="fixPhone" class="form-input" />
+    </div>
+    <div>
+      <label class="block text-sm font-semibold text-gray-700">Website URL (if any)</label>
+      <input type="url" id="fixUrl" class="form-input" placeholder="https://example.com" />
+    </div>
+    <div>
+      <label class="block text-sm font-semibold text-gray-700">Describe the problem *</label>
+      <textarea id="fixProblem" rows="5" required class="form-input resize-y" placeholder="What's broken? Slow speed? Error messages?"></textarea>
+    </div>
+    <div>
+      <label class="block text-sm font-semibold text-gray-700">Screenshot / Image (Google Drive link)</label>
+      <input type="text" id="fixImageLink" class="form-input" placeholder="Paste your Google Drive share link here" />
+      <p class="text-xs text-gray-400 mt-1">Upload image to Google Drive, get shareable link, and paste here.</p>
+    </div>
+    <button type="submit" class="btn-primary w-full justify-center">
+      <i class="fas fa-paper-plane"></i> Submit Fix Request
+    </button>
+    <div id="fixFeedback" class="hidden text-sm font-medium p-4 rounded-xl"></div>
+  </form>
+</section>
+
+<script type="module">
+import { auth, db, collection, addDoc, serverTimestamp } from './firebase-config.js';
+
+document.getElementById('fixForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const name = document.getElementById('fixName').value.trim();
+  const email = document.getElementById('fixEmail').value.trim();
+  const phone = document.getElementById('fixPhone').value.trim();
+  const url = document.getElementById('fixUrl').value.trim();
+  const problem = document.getElementById('fixProblem').value.trim();
+  const imageLink = document.getElementById('fixImageLink').value.trim();
+  const feedback = document.getElementById('fixFeedback');
+
+  if (!name || !email || !problem) {
+    feedback.className = 'block text-sm font-medium p-4 rounded-xl bg-red-50 text-red-600 border border-red-200';
+    feedback.textContent = 'দয়া করে নাম, ইমেইল ও সমস্যা বিবরণ দিন।';
+    return;
+  }
+
+  try {
+    await addDoc(collection(db, 'fixRequests'), {
+      name, email, phone, url, problem, imageLink,
+      status: 'pending',
+      timestamp: serverTimestamp(),
+      read: false
+    });
+    feedback.className = 'block text-sm font-medium p-4 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200';
+    feedback.textContent = '✅ আপনার রিকোয়েস্ট সফলভাবে জমা হয়েছে। শীঘ্রই যোগাযোগ করা হবে।';
+    document.getElementById('fixForm').reset();
+    setTimeout(() => feedback.className = 'hidden', 8000);
+  } catch (error) {
+    feedback.className = 'block text-sm font-medium p-4 rounded-xl bg-red-50 text-red-600 border border-red-200';
+    feedback.textContent = '⚠️ কিছু সমস্যা হয়েছে, আবার চেষ্টা করুন।';
+    console.error(error);
+  }
+});
+</script>
+
+</body>
+</html>
