@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Panel – SWD Store</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link rel="stylesheet" href="style.css" />
   <style>
@@ -14,6 +15,9 @@
     .nav-item:hover, .nav-item.active { background:#f0f0f5; color:#007AFF; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
+    .chart-container { height: 280px; position: relative; }
+    .dashboard-card { transition: all 0.3s ease; }
+    .dashboard-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.08); }
   </style>
 </head>
 <body>
@@ -36,17 +40,37 @@
 </div>
 
 <div class="main">
-  <!-- ড্যাশবোর্ড -->
+  <!-- ===== ড্যাশবোর্ড ===== -->
   <div id="tab-dashboard" class="tab-content active">
     <h2 class="text-2xl font-bold">Dashboard</h2>
-    <div class="grid grid-cols-4 gap-4 mt-6">
-      <div class="glass-card"><span class="text-gray-500">Total Orders</span><div id="totalOrders" class="text-2xl font-bold">0</div></div>
-      <div class="glass-card"><span class="text-gray-500">Products</span><div id="totalProducts" class="text-2xl font-bold">0</div></div>
-      <div class="glass-card"><span class="text-gray-500">Messages</span><div id="totalMessages" class="text-2xl font-bold">0</div></div>
-      <div class="glass-card"><span class="text-gray-500">Fix Requests</span><div id="totalFixRequests" class="text-2xl font-bold">0</div></div>
+    
+    <!-- স্ট্যাটিস্টিক্স কার্ড -->
+    <div class="grid grid-cols-5 gap-4 mt-6">
+      <div class="glass-card dashboard-card"><span class="text-gray-500">Total Orders</span><div id="totalOrders" class="text-2xl font-bold">0</div></div>
+      <div class="glass-card dashboard-card"><span class="text-gray-500">Revenue</span><div id="totalRevenue" class="text-2xl font-bold text-green-600">$0</div></div>
+      <div class="glass-card dashboard-card"><span class="text-gray-500">Products</span><div id="totalProducts" class="text-2xl font-bold">0</div></div>
+      <div class="glass-card dashboard-card"><span class="text-gray-500">Messages</span><div id="totalMessages" class="text-2xl font-bold">0</div></div>
+      <div class="glass-card dashboard-card"><span class="text-gray-500">Fix Requests</span><div id="totalFixRequests" class="text-2xl font-bold">0</div></div>
+    </div>
+
+    <!-- চার্ট -->
+    <div class="grid grid-cols-2 gap-6 mt-6">
+      <div class="glass-card">
+        <h3 class="font-semibold text-gray-700 mb-2">📊 Monthly Orders</h3>
+        <div class="chart-container">
+          <canvas id="monthlyOrdersChart"></canvas>
+        </div>
+      </div>
+      <div class="glass-card">
+        <h3 class="font-semibold text-gray-700 mb-2">🧩 Order Status</h3>
+        <div class="chart-container">
+          <canvas id="statusChart"></canvas>
+        </div>
+      </div>
     </div>
   </div>
 
+  <!-- ===== অন্যান্য ট্যাব (পণ্য, অর্ডার, ইত্যাদি) ===== -->
   <!-- পণ্য -->
   <div id="tab-products" class="tab-content">
     <div class="flex justify-between items-center">
@@ -62,7 +86,6 @@
           <input type="text" id="prodDesc" placeholder="Description" class="form-input" />
           <input type="number" id="prodPrice" placeholder="Price" required class="form-input" />
           <input type="text" id="prodCategory" placeholder="Category (static/spa/dynamic)" class="form-input" />
-          <!-- ✅ নতুন ইমেজ ফিল্ড -->
           <input type="text" id="prodImage" placeholder="Image URL (Google Drive link)" class="form-input" />
           <input type="hidden" id="prodId" />
           <button type="submit" class="btn-primary w-full">Save</button>
@@ -130,6 +153,7 @@ import {
 } from './firebase-config.js';
 import { setLoading } from './components.js';
 
+// ===== অথ চেক =====
 onAuthStateChanged(auth, async (user) => {
   if (!user) { window.location.href = 'admin-login.html'; return; }
   const userDoc = await getDoc(doc(db, 'users', user.uid));
@@ -138,19 +162,116 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// ===== ট্যাব সুইচ =====
-document.querySelectorAll('.nav-item').forEach(item => {
-  item.addEventListener('click', () => {
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    item.classList.add('active');
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    const tab = item.dataset.tab;
-    const target = document.getElementById('tab-'+tab);
-    if (target) target.classList.add('active');
+// ===== চার্ট ভেরিয়েবল =====
+let monthlyChart = null;
+let statusChart = null;
+
+// ===== ড্যাশবোর্ড ডেটা & চার্ট আপডেট =====
+function updateCharts(ordersData) {
+  // ১. মাসিক অর্ডার ট্রেন্ড
+  const monthMap = {};
+  let totalRevenue = 0;
+  const statusCount = { pending: 0, processing: 0, completed: 0 };
+
+  ordersData.forEach(o => {
+    const date = o.createdAt?.toDate?.() || new Date();
+    const monthKey = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+    monthMap[monthKey] = (monthMap[monthKey] || 0) + 1;
+    totalRevenue += o.total || 0;
+    if (o.status) statusCount[o.status] = (statusCount[o.status] || 0) + 1;
   });
+
+  // রেভিনিউ আপডেট
+  document.getElementById('totalRevenue').textContent = `$${totalRevenue.toFixed(2)}`;
+
+  const months = Object.keys(monthMap).sort((a, b) => new Date(a) - new Date(b));
+  const counts = months.map(m => monthMap[m]);
+
+  // মাসিক চার্ট
+  const ctx1 = document.getElementById('monthlyOrdersChart').getContext('2d');
+  if (monthlyChart) monthlyChart.destroy();
+  monthlyChart = new Chart(ctx1, {
+    type: 'bar',
+    data: {
+      labels: months.length ? months : ['No Data'],
+      datasets: [{
+        label: 'Orders',
+        data: months.length ? counts : [0],
+        backgroundColor: 'rgba(0, 122, 255, 0.6)',
+        borderColor: '#007AFF',
+        borderWidth: 1,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+    }
+  });
+
+  // স্ট্যাটাস ডোনাট চার্ট
+  const ctx2 = document.getElementById('statusChart').getContext('2d');
+  if (statusChart) statusChart.destroy();
+  const hasData = statusCount.pending + statusCount.processing + statusCount.completed > 0;
+  statusChart = new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+      labels: hasData ? ['Pending', 'Processing', 'Completed'] : ['No Orders'],
+      datasets: [{
+        data: hasData ? [statusCount.pending, statusCount.processing, statusCount.completed] : [1],
+        backgroundColor: ['#FF9500', '#007AFF', '#34C759'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom' } },
+      cutout: '70%'
+    }
+  });
+}
+
+// ===== অর্ডার স্ন্যাপশট =====
+let allOrders = [];
+onSnapshot(collection(db, 'orders'), (snapshot) => {
+  document.getElementById('totalOrders').innerText = snapshot.size;
+  allOrders = [];
+  let html = '';
+  snapshot.forEach(doc => {
+    const o = doc.data();
+    allOrders.push({ id: doc.id, ...o });
+    const statusClass = o.status === 'pending' ? 'badge-pending' : o.status === 'processing' ? 'badge-processing' : 'badge-completed';
+    html += `<div class="glass-card">
+      <div class="flex flex-wrap justify-between items-start gap-2">
+        <div>
+          <p class="font-bold">User: ${o.userId}</p>
+          <p class="text-sm">Total: $${o.total}</p>
+          ${o.transactionId ? `<p class="text-xs text-gray-500">Txn ID: ${o.transactionId}</p>` : '<p class="text-xs text-red-400">Payment pending</p>'}
+          ${o.paymentMethod ? `<p class="text-xs text-gray-400">Method: ${o.paymentMethod}</p>` : ''}
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="${statusClass} px-2 py-1 rounded-full text-xs">${o.status}</span>
+          <select onchange="updateOrderStatus('${doc.id}', this.value)" class="border rounded p-1 text-sm">
+            <option value="pending" ${o.status==='pending'?'selected':''}>Pending</option>
+            <option value="processing" ${o.status==='processing'?'selected':''}>Processing</option>
+            <option value="completed" ${o.status==='completed'?'selected':''}>Completed</option>
+          </select>
+        </div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('orderList').innerHTML = html || '<p class="text-gray-500">No orders.</p>';
+  
+  // চার্ট আপডেট
+  updateCharts(allOrders);
 });
 
-// ===== ড্যাশবোর্ড কাউন্ট + পণ্য =====
+// ===== অন্যান্য ফাংশন (প্রোডাক্ট, ইউজার, মেসেজ, ইত্যাদি) =====
+
+// ---------- প্রোডাক্ট ----------
 const productList = document.getElementById('productList');
 onSnapshot(collection(db, 'products'), (snapshot) => {
   document.getElementById('totalProducts').innerText = snapshot.size;
@@ -187,14 +308,13 @@ window.editProduct = async (id) => {
 window.openProductModal = (id) => {
   document.getElementById('productModal').classList.remove('hidden');
   if (id) editProduct(id);
-  else { document.getElementById('productModalTitle').innerText = 'Add Product'; document.getElementById('prodId').value = ''; document.getElementById('prodImage').value = ''; }
+  else { document.getElementById('productModalTitle').innerText = 'Add Product'; document.getElementById('prodId').value = ''; }
 };
 window.closeProductModal = () => {
   document.getElementById('productModal').classList.add('hidden');
   document.getElementById('productForm').reset();
 };
 
-// প্রোডাক্ট ফর্মে লোডিং + ইমেজ ফিল্ড
 const productForm = document.getElementById('productForm');
 const productSubmitBtn = productForm.querySelector('button[type="submit"]');
 productForm.addEventListener('submit', async (e) => {
@@ -206,7 +326,6 @@ productForm.addEventListener('submit', async (e) => {
   const imageUrl = document.getElementById('prodImage').value.trim();
   const id = document.getElementById('prodId').value;
   if (!name || !price) return alert('Name and price required.');
-  
   setLoading(productSubmitBtn, true, 'Save');
   try {
     const productData = { name, desc, price, category, imageUrl };
@@ -221,40 +340,7 @@ window.deleteProduct = async (id) => {
   if (confirm('Delete this product?')) await deleteDoc(doc(db, 'products', id));
 };
 
-// ===== অর্ডার =====
-const orderList = document.getElementById('orderList');
-onSnapshot(collection(db, 'orders'), (snapshot) => {
-  document.getElementById('totalOrders').innerText = snapshot.size;
-  let html = '';
-  snapshot.forEach(doc => {
-    const o = doc.data();
-    const statusClass = o.status === 'pending' ? 'badge-pending' : o.status === 'processing' ? 'badge-processing' : 'badge-completed';
-    html += `<div class="glass-card">
-      <div class="flex flex-wrap justify-between items-start gap-2">
-        <div>
-          <p class="font-bold">User: ${o.userId}</p>
-          <p class="text-sm">Total: $${o.total}</p>
-          ${o.transactionId ? `<p class="text-xs text-gray-500">Txn ID: ${o.transactionId}</p>` : '<p class="text-xs text-red-400">Payment pending</p>'}
-          ${o.paymentMethod ? `<p class="text-xs text-gray-400">Method: ${o.paymentMethod}</p>` : ''}
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="${statusClass} px-2 py-1 rounded-full text-xs">${o.status}</span>
-          <select onchange="updateOrderStatus('${doc.id}', this.value)" class="border rounded p-1 text-sm">
-            <option value="pending" ${o.status==='pending'?'selected':''}>Pending</option>
-            <option value="processing" ${o.status==='processing'?'selected':''}>Processing</option>
-            <option value="completed" ${o.status==='completed'?'selected':''}>Completed</option>
-          </select>
-        </div>
-      </div>
-    </div>`;
-  });
-  orderList.innerHTML = html || '<p class="text-gray-500">No orders.</p>';
-});
-window.updateOrderStatus = async (id, status) => {
-  await updateDoc(doc(db, 'orders', id), { status });
-};
-
-// ===== ইউজার =====
+// ---------- ইউজার ----------
 const userList = document.getElementById('userList');
 onSnapshot(collection(db, 'users'), (snapshot) => {
   let html = '';
@@ -265,7 +351,7 @@ onSnapshot(collection(db, 'users'), (snapshot) => {
   userList.innerHTML = html;
 });
 
-// ===== কন্টাক্ট মেসেজ =====
+// ---------- কন্টাক্ট মেসেজ ----------
 const messageList = document.getElementById('messageList');
 onSnapshot(collection(db, 'contactMessages'), (snapshot) => {
   document.getElementById('totalMessages').innerText = snapshot.size;
@@ -277,7 +363,7 @@ onSnapshot(collection(db, 'contactMessages'), (snapshot) => {
   messageList.innerHTML = html || '<p class="text-gray-500">No messages.</p>';
 });
 
-// ===== ফিক্স রিকোয়েস্ট =====
+// ---------- ফিক্স রিকোয়েস্ট ----------
 const fixRequestList = document.getElementById('fixRequestList');
 onSnapshot(collection(db, 'fixRequests'), (snapshot) => {
   document.getElementById('totalFixRequests').innerText = snapshot.size;
@@ -289,7 +375,7 @@ onSnapshot(collection(db, 'fixRequests'), (snapshot) => {
   fixRequestList.innerHTML = html || '<p class="text-gray-500">No fix requests.</p>';
 });
 
-// ===== সেটিংস =====
+// ---------- সেটিংস ----------
 const settingsForm = document.getElementById('settingsForm');
 const settingsBtn = settingsForm.querySelector('button[type="submit"]');
 settingsForm.addEventListener('submit', async (e) => {
@@ -305,7 +391,7 @@ settingsForm.addEventListener('submit', async (e) => {
   finally { setLoading(settingsBtn, false); }
 });
 
-// ===== সাপোর্ট চ্যাট =====
+// ---------- সাপোর্ট চ্যাট ----------
 const adminChatContainer = document.getElementById('adminChatContainer');
 const adminChatForm = document.getElementById('adminChatForm');
 const adminChatInput = document.getElementById('adminChatInput');
@@ -346,7 +432,31 @@ adminChatForm.addEventListener('submit', async (e) => {
   finally { setLoading(chatSendBtn, false); }
 });
 
+// ---------- লগআউট ----------
 window.logoutAdmin = () => { signOut(auth); window.location.href = 'admin-login.html'; };
+window.updateOrderStatus = async (id, status) => {
+  await updateDoc(doc(db, 'orders', id), { status });
+};
+
+// ===== ট্যাব সুইচ =====
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    item.classList.add('active');
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    const tab = item.dataset.tab;
+    const target = document.getElementById('tab-'+tab);
+    if (target) target.classList.add('active');
+    
+    // চার্ট রিসাইজ (যদি ড্যাশবোর্ডে যায়)
+    if (tab === 'dashboard') {
+      setTimeout(() => {
+        if (monthlyChart) monthlyChart.resize();
+        if (statusChart) statusChart.resize();
+      }, 100);
+    }
+  });
+});
 </script>
 </body>
 </html>
