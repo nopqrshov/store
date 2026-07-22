@@ -25,6 +25,51 @@
     .dropdown-menu a:hover { background:#f0f0f5; }
     .dropdown-menu.show { display:block; }
     .profile-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#007AFF,#5856D6); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; cursor:pointer; }
+
+    /* টোস্ট */
+    #toast-container {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 380px;
+      width: 100%;
+    }
+    .toast {
+      padding: 16px 20px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.8);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #1c1c1e;
+      transform: translateX(calc(100% + 30px));
+      animation: slideIn 0.4s cubic-bezier(0.25,0.46,0.45,0.94) forwards;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .toast.success { border-left: 4px solid #34C759; }
+    .toast.error { border-left: 4px solid #FF3B30; }
+    .toast.warning { border-left: 4px solid #FF9500; }
+    .toast i { font-size: 1.2rem; }
+    .toast.success i { color: #34C759; }
+    .toast.error i { color: #FF3B30; }
+    .toast.warning i { color: #FF9500; }
+    @keyframes slideIn {
+      to { transform: translateX(0); }
+    }
+    .toast.hide {
+      animation: slideOut 0.4s cubic-bezier(0.25,0.46,0.45,0.94) forwards;
+    }
+    @keyframes slideOut {
+      to { transform: translateX(calc(100% + 30px)); opacity: 0; }
+    }
   </style>
 </head>
 <body>
@@ -32,21 +77,19 @@
 <!-- নেভবার -->
 <nav class="fixed top-0 left-0 w-full glass z-50 h-16 md:h-20 flex items-center px-6 sm:px-8 lg:px-12">
   <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
-    <a href="swd-store.html" class="text-xl md:text-2xl font-bold text-gray-900">
+    <a href="index.html" class="text-xl md:text-2xl font-bold text-gray-900">
       SWD <span class="gradient-text">Store</span>
     </a>
     <div class="hidden md:flex items-center gap-6">
-      <a href="swd-store.html" class="nav-link text-sm">Home</a>
+      <a href="index.html" class="nav-link text-sm">Home</a>
       <a href="get-new-website.html" class="nav-link text-sm">Store</a>
       <a href="fix-website.html" class="nav-link text-sm">Fix</a>
     </div>
     <div class="flex items-center gap-4">
-      <!-- Auth বাটন (ডিফল্ট) -->
       <div id="auth-buttons" class="flex items-center gap-3">
         <a href="#" onclick="openAuthModal('signin')" class="nav-link text-sm">Sign In</a>
         <a href="#" onclick="openAuthModal('signup')" class="btn-primary text-sm py-2 px-5">Get Started</a>
       </div>
-      <!-- প্রোফাইল (লগইন পর) -->
       <div id="profile-section" class="relative hidden">
         <div class="profile-avatar" id="profileAvatar">S</div>
         <div class="dropdown-menu" id="dropdownMenu">
@@ -73,7 +116,6 @@
       <a href="get-new-website.html" class="btn-primary"><i class="fas fa-shopping-cart"></i> Explore Store</a>
       <a href="fix-website.html" class="btn-outline"><i class="fas fa-wrench"></i> Fix My Site</a>
     </div>
-    <!-- ফিচার প্রিভিউ -->
     <div class="mt-16 grid md:grid-cols-3 gap-6 text-left">
       <div class="glass-card">
         <i class="fas fa-file-code text-3xl text-blue-500"></i>
@@ -117,10 +159,28 @@
   </div>
 </div>
 
+<!-- টোস্ট -->
+<div id="toast-container"></div>
+
 <script type="module">
 import { auth, db, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, doc, setDoc, getDoc } from './firebase-config.js';
 
-// DOM
+// ===== TOAST =====
+window.showToast = (message, type = 'success') => {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const toast = document.createElement('div');
+  const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('hide');
+    setTimeout(() => toast.remove(), 400);
+  }, 4500);
+};
+
+// ===== AUTH =====
 const authBtns = document.getElementById('auth-buttons');
 const profileSection = document.getElementById('profile-section');
 const profileAvatar = document.getElementById('profileAvatar');
@@ -149,7 +209,7 @@ window.closeAuthModal = () => authModal.classList.add('hidden');
 authToggleLink.addEventListener('click', (e) => {
   e.preventDefault();
   currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
-  openAuthModal(currentAuthMode);
+  window.openAuthModal(currentAuthMode);
 });
 
 authForm.addEventListener('submit', async (e) => {
@@ -161,17 +221,20 @@ authForm.addEventListener('submit', async (e) => {
     let userCred;
     if (currentAuthMode === 'signin') {
       userCred = await signInWithEmailAndPassword(auth, email, password);
+      showToast('✅ সাইন ইন সফল!', 'success');
     } else {
       userCred = await createUserWithEmailAndPassword(auth, email, password);
       await setDoc(doc(db, 'users', userCred.user.uid), {
         email, displayName: email.split('@')[0], role: 'user', createdAt: new Date().toISOString()
       });
+      showToast('✅ অ্যাকাউন্ট তৈরি হয়েছে!', 'success');
     }
     closeAuthModal();
     authForm.reset();
   } catch (error) {
     authError.textContent = error.message;
     authError.classList.remove('hidden');
+    showToast('⚠️ ' + error.message, 'error');
   }
 });
 
@@ -196,15 +259,15 @@ document.addEventListener('click', (e) => {
 window.handleLogout = async () => {
   await signOut(auth);
   dropdownMenu.classList.remove('show');
+  showToast('✅ লগআউট সফল', 'success');
 };
 
 window.navigateTo = (page) => {
   dropdownMenu.classList.remove('show');
-  if (page === 'my-profile') alert('প্রোফাইল পেজ শীঘ্রই আসছে');
-  else if (page === 'my-orders') alert('আপনার অর্ডার তালিকা');
-  else if (page === 'settings') alert('সেটিংস পেজ');
+  if (page === 'my-profile') showToast('📄 প্রোফাইল পেজ শীঘ্রই আসছে', 'warning');
+  else if (page === 'my-orders') showToast('📦 আপনার অর্ডার তালিকা', 'warning');
+  else if (page === 'settings') showToast('⚙️ সেটিংস পেজ', 'warning');
 };
 </script>
-
 </body>
 </html>

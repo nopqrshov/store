@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
   <style>
-    /* আগের মতো স্টাইল */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family: 'Inter', sans-serif; background: #f2f4f7; color: #1c1c1e; }
     .glass { background: rgba(255,255,255,0.6); backdrop-filter: blur(20px); border:1px solid rgba(255,255,255,0.6); }
@@ -25,19 +24,61 @@
     .dropdown-menu.show { display:block; }
     .profile-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#007AFF,#5856D6); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; cursor:pointer; }
     .cart-badge { background:#007AFF; color:white; border-radius:50%; padding:2px 8px; font-size:0.7rem; font-weight:700; }
-    /* কার্ট সাইডবার */
     .cart-sidebar { position:fixed; right:-400px; top:0; width:380px; height:100%; background:white; box-shadow:-10px 0 40px rgba(0,0,0,0.1); transition:0.4s cubic-bezier(0.25,0.46,0.45,0.94); z-index:200; padding:1.5rem; overflow-y:auto; }
     .cart-sidebar.open { right:0; }
     .cart-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.2); backdrop-filter:blur(4px); z-index:199; display:none; }
     .cart-overlay.open { display:block; }
+    #toast-container {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 380px;
+      width: 100%;
+    }
+    .toast {
+      padding: 16px 20px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.8);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #1c1c1e;
+      transform: translateX(calc(100% + 30px));
+      animation: slideIn 0.4s cubic-bezier(0.25,0.46,0.45,0.94) forwards;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .toast.success { border-left: 4px solid #34C759; }
+    .toast.error { border-left: 4px solid #FF3B30; }
+    .toast.warning { border-left: 4px solid #FF9500; }
+    .toast i { font-size: 1.2rem; }
+    .toast.success i { color: #34C759; }
+    .toast.error i { color: #FF3B30; }
+    .toast.warning i { color: #FF9500; }
+    @keyframes slideIn {
+      to { transform: translateX(0); }
+    }
+    .toast.hide {
+      animation: slideOut 0.4s cubic-bezier(0.25,0.46,0.45,0.94) forwards;
+    }
+    @keyframes slideOut {
+      to { transform: translateX(calc(100% + 30px)); opacity: 0; }
+    }
   </style>
 </head>
 <body>
 
-<!-- নেভবার (SWD Store এর মতো) -->
+<!-- নেভবার (লিংক আপডেট) -->
 <nav class="fixed top-0 left-0 w-full glass z-50 h-16 md:h-20 flex items-center px-6 sm:px-8 lg:px-12">
   <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
-    <a href="swd-store.html" class="text-xl md:text-2xl font-bold text-gray-900">
+    <a href="index.html" class="text-xl md:text-2xl font-bold text-gray-900">
       SWD <span class="gradient-text">Store</span>
     </a>
     <div class="flex items-center gap-4">
@@ -62,13 +103,11 @@
   </div>
 </nav>
 
-<!-- মূল কন্টেন্ট: পণ্যের তালিকা -->
+<!-- মূল কন্টেন্ট -->
 <section class="pt-24 pb-12 px-6">
   <div class="max-w-7xl mx-auto">
     <h1 class="text-3xl font-bold text-gray-900">Choose Your Website Package</h1>
-    <div id="productGrid" class="grid md:grid-cols-3 gap-6 mt-8">
-      <!-- ডাইনামিকভাবে JS দিয়ে রেন্ডার করবে -->
-    </div>
+    <div id="productGrid" class="grid md:grid-cols-3 gap-6 mt-8"></div>
   </div>
 </section>
 
@@ -89,26 +128,131 @@
   </div>
 </div>
 
-<!-- অথ মডাল (পূর্বের মতো) -->
-<!-- ... অথ মডাল HTML ... (একই) -->
+<!-- অথ মডাল -->
+<div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+    <div class="flex justify-between items-center mb-4">
+      <h3 id="authModalTitle" class="text-2xl font-bold">Sign In</h3>
+      <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+    </div>
+    <form id="authForm" class="space-y-4">
+      <input type="email" id="authEmail" placeholder="Email" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
+      <input type="password" id="authPassword" placeholder="Password" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
+      <button type="submit" class="btn-primary w-full justify-center">Continue</button>
+    </form>
+    <p class="mt-4 text-sm text-gray-500 text-center">
+      <span id="authToggleText">Don't have an account?</span>
+      <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
+    </p>
+    <div id="authError" class="text-red-500 text-sm mt-2 hidden"></div>
+  </div>
+</div>
+
+<!-- টোস্ট -->
+<div id="toast-container"></div>
 
 <script type="module">
-import { auth, db, collection, doc, getDocs, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, query, where } from './firebase-config.js';
+import { auth, db, collection, doc, getDocs, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, query, where, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setDoc, getDoc } from './firebase-config.js';
 
-// পণ্য লোড করা
-const productGrid = document.getElementById('productGrid');
-let products = [];
-
-const loadProducts = () => {
-  onSnapshot(collection(db, 'products'), (snapshot) => {
-    products = [];
-    snapshot.forEach(doc => {
-      products.push({ id: doc.id, ...doc.data() });
-    });
-    renderProducts();
-  });
+// ===== TOAST =====
+window.showToast = (message, type = 'success') => {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const toast = document.createElement('div');
+  const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('hide');
+    setTimeout(() => toast.remove(), 400);
+  }, 4500);
 };
 
+// ===== AUTH =====
+let currentAuthMode = 'signin';
+window.openAuthModal = (mode) => {
+  currentAuthMode = mode;
+  document.getElementById('authModalTitle').textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
+  document.getElementById('authToggleText').textContent = mode === 'signin' ? "Don't have an account?" : "Already have an account?";
+  document.getElementById('authToggleLink').textContent = mode === 'signin' ? 'Sign Up' : 'Sign In';
+  document.getElementById('authError').classList.add('hidden');
+  document.getElementById('authModal').classList.remove('hidden');
+};
+window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
+document.getElementById('authToggleLink').addEventListener('click', (e) => {
+  e.preventDefault();
+  currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
+  window.openAuthModal(currentAuthMode);
+});
+document.getElementById('authForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value.trim();
+  const errorDiv = document.getElementById('authError');
+  errorDiv.classList.add('hidden');
+  try {
+    let userCred;
+    if (currentAuthMode === 'signin') {
+      userCred = await signInWithEmailAndPassword(auth, email, password);
+      showToast('✅ সাইন ইন সফল!', 'success');
+    } else {
+      userCred = await createUserWithEmailAndPassword(auth, email, password);
+      await setDoc(doc(db, 'users', userCred.user.uid), {
+        email, displayName: email.split('@')[0], role: 'user', createdAt: new Date().toISOString()
+      });
+      showToast('✅ অ্যাকাউন্ট তৈরি হয়েছে!', 'success');
+    }
+    closeAuthModal();
+    document.getElementById('authForm').reset();
+  } catch (error) {
+    errorDiv.textContent = error.message;
+    errorDiv.classList.remove('hidden');
+    showToast('⚠️ ' + error.message, 'error');
+  }
+});
+
+// ===== PROFILE =====
+const authBtns = document.getElementById('auth-buttons');
+const profileSection = document.getElementById('profile-section');
+const profileAvatar = document.getElementById('profileAvatar');
+const dropdownMenu = document.getElementById('dropdownMenu');
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    authBtns.classList.add('hidden');
+    profileSection.classList.remove('hidden');
+    const userDoc = await getDoc(doc(db, 'users', user.uid));
+    const name = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
+    profileAvatar.textContent = name.charAt(0).toUpperCase();
+  } else {
+    authBtns.classList.remove('hidden');
+    profileSection.classList.add('hidden');
+  }
+});
+profileAvatar.addEventListener('click', () => dropdownMenu.classList.toggle('show'));
+document.addEventListener('click', (e) => {
+  if (!profileSection.contains(e.target)) dropdownMenu.classList.remove('show');
+});
+window.handleLogout = async () => {
+  await signOut(auth);
+  dropdownMenu.classList.remove('show');
+  showToast('✅ লগআউট সফল', 'success');
+};
+window.navigateTo = (page) => {
+  dropdownMenu.classList.remove('show');
+  if (page === 'my-profile') showToast('📄 প্রোফাইল পেজ শীঘ্রই আসছে', 'warning');
+  else if (page === 'my-orders') showToast('📦 আপনার অর্ডার তালিকা', 'warning');
+  else if (page === 'settings') showToast('⚙️ সেটিংস পেজ', 'warning');
+};
+
+// ===== PRODUCTS & CART =====
+const productGrid = document.getElementById('productGrid');
+let products = [];
+onSnapshot(collection(db, 'products'), (snapshot) => {
+  products = [];
+  snapshot.forEach(doc => products.push({ id: doc.id, ...doc.data() }));
+  renderProducts();
+});
 const renderProducts = () => {
   productGrid.innerHTML = products.map(p => `
     <div class="glass-card">
@@ -119,12 +263,7 @@ const renderProducts = () => {
     </div>
   `).join('');
 };
-
-loadProducts();
-
-// কার্ট সিস্টেম
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
 const updateCartUI = () => {
   document.getElementById('cartCount').textContent = cart.length;
   const cartItemsDiv = document.getElementById('cartItems');
@@ -148,43 +287,36 @@ const updateCartUI = () => {
   }).join('');
   document.getElementById('cartTotal').textContent = `$${total}`;
 };
-
 window.addToCart = (productId) => {
   const product = products.find(p => p.id === productId);
   if (!product) return;
   cart.push({ id: product.id, name: product.name, price: product.price });
   localStorage.setItem('cart', JSON.stringify(cart));
   updateCartUI();
-  // অ্যানিমেশন
+  showToast(`✅ "${product.name}" কার্টে যোগ হয়েছে`, 'success');
 };
-
 window.removeFromCart = (index) => {
   cart.splice(index, 1);
   localStorage.setItem('cart', JSON.stringify(cart));
   updateCartUI();
 };
-
 window.toggleCart = () => {
   document.getElementById('cartSidebar').classList.toggle('open');
   document.getElementById('cartOverlay').classList.toggle('open');
 };
-
 updateCartUI();
 
-// চেকআউট
 window.checkout = () => {
   if (cart.length === 0) {
-    alert('Your cart is empty.');
+    showToast('🛒 আপনার কার্ট খালি', 'warning');
     return;
   }
-  // ইউজার চেক
   const user = auth.currentUser;
   if (!user) {
-    alert('Please sign in to checkout.');
+    showToast('⚠️ চেকআউট করতে দয়া করে সাইন ইন করুন', 'error');
     openAuthModal('signin');
     return;
   }
-  // অর্ডার তৈরি
   const orderData = {
     userId: user.uid,
     items: cart,
@@ -195,24 +327,13 @@ window.checkout = () => {
     createdAt: serverTimestamp(),
   };
   addDoc(collection(db, 'orders'), orderData).then(() => {
-    alert('Order placed! Please complete payment.');
+    showToast('🎉 অর্ডার সফল! দয়া করে পেমেন্ট সম্পন্ন করুন।', 'success');
     cart = [];
     localStorage.removeItem('cart');
     updateCartUI();
     toggleCart();
-  }).catch(err => alert('Error: '+err.message));
+  }).catch(err => showToast('⚠️ ' + err.message, 'error'));
 };
-
-// Auth functions (পূর্বের মতো)
-window.openAuthModal = (mode) => { /* ... */ };
-window.closeAuthModal = () => { /* ... */ };
-window.handleLogout = async () => { /* ... */ };
-// অথ স্টেট মনিটর
-import { onAuthStateChanged, signOut } from './firebase-config.js';
-onAuthStateChanged(auth, (user) => {
-  // আপডেট UI
-});
 </script>
-
 </body>
 </html>
