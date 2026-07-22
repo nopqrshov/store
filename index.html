@@ -86,6 +86,10 @@
       <a href="fix-website.html" class="nav-link text-sm">Fix</a>
     </div>
     <div class="flex items-center gap-4">
+      <!-- ✅ মেসেজ আইকন (কার্টের বামে) -->
+      <a href="messages.html" class="text-gray-700 hover:text-blue-500 text-xl" title="Messages">
+        <i class="fas fa-envelope"></i>
+      </a>
       <div id="auth-buttons" class="flex items-center gap-3">
         <a href="#" onclick="openAuthModal('signin')" class="nav-link text-sm">Sign In</a>
         <a href="#" onclick="openAuthModal('signup')" class="btn-primary text-sm py-2 px-5">Get Started</a>
@@ -93,9 +97,9 @@
       <div id="profile-section" class="relative hidden">
         <div class="profile-avatar" id="profileAvatar">S</div>
         <div class="dropdown-menu" id="dropdownMenu">
-          <a href="#" onclick="navigateTo('my-profile')"><i class="fas fa-user mr-2"></i> My Profile</a>
-          <a href="#" onclick="navigateTo('my-orders')"><i class="fas fa-box mr-2"></i> My Orders</a>
-          <a href="#" onclick="navigateTo('settings')"><i class="fas fa-cog mr-2"></i> Settings</a>
+          <a href="my-profile.html"><i class="fas fa-user mr-2"></i> My Profile</a>
+          <a href="my-orders.html"><i class="fas fa-box mr-2"></i> My Orders</a>
+          <a href="settings.html"><i class="fas fa-cog mr-2"></i> Settings</a>
           <a href="#" onclick="handleLogout()"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
         </div>
       </div>
@@ -103,7 +107,7 @@
   </div>
 </nav>
 
-<!-- হিরো সেকশন -->
+<!-- হিরো সেকশন (অপরিবর্তিত) -->
 <section class="pt-32 pb-16 px-6 min-h-screen flex items-center">
   <div class="max-w-7xl mx-auto text-center">
     <h1 class="text-5xl md:text-7xl font-bold text-gray-900 leading-tight">
@@ -139,7 +143,7 @@
   </div>
 </section>
 
-<!-- অথ মডাল -->
+<!-- অথ মডাল (অপরিবর্তিত) -->
 <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
     <div class="flex justify-between items-center mb-4">
@@ -260,13 +264,6 @@ window.handleLogout = async () => {
   await signOut(auth);
   dropdownMenu.classList.remove('show');
   showToast('✅ লগআউট সফল', 'success');
-};
-
-window.navigateTo = (page) => {
-  dropdownMenu.classList.remove('show');
-  if (page === 'my-profile') showToast('📄 প্রোফাইল পেজ শীঘ্রই আসছে', 'warning');
-  else if (page === 'my-orders') showToast('📦 আপনার অর্ডার তালিকা', 'warning');
-  else if (page === 'settings') showToast('⚙️ সেটিংস পেজ', 'warning');
 };
 </script>
 </body>

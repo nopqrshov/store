@@ -65,30 +65,30 @@
     .toast.success i { color: #34C759; }
     .toast.error i { color: #FF3B30; }
     .toast.warning i { color: #FF9500; }
-    @keyframes slideIn {
-      to { transform: translateX(0); }
-    }
-    .toast.hide {
-      animation: slideOut 0.4s cubic-bezier(0.25,0.46,0.45,0.94) forwards;
-    }
-    @keyframes slideOut {
-      to { transform: translateX(calc(100% + 30px)); opacity: 0; }
-    }
+    @keyframes slideIn { to { transform: translateX(0); } }
+    .toast.hide { animation: slideOut 0.4s cubic-bezier(0.25,0.46,0.45,0.94) forwards; }
+    @keyframes slideOut { to { transform: translateX(calc(100% + 30px)); opacity: 0; } }
   </style>
 </head>
 <body>
 
-<!-- নেভবার -->
+<!-- নেভবার (✅ মেসেজ আইকন যুক্ত) -->
 <nav class="fixed top-0 left-0 w-full glass z-50 h-16 md:h-20 flex items-center px-6 sm:px-8 lg:px-12">
   <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
     <a href="index.html" class="text-xl md:text-2xl font-bold text-gray-900">
       SWD <span class="gradient-text">Store</span>
     </a>
     <div class="flex items-center gap-4">
+      <!-- ✅ মেসেজ আইকন (কার্টের বামে) -->
+      <a href="messages.html" class="text-gray-700 hover:text-blue-500 text-xl" title="Messages">
+        <i class="fas fa-envelope"></i>
+      </a>
+      <!-- কার্ট আইকন -->
       <button onclick="toggleCart()" class="relative text-gray-700">
         <i class="fas fa-shopping-cart text-xl"></i>
         <span id="cartCount" class="cart-badge absolute -top-2 -right-3">0</span>
       </button>
+      <!-- অথ বাটন / প্রোফাইল -->
       <div id="auth-buttons" class="flex items-center gap-3">
         <a href="#" onclick="openAuthModal('signin')" class="nav-link text-sm">Sign In</a>
         <a href="#" onclick="openAuthModal('signup')" class="btn-primary text-sm py-2 px-5">Get Started</a>
@@ -96,9 +96,9 @@
       <div id="profile-section" class="relative hidden">
         <div class="profile-avatar" id="profileAvatar">S</div>
         <div class="dropdown-menu" id="dropdownMenu">
-          <a href="#" onclick="navigateTo('my-profile')"><i class="fas fa-user mr-2"></i> My Profile</a>
-          <a href="#" onclick="navigateTo('my-orders')"><i class="fas fa-box mr-2"></i> My Orders</a>
-          <a href="#" onclick="navigateTo('settings')"><i class="fas fa-cog mr-2"></i> Settings</a>
+          <a href="my-profile.html"><i class="fas fa-user mr-2"></i> My Profile</a>
+          <a href="my-orders.html"><i class="fas fa-box mr-2"></i> My Orders</a>
+          <a href="settings.html"><i class="fas fa-cog mr-2"></i> Settings</a>
           <a href="#" onclick="handleLogout()"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
         </div>
       </div>
@@ -151,7 +151,7 @@
   </div>
 </div>
 
-<!-- ✅ পেমেন্ট মডাল (নতুন) -->
+<!-- পেমেন্ট মডাল -->
 <div id="paymentModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[300] hidden">
   <div class="bg-white rounded-2xl p-8 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto">
     <div class="flex justify-between items-center mb-4">
@@ -190,10 +190,7 @@ window.showToast = (message, type = 'success') => {
   toast.className = `toast ${type}`;
   toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
   container.appendChild(toast);
-  setTimeout(() => {
-    toast.classList.add('hide');
-    setTimeout(() => toast.remove(), 400);
-  }, 4500);
+  setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
 };
 
 // ===== AUTH =====
@@ -291,7 +288,7 @@ const renderProducts = () => {
   `).join('');
 };
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
-let currentOrderId = null; // পেমেন্ট মডালের জন্য
+let currentOrderId = null;
 
 const updateCartUI = () => {
   document.getElementById('cartCount').textContent = cart.length;
@@ -335,22 +332,16 @@ window.toggleCart = () => {
 };
 updateCartUI();
 
-// ===== PAYMENT MODAL (গ্রুপ ৩) =====
+// ===== PAYMENT =====
 let paymentSettings = { bkash: '', nagad: '', usdt: '' };
-
-// পেমেন্ট সেটিংস লোড
 const loadPaymentSettings = async () => {
   try {
     const docSnap = await getDoc(doc(db, 'settings', 'payment'));
-    if (docSnap.exists()) {
-      paymentSettings = docSnap.data();
-    }
+    if (docSnap.exists()) paymentSettings = docSnap.data();
   } catch (e) { console.error(e); }
 };
-
 window.openPaymentModal = (orderId) => {
   currentOrderId = orderId;
-  const modal = document.getElementById('paymentModal');
   const numbersDiv = document.getElementById('paymentNumbers');
   let html = '';
   if (paymentSettings.bkash) html += `<p><i class="fas fa-mobile-alt text-blue-500"></i> BKash: <strong>${paymentSettings.bkash}</strong></p>`;
@@ -358,16 +349,14 @@ window.openPaymentModal = (orderId) => {
   if (paymentSettings.usdt) html += `<p><i class="fab fa-bitcoin text-yellow-500"></i> USDT (BEP20): <strong>${paymentSettings.usdt}</strong></p>`;
   if (!html) html = '<p class="text-gray-500">পেমেন্ট পদ্ধতি সেট করা হয়নি। অ্যাডমিনের সাথে যোগাযোগ করুন।</p>';
   numbersDiv.innerHTML = html;
-  modal.classList.remove('hidden');
+  document.getElementById('paymentModal').classList.remove('hidden');
   document.getElementById('paymentError').classList.add('hidden');
   document.getElementById('transactionId').value = '';
 };
-
 window.closePaymentModal = () => {
   document.getElementById('paymentModal').classList.add('hidden');
   currentOrderId = null;
 };
-
 document.getElementById('paymentForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const txnId = document.getElementById('transactionId').value.trim();
@@ -391,11 +380,10 @@ document.getElementById('paymentForm').addEventListener('submit', async (e) => {
     });
     showToast('✅ পেমেন্ট কনফর্ম! অ্যাডমিন শীঘ্রই ভেরিফাই করবেন।', 'success');
     closePaymentModal();
-    // কার্ট খালি করুন
     cart = [];
     localStorage.removeItem('cart');
     updateCartUI();
-    toggleCart(); // কার্ট সাইডবার বন্ধ করুন
+    toggleCart();
   } catch (err) {
     errorDiv.textContent = '⚠️ ' + err.message;
     errorDiv.classList.remove('hidden');
@@ -403,7 +391,7 @@ document.getElementById('paymentForm').addEventListener('submit', async (e) => {
   }
 });
 
-// ===== CHECKOUT (পেমেন্ট মডাল খুলবে) =====
+// ===== CHECKOUT =====
 window.checkout = async () => {
   if (cart.length === 0) {
     showToast('🛒 আপনার কার্ট খালি', 'warning');
@@ -415,7 +403,6 @@ window.checkout = async () => {
     openAuthModal('signin');
     return;
   }
-  // পেমেন্ট সেটিংস লোড করুন
   await loadPaymentSettings();
   if (!paymentSettings.bkash && !paymentSettings.nagad && !paymentSettings.usdt) {
     showToast('⚠️ পেমেন্ট পদ্ধতি সেট করা হয়নি। অ্যাডমিনের সাথে যোগাযোগ করুন।', 'error');
@@ -432,7 +419,6 @@ window.checkout = async () => {
   };
   try {
     const docRef = await addDoc(collection(db, 'orders'), orderData);
-    // পেমেন্ট মডাল খুলুন
     openPaymentModal(docRef.id);
   } catch (err) {
     showToast('⚠️ ' + err.message, 'error');

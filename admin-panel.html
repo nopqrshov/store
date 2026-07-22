@@ -24,11 +24,16 @@
     .badge-pending { background:#FF9500; color:white; padding:2px 10px; border-radius:60px; font-size:0.7rem; }
     .badge-processing { background:#007AFF; color:white; padding:2px 10px; border-radius:60px; font-size:0.7rem; }
     .badge-completed { background:#34C759; color:white; padding:2px 10px; border-radius:60px; font-size:0.7rem; }
+    /* চ্যাট স্টাইল */
+    .chat-container { max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 4px; }
+    .msg-admin { align-self: flex-end; background: #007AFF; color: white; border-radius: 18px 18px 0 18px; padding: 10px 16px; max-width: 80%; }
+    .msg-user { align-self: flex-start; background: #e5e5ea; color: #1c1c1e; border-radius: 18px 18px 18px 0; padding: 10px 16px; max-width: 80%; }
+    .msg-time { font-size: 0.6rem; opacity: 0.7; margin-top: 4px; text-align: right; }
   </style>
 </head>
 <body>
 
-<!-- সাইডবার (অপরিবর্তিত) -->
+<!-- সাইডবার -->
 <div class="sidebar">
   <h2 class="text-xl font-bold text-gray-900 mb-6">SWD Admin</h2>
   <div class="space-y-1">
@@ -39,6 +44,8 @@
     <div class="nav-item" data-tab="messages"><i class="fas fa-envelope"></i> Messages</div>
     <div class="nav-item" data-tab="fixrequests"><i class="fas fa-wrench"></i> Fix Requests</div>
     <div class="nav-item" data-tab="settings"><i class="fas fa-cog"></i> Settings</div>
+    <!-- ✅ নতুন: Support Chat -->
+    <div class="nav-item" data-tab="supportchat"><i class="fas fa-comments"></i> Support Chat</div>
   </div>
   <div class="absolute bottom-6 left-6">
     <button onclick="logoutAdmin()" class="text-red-500 hover:text-red-700"><i class="fas fa-sign-out-alt"></i> Logout</button>
@@ -81,7 +88,7 @@
     </div>
   </div>
 
-  <!-- অর্ডার (✅ ট্রানজেকশন ID দেখানো হচ্ছে) -->
+  <!-- অর্ডার -->
   <div id="tab-orders" class="tab-content">
     <h2 class="text-2xl font-bold">Orders</h2>
     <div id="orderList" class="space-y-4 mt-4"></div>
@@ -93,7 +100,7 @@
     <div id="userList" class="grid grid-cols-3 gap-4 mt-4"></div>
   </div>
 
-  <!-- মেসেজ -->
+  <!-- মেসেজ (কন্টাক্ট ফর্ম) -->
   <div id="tab-messages" class="tab-content">
     <h2 class="text-2xl font-bold">Contact Messages</h2>
     <div id="messageList" class="space-y-3 mt-4"></div>
@@ -118,12 +125,25 @@
       <button type="submit" class="btn-primary">Save Settings</button>
     </form>
   </div>
+
+  <!-- ✅ Support Chat (নতুন ট্যাব) -->
+  <div id="tab-supportchat" class="tab-content">
+    <h2 class="text-2xl font-bold">Support Chat</h2>
+    <div class="glass-card mt-4">
+      <div id="adminChatContainer" class="chat-container"></div>
+      <form id="adminChatForm" class="mt-4 flex gap-2">
+        <input type="text" id="adminChatInput" placeholder="Type your reply..." class="form-input flex-1" required />
+        <button type="submit" class="btn-primary"><i class="fas fa-paper-plane"></i></button>
+      </form>
+    </div>
+  </div>
 </div>
 
 <script type="module">
-import { auth, db, collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc, onSnapshot, query, where } from './firebase-config.js';
+import { auth, db, collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc, onSnapshot, query, where, orderBy, serverTimestamp } from './firebase-config.js';
 import { onAuthStateChanged } from './firebase-config.js';
 
+// ===== অ্যাডমিন চেক =====
 onAuthStateChanged(auth, async (user) => {
   if (!user) { window.location.href = 'admin-login.html'; return; }
   const userDoc = await getDoc(doc(db, 'users', user.uid));
@@ -132,7 +152,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// ট্যাব সুইচ
+// ===== ট্যাব সুইচ =====
 document.querySelectorAll('.nav-item').forEach(item => {
   item.addEventListener('click', () => {
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -200,7 +220,7 @@ window.deleteProduct = async (id) => {
   if (confirm('Delete this product?')) await deleteDoc(doc(db, 'products', id));
 };
 
-// ===== অর্ডার (✅ ট্রানজেকশন ID সহ) =====
+// ===== অর্ডার =====
 const orderList = document.getElementById('orderList');
 onSnapshot(collection(db, 'orders'), (snapshot) => {
   document.getElementById('totalOrders').innerText = snapshot.size;
@@ -244,7 +264,7 @@ onSnapshot(collection(db, 'users'), (snapshot) => {
   userList.innerHTML = html;
 });
 
-// ===== মেসেজ =====
+// ===== কন্টাক্ট মেসেজ =====
 const messageList = document.getElementById('messageList');
 onSnapshot(collection(db, 'contactMessages'), (snapshot) => {
   document.getElementById('totalMessages').innerText = snapshot.size;
@@ -278,6 +298,48 @@ document.getElementById('settingsForm').addEventListener('submit', async (e) => 
     await setDoc(doc(db, 'settings', 'payment'), { bkash, nagad, usdt });
     alert('Settings saved!');
   } catch (err) { alert('Error: ' + err.message); }
+});
+
+// ===== ✅ সাপোর্ট চ্যাট (অ্যাডমিন রিপ্লাই) =====
+const adminChatContainer = document.getElementById('adminChatContainer');
+const adminChatForm = document.getElementById('adminChatForm');
+const adminChatInput = document.getElementById('adminChatInput');
+
+// লোড সব মেসেজ যেখানে participants-এ 'admin' আছে
+onSnapshot(
+  query(collection(db, 'messages'), where('participants', 'array-contains', 'admin'), orderBy('timestamp', 'asc')),
+  (snapshot) => {
+    adminChatContainer.innerHTML = '';
+    snapshot.forEach(doc => {
+      const msg = doc.data();
+      const isAdmin = msg.fromUserId === 'admin';
+      const div = document.createElement('div');
+      div.className = isAdmin ? 'msg-admin' : 'msg-user';
+      div.innerHTML = `${msg.content}<div class="msg-time">${msg.timestamp?.toDate?.()?.toLocaleString() || ''}</div>`;
+      adminChatContainer.appendChild(div);
+    });
+    adminChatContainer.scrollTop = adminChatContainer.scrollHeight;
+  }
+);
+
+// অ্যাডমিন রিপ্লাই পাঠানো
+adminChatForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const content = adminChatInput.value.trim();
+  if (!content) return;
+  try {
+    await addDoc(collection(db, 'messages'), {
+      fromUserId: 'admin',
+      toUserId: 'all', // সব ইউজারের কাছে যাবে
+      content,
+      timestamp: serverTimestamp(),
+      participants: ['admin', 'all'],
+      read: false
+    });
+    adminChatInput.value = '';
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
 });
 
 // ===== লগআউট =====
