@@ -699,7 +699,7 @@
     });
 
     // ================================================================
-    // ===== ⭐ MESSENGER: CONVERSATIONS + CHAT =====
+    // ===== ⭐ FIXED MESSENGER (no index required) =====
     // ================================================================
 
     // DOM refs
@@ -712,17 +712,17 @@
     const adminChatSendBtn = document.getElementById('adminChatSendBtn');
 
     // State
-    let activeConversationUserId = null; // uid of the user we're chatting with
-    let allUsersCache = {}; // uid -> { displayName, email }
-    let conversationsMap = {}; // uid -> { lastMsg, unread, user }
-    let messagesCache = {}; // conversationId -> array of messages
+    let activeConversationUserId = null;
+    let allUsersCache = {};
+    let conversationsMap = {};
+    let allMessages = []; // store all messages for admin to build conv list
 
-    // ---------- helper: get conversationId ----------
+    // ---------- helper ----------
     function getConvId(userId) {
       return `conv_${userId}_admin`;
     }
 
-    // ---------- load users for display names ----------
+    // ---------- load users ----------
     async function loadAllUsers() {
       const snap = await getDocs(collection(db, 'users'));
       snap.forEach(doc => {
@@ -741,7 +741,6 @@
         convListEl.innerHTML = `<div class="empty-state" style="height:100%;font-size:0.85rem;"><i class="fas fa-comments"></i><span>No conversations yet</span></div>`;
         return;
       }
-      // sort by lastMsg time desc
       entries.sort((a, b) => (b.lastMsgTime || 0) - (a.lastMsgTime || 0));
 
       let html = '';
@@ -767,7 +766,6 @@
       });
       convListEl.innerHTML = html;
 
-      // click handler
       convListEl.querySelectorAll('.conv-item').forEach(el => {
         el.addEventListener('click', () => {
           const uid = el.dataset.userid;
@@ -776,24 +774,32 @@
       });
     }
 
-    // ---------- select a conversation ----------
+    // ---------- select conversation ----------
     async function selectConversation(userId) {
       if (!userId) return;
       activeConversationUserId = userId;
-      // clear unread for this conversation
+
+      // Clear unread for this conversation
       if (conversationsMap[userId]) {
         conversationsMap[userId].unread = 0;
-        // update Firestore: mark all messages as read for this conversation
+        // Mark messages from this user as read (client-side then update DB)
         const convId = getConvId(userId);
-        const q = query(collection(db, 'messages'), where('conversationId', '==', convId), where('read', '==', false));
-        const snap = await getDocs(q);
-        snap.forEach(async (docSnap) => {
-          await updateDoc(doc(db, 'messages', docSnap.id), { read: true, readAt: serverTimestamp() });
+        const unreadMsgs = allMessages.filter(m => m.conversationId === convId && m.fromUserId === userId && !m.read);
+        unreadMsgs.forEach(async (m) => {
+          await updateDoc(doc(db, 'messages', m.id), { read: true, readAt: serverTimestamp() });
         });
+        renderConvList();
       }
-      renderConvList();
-      loadMessages(userId);
-      // update header
+
+      // Load messages for this conversation
+      const convId = getConvId(userId);
+      const msgs = allMessages.filter(m => m.conversationId === convId).sort((a, b) => {
+        const ta = a.timestamp?.toDate?.()?.getTime() || 0;
+        const tb = b.timestamp?.toDate?.()?.getTime() || 0;
+        return ta - tb;
+      });
+      renderMessages(msgs);
+
       const user = allUsersCache[userId] || { displayName: 'User', email: '' };
       const name = user.displayName || user.email || 'User';
       chatHeaderName.textContent = name;
@@ -801,42 +807,7 @@
       adminChatInput.focus();
     }
 
-    // ---------- load messages for a conversation ----------
-    function loadMessages(userId) {
-      const convId = getConvId(userId);
-      const q = query(collection(db, 'messages'), where('conversationId', '==', convId), orderBy('timestamp', 'asc'));
-
-      // Unsubscribe previous listener if any (we'll just use onSnapshot)
-      // We'll store the unsubscribe function
-      if (window._msgUnsub) {
-        window._msgUnsub();
-        window._msgUnsub = null;
-      }
-
-      window._msgUnsub = onSnapshot(q, (snapshot) => {
-        const msgs = [];
-        snapshot.forEach(doc => {
-          msgs.push({ id: doc.id, ...doc.data() });
-        });
-        messagesCache[convId] = msgs;
-        renderMessages(msgs);
-
-        // If there are new messages from user, mark them read
-        const unreadMsgs = msgs.filter(m => m.fromUserId === userId && !m.read);
-        if (unreadMsgs.length > 0 && activeConversationUserId === userId) {
-          unreadMsgs.forEach(async (m) => {
-            await updateDoc(doc(db, 'messages', m.id), { read: true, readAt: serverTimestamp() });
-          });
-          // update unread count in map
-          if (conversationsMap[userId]) {
-            conversationsMap[userId].unread = 0;
-            renderConvList();
-          }
-        }
-      });
-    }
-
-    // ---------- render messages in chat area ----------
+    // ---------- render messages ----------
     function renderMessages(msgs) {
       if (!msgs || msgs.length === 0) {
         chatMessagesEl.innerHTML = `<div class="empty-state"><i class="fas fa-inbox"></i><span>No messages yet</span></div>`;
@@ -880,13 +851,7 @@
           participants: ['admin', activeConversationUserId]
         });
         adminChatInput.value = '';
-        // update lastMsg in map
-        if (conversationsMap[activeConversationUserId]) {
-          conversationsMap[activeConversationUserId].lastMsg = content;
-          conversationsMap[activeConversationUserId].lastMsgTime = Date.now();
-        }
-        renderConvList();
-        // messages will update via onSnapshot
+        // update local map (will be updated by snapshot)
       } catch (err) {
         showToast('Error: ' + err.message, 'error');
       } finally {
@@ -895,14 +860,12 @@
       }
     });
 
-    // ---------- build conversations map from messages ----------
-    function buildConversations(messagesSnapshot) {
+    // ---------- build conversations from all messages ----------
+    function buildConversations(messages) {
       const map = {};
-      messagesSnapshot.forEach(doc => {
-        const m = doc.data();
+      messages.forEach(m => {
         const convId = m.conversationId;
         if (!convId) return;
-        // extract userId from convId: "conv_xxx_admin" -> xxx
         const parts = convId.split('_');
         if (parts.length < 3) return;
         const userId = parts[1];
@@ -920,7 +883,6 @@
             user: allUsersCache[userId] || { displayName: userId, email: '' }
           };
         }
-        // update last message if newer
         const ts = m.timestamp?.toDate?.()?.getTime() || 0;
         if (ts > map[userId].lastMsgTime) {
           map[userId].lastMsg = m.content || '';
@@ -929,7 +891,6 @@
         if (isUnread) {
           map[userId].unread = (map[userId].unread || 0) + 1;
         }
-        // attach user info
         if (allUsersCache[userId]) {
           map[userId].user = allUsersCache[userId];
         }
@@ -938,33 +899,53 @@
       renderConvList();
     }
 
-    // ---------- listen to all messages for admin ----------
+    // ---------- listen to all messages (without orderBy) ----------
     function listenAllMessages() {
-      const q = query(collection(db, 'messages'), where('participants', 'array-contains', 'admin'), orderBy('timestamp', 'asc'));
+      // Query all messages that involve admin (participants array contains 'admin')
+      const q = query(collection(db, 'messages'), where('participants', 'array-contains', 'admin'));
       onSnapshot(q, async (snapshot) => {
-        // first, ensure users are loaded
+        allMessages = [];
+        snapshot.forEach(doc => {
+          allMessages.push({ id: doc.id, ...doc.data() });
+        });
         await loadAllUsers();
-        buildConversations(snapshot);
-        // if there's an active conversation, refresh its messages
+        buildConversations(allMessages);
+
+        // If there is an active conversation, refresh its messages
         if (activeConversationUserId) {
-          // ensure the messages for this conv are loaded
-          // the onSnapshot in loadMessages will handle it
+          const convId = getConvId(activeConversationUserId);
+          const msgs = allMessages.filter(m => m.conversationId === convId).sort((a, b) => {
+            const ta = a.timestamp?.toDate?.()?.getTime() || 0;
+            const tb = b.timestamp?.toDate?.()?.getTime() || 0;
+            return ta - tb;
+          });
+          renderMessages(msgs);
+          // Mark any unread from user as read
+          const unread = msgs.filter(m => m.fromUserId === activeConversationUserId && !m.read);
+          if (unread.length > 0) {
+            unread.forEach(async (m) => {
+              await updateDoc(doc(db, 'messages', m.id), { read: true, readAt: serverTimestamp() });
+            });
+            // Clear unread in map
+            if (conversationsMap[activeConversationUserId]) {
+              conversationsMap[activeConversationUserId].unread = 0;
+              renderConvList();
+            }
+          }
         }
       });
     }
 
-    // ---------- init messenger ----------
+    // ---------- init ----------
     async function initMessenger() {
       await loadAllUsers();
       listenAllMessages();
 
-      // if no active conversation, select the first one after a short delay
       setTimeout(() => {
         const first = Object.keys(conversationsMap)[0];
         if (first) {
           selectConversation(first);
         } else {
-          // show empty state
           chatHeaderName.textContent = 'No conversations';
           chatHeaderAvatar.textContent = '—';
           chatMessagesEl.innerHTML = `<div class="empty-state"><i class="fas fa-comment-dots"></i><span>No messages yet. Users will appear here when they contact you.</span></div>`;
@@ -1016,11 +997,16 @@
           setTimeout(() => { if (monthlyChart) monthlyChart.resize(); if (statusChart) statusChart.resize(); }, 100);
         }
         if (tab === 'supportchat') {
-          // re-render conv list and scroll to bottom
           setTimeout(() => {
             renderConvList();
             if (activeConversationUserId) {
-              loadMessages(activeConversationUserId);
+              const convId = getConvId(activeConversationUserId);
+              const msgs = allMessages.filter(m => m.conversationId === convId).sort((a, b) => {
+                const ta = a.timestamp?.toDate?.()?.getTime() || 0;
+                const tb = b.timestamp?.toDate?.()?.getTime() || 0;
+                return ta - tb;
+              });
+              renderMessages(msgs);
             }
           }, 100);
         }

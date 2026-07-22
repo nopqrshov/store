@@ -352,7 +352,7 @@
       }
     });
 
-    // ===== CHAT LOGIC (FIXED) =====
+    // ===== CHAT LOGIC (FIXED – no orderBy) =====
     const chatMessages = document.getElementById('chatMessages');
     const chatForm = document.getElementById('chatForm');
     const chatInput = document.getElementById('chatInput');
@@ -361,7 +361,6 @@
     let conversationId = null;
     let unsubMessages = null;
 
-    // Helper to render messages
     function renderMessages(msgs) {
       if (!msgs || msgs.length === 0) {
         chatMessages.innerHTML = `<div class="empty-state"><i class="fas fa-comment-dots"></i><span>No messages yet. Start the conversation!</span></div>`;
@@ -394,29 +393,32 @@
         return;
       }
       currentUser = user;
-      // update navbar
       const userDoc = await getDoc(doc(db, 'users', user.uid));
       const displayName = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
       updateNavbarAuth(user, displayName);
 
-      // Build conversation ID – must match admin's pattern
       conversationId = `conv_${user.uid}_admin`;
 
-      // Listen to messages for this conversation
       if (unsubMessages) unsubMessages();
+      // Query without orderBy to avoid index requirement
       const q = query(
         collection(db, 'messages'),
-        where('conversationId', '==', conversationId),
-        orderBy('timestamp', 'asc')
+        where('conversationId', '==', conversationId)
       );
       unsubMessages = onSnapshot(q, (snapshot) => {
         const msgs = [];
         snapshot.forEach(doc => {
           msgs.push({ id: doc.id, ...doc.data() });
         });
+        // Sort client-side by timestamp
+        msgs.sort((a, b) => {
+          const ta = a.timestamp?.toDate?.()?.getTime() || 0;
+          const tb = b.timestamp?.toDate?.()?.getTime() || 0;
+          return ta - tb;
+        });
         renderMessages(msgs);
 
-        // Mark admin messages as read when user opens chat
+        // Mark admin messages as read
         const unreadAdminMsgs = msgs.filter(m => m.fromUserId === 'admin' && !m.read);
         if (unreadAdminMsgs.length > 0) {
           unreadAdminMsgs.forEach(async (m) => {
@@ -455,7 +457,6 @@
           participants: [currentUser.uid, 'admin']
         });
         chatInput.value = '';
-        // message will appear via snapshot
         showToast('Message sent', 'success');
       } catch (err) {
         console.error('Send error:', err);
