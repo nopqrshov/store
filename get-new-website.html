@@ -96,7 +96,6 @@
     renderNavbar();
     renderFooter();
 
-    // ✅ কার্ট আইকনে ক্লিক করলে সাইডবার টগল
     const cartIcon = document.getElementById('cartIconLink');
     if (cartIcon) {
       cartIcon.addEventListener('click', (e) => {
@@ -105,7 +104,6 @@
       });
     }
 
-    // ===== TOAST =====
     window.showToast = (message, type = 'success') => {
       const container = document.getElementById('toast-container');
       if (!container) return;
@@ -114,13 +112,9 @@
       toast.className = `toast ${type}`;
       toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
       container.appendChild(toast);
-      setTimeout(() => {
-        toast.classList.add('hide');
-        setTimeout(() => toast.remove(), 400);
-      }, 4500);
+      setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
     };
 
-    // ===== AUTH =====
     let currentAuthMode = 'signin';
     window.openAuthModal = (mode) => {
       currentAuthMode = mode;
@@ -163,7 +157,6 @@
       }
     });
 
-    // ===== AUTH STATE =====
     onAuthStateChanged(auth, async (user) => {
       let name = null;
       if (user) {
@@ -178,7 +171,6 @@
       showToast('✅ লগআউট সফল', 'success');
     };
 
-    // ===== PRODUCTS & CART =====
     const productGrid = document.getElementById('productGrid');
     let products = [];
     onSnapshot(collection(db, 'products'), (snapshot) => {
@@ -241,7 +233,6 @@
     };
     updateCartUI();
 
-    // ===== PAYMENT =====
     let paymentSettings = { bkash: '', nagad: '', usdt: '' };
     const loadPaymentSettings = async () => {
       try {
@@ -300,7 +291,6 @@
       }
     });
 
-    // ===== CHECKOUT =====
     window.checkout = async () => {
       if (cart.length === 0) {
         showToast('🛒 আপনার কার্ট খালি', 'warning');

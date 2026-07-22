@@ -85,7 +85,6 @@
     renderFooter();
     updateCartBadge();
 
-    // ===== TOAST =====
     window.showToast = (message, type = 'success') => {
       const container = document.getElementById('toast-container');
       if (!container) return;
@@ -94,13 +93,9 @@
       toast.className = `toast ${type}`;
       toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
       container.appendChild(toast);
-      setTimeout(() => {
-        toast.classList.add('hide');
-        setTimeout(() => toast.remove(), 400);
-      }, 4500);
+      setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
     };
 
-    // ===== ফর্ম সাবমিট =====
     document.getElementById('fixForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = document.getElementById('fixName').value.trim();
@@ -138,7 +133,6 @@
       }
     });
 
-    // ===== AUTH =====
     let currentAuthMode = 'signin';
     window.openAuthModal = (mode) => {
       currentAuthMode = mode;
@@ -181,7 +175,6 @@
       }
     });
 
-    // ===== AUTH STATE =====
     onAuthStateChanged(auth, async (user) => {
       let name = null;
       if (user) {

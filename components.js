@@ -1,7 +1,6 @@
 // components.js
 import { auth, onAuthStateChanged, signOut } from './firebase-config.js';
 
-// ===== কার্ট ব্যাজ আপডেট =====
 export function updateCartBadge() {
   const cartBadge = document.getElementById('cartCount');
   if (!cartBadge) return;
@@ -13,7 +12,6 @@ export function updateCartBadge() {
   }
 }
 
-// ===== নেভবার রেন্ডার =====
 export function renderNavbar() {
   const navbarHTML = `
     <nav class="fixed top-0 left-0 w-full glass z-50 h-16 md:h-20 flex items-center px-6 sm:px-8 lg:px-12">
@@ -53,7 +51,6 @@ export function renderNavbar() {
   `;
   document.getElementById('navbar-placeholder').innerHTML = navbarHTML;
 
-  // প্রোফাইল ড্রপডাউন
   const avatar = document.getElementById('profileAvatar');
   const dropdown = document.getElementById('dropdownMenu');
   if (avatar) {
@@ -64,11 +61,9 @@ export function renderNavbar() {
       dropdown.classList.remove('show');
     }
   });
-
   updateCartBadge();
 }
 
-// ===== ফুটার রেন্ডার =====
 export function renderFooter() {
   const footerHTML = `
     <footer class="glass border-t border-gray-200/30 py-8 px-6 sm:px-8 lg:px-12 mt-auto">
@@ -91,7 +86,6 @@ export function renderFooter() {
   document.getElementById('footer-placeholder').innerHTML = footerHTML;
 }
 
-// ===== অথ স্টেট আপডেট =====
 export function updateNavbarAuth(user, displayName) {
   const authBtns = document.getElementById('auth-buttons');
   const profileSection = document.getElementById('profile-section');
