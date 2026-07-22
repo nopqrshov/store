@@ -30,7 +30,7 @@ export function renderNavbar() {
           <a href="messages.html" class="text-gray-700 hover:text-blue-500 text-xl" title="Messages">
             <i class="fas fa-envelope"></i>
           </a>
-          <!-- ✅ কার্ট আইকন – onclick সরিয়ে event listener ব্যবহার -->
+          <!-- ✅ কার্ট আইকন – সরাসরি window.toggleCart কল করবে -->
           <a href="#" class="cart-toggle text-gray-700 hover:text-blue-500 text-xl relative" title="Cart">
             <i class="fas fa-shopping-cart"></i>
             <span id="cartCount" class="cart-badge">0</span>
@@ -66,15 +66,13 @@ export function renderNavbar() {
     }
   });
 
-  // ✅ কার্ট টগল – event listener + fallback
+  // ✅ কার্ট টগল – রিডাইরেক্ট সরানো হয়েছে
   const cartToggle = document.querySelector('#navbar-placeholder .cart-toggle');
   if (cartToggle) {
     cartToggle.addEventListener('click', (e) => {
       e.preventDefault();
       if (typeof window.toggleCart === 'function') {
         window.toggleCart();
-      } else {
-        window.location.href = 'get-new-website.html';
       }
     });
   }
@@ -119,3 +117,86 @@ export function updateNavbarAuth(user, displayName) {
     profileSection.classList.add('hidden');
   }
 }
+
+// ======================================================
+// ✅ নতুন: কার্ট সাইডবার রেন্ডার ও টগল ফাংশন
+// ======================================================
+
+export function renderCartSidebar() {
+  // ডুপ্লিকেট রোধ
+  if (document.getElementById('cartSidebar')) return;
+
+  const html = `
+    <div class="cart-overlay" id="cartOverlay" onclick="window.toggleCart()"></div>
+    <div class="cart-sidebar" id="cartSidebar">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold">Your Cart</h2>
+        <button onclick="window.toggleCart()" class="text-gray-500"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="cartItems" class="space-y-4"></div>
+      <div class="mt-6 border-t pt-4">
+        <div class="flex justify-between font-bold">
+          <span>Total:</span>
+          <span id="cartTotal">$0</span>
+        </div>
+        <button onclick="window.checkout()" class="btn-primary w-full mt-4 justify-center">Proceed to Checkout</button>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', html);
+  
+  // প্রাথমিক UI আপডেট
+  updateCartUI();
+}
+
+export function toggleCart() {
+  const sidebar = document.getElementById('cartSidebar');
+  const overlay = document.getElementById('cartOverlay');
+  if (sidebar) sidebar.classList.toggle('open');
+  if (overlay) overlay.classList.toggle('open');
+}
+
+export function updateCartUI() {
+  const container = document.getElementById('cartItems');
+  const totalEl = document.getElementById('cartTotal');
+  if (!container || !totalEl) return;
+
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  if (cart.length === 0) {
+    container.innerHTML = '<p class="text-gray-500">Your cart is empty.</p>';
+    totalEl.textContent = '$0';
+  } else {
+    let total = 0;
+    container.innerHTML = cart.map((item, idx) => {
+      total += item.price;
+      return `
+        <div class="flex justify-between items-center border-b pb-2">
+          <div>
+            <span class="font-medium">${item.name}</span>
+            <span class="text-sm text-gray-500">$${item.price}</span>
+          </div>
+          <button onclick="window.removeFromCart(${idx})" class="text-red-500"><i class="fas fa-trash"></i></button>
+        </div>
+      `;
+    }).join('');
+    totalEl.textContent = `$${total}`;
+  }
+  updateCartBadge();
+}
+
+// গ্লোবাল ফাংশন (যাতে নেভবারের ইভেন্ট লিসেনার ও HTML-এর onclick কাজ করে)
+window.toggleCart = toggleCart;
+window.updateCartUI = updateCartUI;
+
+window.removeFromCart = function(index) {
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  cart.splice(index, 1);
+  localStorage.setItem('cart', JSON.stringify(cart));
+  updateCartUI();
+};
+
+// checkout ফাংশনটি get-new-website.html-এ ডিফাইন করা হবে, 
+// কিন্তু এখানে ডামি ফাংশন রাখছি যাতে অন্য পেজে error না হয়
+window.checkout = window.checkout || function() {
+  alert('Please go to the Store page to checkout.');
+};

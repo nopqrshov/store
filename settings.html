@@ -56,14 +56,14 @@
   <div id="toast-container"></div>
 
   <script type="module">
-    import { auth, signOut, reauthenticateWithCredential, EmailAuthProvider, updatePassword, deleteUser, onAuthStateChanged, doc, getDoc, signInWithEmailAndPassword, createUserWithEmailAndPassword, setDoc } from './firebase-config.js';
-    import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge } from './components.js';
+    import { auth, signOut, reauthenticateWithCredential, EmailAuthProvider, updatePassword, deleteUser, onAuthStateChanged, doc, getDoc, signInWithEmailAndPassword, createUserWithEmailAndPassword, setDoc, deleteDoc } from './firebase-config.js';
+    import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar } from './components.js';
 
     renderNavbar();
     renderFooter();
+    renderCartSidebar();  // ✅ কার্ট সাইডবার যোগ
     updateCartBadge();
 
-    // ===== TOAST =====
     window.showToast = (message, type = 'success') => {
       const container = document.getElementById('toast-container');
       if (!container) return;
@@ -78,7 +78,6 @@
       }, 4500);
     };
 
-    // ===== AUTH =====
     let currentAuthMode = 'signin';
     window.openAuthModal = (mode) => {
       currentAuthMode = mode;
@@ -121,7 +120,6 @@
       }
     });
 
-    // ===== AUTH STATE =====
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = 'index.html';
@@ -131,7 +129,6 @@
       updateNavbarAuth(user, userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0]);
     });
 
-    // ===== পাসওয়ার্ড পরিবর্তন =====
     document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const current = document.getElementById('currentPassword').value;
@@ -150,12 +147,14 @@
       }
     });
 
-    // ===== অ্যাকাউন্ট ডিলিট =====
     window.deleteAccount = async () => {
       if (!confirm('আপনি কি নিশ্চিত আপনার অ্যাকাউন্ট ডিলিট করতে চান? এই কাজ অপরিবর্তনীয়।')) return;
       const user = auth.currentUser;
       if (!user) return showToast('আপনি লগইন নেই', 'error');
       try {
+        // Firestore ডকুমেন্ট প্রথমে ডিলিট
+        await deleteDoc(doc(db, 'users', user.uid));
+        // তারপর Auth ইউজার ডিলিট
         await deleteUser(user);
         showToast('✅ অ্যাকাউন্ট ডিলিট হয়েছে', 'success');
         window.location.href = 'index.html';

@@ -54,13 +54,13 @@
 
   <script type="module">
     import { auth, db, collection, query, where, onSnapshot, addDoc, serverTimestamp, orderBy, signOut, onAuthStateChanged, doc, getDoc, signInWithEmailAndPassword, createUserWithEmailAndPassword, setDoc } from './firebase-config.js';
-    import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge } from './components.js';
+    import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar } from './components.js';
 
     renderNavbar();
     renderFooter();
+    renderCartSidebar();  // ✅ কার্ট সাইডবার যোগ
     updateCartBadge();
 
-    // ===== TOAST =====
     window.showToast = (message, type = 'success') => {
       const container = document.getElementById('toast-container');
       if (!container) return;
@@ -75,7 +75,6 @@
       }, 4500);
     };
 
-    // ===== AUTH =====
     let currentAuthMode = 'signin';
     window.openAuthModal = (mode) => {
       currentAuthMode = mode;
@@ -118,7 +117,7 @@
       }
     });
 
-    // ===== AUTH STATE & CHAT (দুটি কোয়েরি মার্জ) =====
+    // ===== CHAT =====
     let snapshot1 = null;
     let snapshot2 = null;
     const chatMessages = document.getElementById('chatMessages');
@@ -156,7 +155,6 @@
       const displayName = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
       updateNavbarAuth(user, displayName);
 
-      // Query 1: যেখানে user participant
       const q1 = query(
         collection(db, 'messages'),
         where('participants', 'array-contains', user.uid),
@@ -167,7 +165,6 @@
         renderMergedMessages(user);
       });
 
-      // Query 2: যেখানে 'all' participant (broadcast)
       const q2 = query(
         collection(db, 'messages'),
         where('participants', 'array-contains', 'all'),
@@ -179,7 +176,6 @@
       });
     });
 
-    // ===== মেসেজ পাঠানো =====
     document.getElementById('chatForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const content = document.getElementById('chatInput').value.trim();

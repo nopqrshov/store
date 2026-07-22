@@ -58,13 +58,13 @@
 
   <script type="module">
     import { auth, db, doc, getDoc, updateDoc, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, setDoc } from './firebase-config.js';
-    import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge } from './components.js';
+    import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar } from './components.js';
 
     renderNavbar();
     renderFooter();
+    renderCartSidebar();  // ✅ কার্ট সাইডবার যোগ
     updateCartBadge();
 
-    // ===== TOAST =====
     window.showToast = (message, type = 'success') => {
       const container = document.getElementById('toast-container');
       if (!container) return;
@@ -79,7 +79,6 @@
       }, 4500);
     };
 
-    // ===== AUTH =====
     let currentAuthMode = 'signin';
     window.openAuthModal = (mode) => {
       currentAuthMode = mode;
@@ -122,7 +121,6 @@
       }
     });
 
-    // ===== প্রোফাইল =====
     const profileEmail = document.getElementById('profileEmail');
     const profileName = document.getElementById('profileName');
 

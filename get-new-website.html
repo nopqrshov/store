@@ -26,22 +26,7 @@
     <div id="footer-placeholder"></div>
   </div>
 
-  <!-- কার্ট সাইডবার -->
-  <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
-  <div class="cart-sidebar" id="cartSidebar">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-xl font-bold">Your Cart</h2>
-      <button onclick="toggleCart()" class="text-gray-500"><i class="fas fa-times"></i></button>
-    </div>
-    <div id="cartItems" class="space-y-4"></div>
-    <div class="mt-6 border-t pt-4">
-      <div class="flex justify-between font-bold">
-        <span>Total:</span>
-        <span id="cartTotal">$0</span>
-      </div>
-      <button onclick="checkout()" class="btn-primary w-full mt-4 justify-center">Proceed to Checkout</button>
-    </div>
-  </div>
+  <!-- ⚠️ কার্ট সাইডবার এখান থেকে সরানো হয়েছে – এখন components.js থেকে রেন্ডার হবে -->
 
   <!-- অথ মডাল -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
@@ -91,10 +76,12 @@
 
   <script type="module">
     import { auth, db, collection, doc, getDoc, onSnapshot, addDoc, updateDoc, serverTimestamp, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setDoc } from './firebase-config.js';
-    import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge } from './components.js';
+    import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar } from './components.js';
 
     renderNavbar();
     renderFooter();
+    renderCartSidebar();  // ✅ কার্ট সাইডবার রেন্ডার (components.js থেকে)
+    updateCartBadge();
 
     window.showToast = (message, type = 'success') => {
       const container = document.getElementById('toast-container');
@@ -174,116 +161,29 @@
       productGrid.innerHTML = products.map(p => `
         <div class="glass-card">
           <h3 class="font-bold text-xl">${p.name}</h3>
-          <p class="text-sm text-gray-500 mt-1">${p.description || ''}</p>
+          <p class="text-sm text-gray-500 mt-1">${p.desc || p.description || ''}</p>
           <p class="text-2xl font-bold text-blue-600 mt-2">$${p.price}</p>
-          <button onclick="addToCart('${p.id}')" class="btn-primary text-sm py-2 px-4 mt-3">Add to Cart</button>
+          <button onclick="window.addToCart('${p.id}')" class="btn-primary text-sm py-2 px-4 mt-3">Add to Cart</button>
         </div>
       `).join('');
     };
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    let currentOrderId = null;
 
-    const updateCartUI = () => {
-      updateCartBadge();
-      const cartItemsDiv = document.getElementById('cartItems');
-      if (cart.length === 0) {
-        cartItemsDiv.innerHTML = '<p class="text-gray-500">Your cart is empty.</p>';
-        document.getElementById('cartTotal').textContent = '$0';
-        return;
-      }
-      let total = 0;
-      cartItemsDiv.innerHTML = cart.map((item, index) => {
-        total += item.price;
-        return `
-          <div class="flex justify-between items-center border-b pb-2">
-            <div>
-              <span class="font-medium">${item.name}</span>
-              <span class="text-sm text-gray-500">$${item.price}</span>
-            </div>
-            <button onclick="removeFromCart(${index})" class="text-red-500"><i class="fas fa-trash"></i></button>
-          </div>
-        `;
-      }).join('');
-      document.getElementById('cartTotal').textContent = `$${total}`;
-    };
+    // ===== কার্ট ফাংশন (components.js-এর সাথে সমন্বয়) =====
     window.addToCart = (productId) => {
       const product = products.find(p => p.id === productId);
       if (!product) return;
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
       cart.push({ id: product.id, name: product.name, price: product.price });
       localStorage.setItem('cart', JSON.stringify(cart));
-      updateCartUI();
+      if (typeof window.updateCartUI === 'function') {
+        window.updateCartUI();  // components.js থেকে UI আপডেট
+      }
       showToast(`✅ "${product.name}" কার্টে যোগ হয়েছে`, 'success');
     };
-    window.removeFromCart = (index) => {
-      cart.splice(index, 1);
-      localStorage.setItem('cart', JSON.stringify(cart));
-      updateCartUI();
-    };
-    window.toggleCart = () => {
-      document.getElementById('cartSidebar').classList.toggle('open');
-      document.getElementById('cartOverlay').classList.toggle('open');
-    };
-    updateCartUI();
 
-    let paymentSettings = { bkash: '', nagad: '', usdt: '' };
-    const loadPaymentSettings = async () => {
-      try {
-        const docSnap = await getDoc(doc(db, 'settings', 'payment'));
-        if (docSnap.exists()) paymentSettings = docSnap.data();
-      } catch (e) { console.error(e); }
-    };
-    window.openPaymentModal = (orderId) => {
-      currentOrderId = orderId;
-      const numbersDiv = document.getElementById('paymentNumbers');
-      let html = '';
-      if (paymentSettings.bkash) html += `<p><i class="fas fa-mobile-alt text-blue-500"></i> BKash: <strong>${paymentSettings.bkash}</strong></p>`;
-      if (paymentSettings.nagad) html += `<p><i class="fas fa-mobile-alt text-orange-500"></i> Nagad: <strong>${paymentSettings.nagad}</strong></p>`;
-      if (paymentSettings.usdt) html += `<p><i class="fab fa-bitcoin text-yellow-500"></i> USDT (BEP20): <strong>${paymentSettings.usdt}</strong></p>`;
-      if (!html) html = '<p class="text-gray-500">পেমেন্ট পদ্ধতি সেট করা হয়নি। অ্যাডমিনের সাথে যোগাযোগ করুন।</p>';
-      numbersDiv.innerHTML = html;
-      document.getElementById('paymentModal').classList.remove('hidden');
-      document.getElementById('paymentError').classList.add('hidden');
-      document.getElementById('transactionId').value = '';
-    };
-    window.closePaymentModal = () => {
-      document.getElementById('paymentModal').classList.add('hidden');
-      currentOrderId = null;
-    };
-    document.getElementById('paymentForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const txnId = document.getElementById('transactionId').value.trim();
-      const errorDiv = document.getElementById('paymentError');
-      errorDiv.classList.add('hidden');
-      if (!txnId) {
-        errorDiv.textContent = 'দয়া করে ট্রানজেকশন ID দিন।';
-        errorDiv.classList.remove('hidden');
-        return;
-      }
-      if (!currentOrderId) {
-        errorDiv.textContent = 'অর্ডার পাওয়া যায়নি।';
-        errorDiv.classList.remove('hidden');
-        return;
-      }
-      try {
-        await updateDoc(doc(db, 'orders', currentOrderId), {
-          transactionId: txnId,
-          paymentMethod: 'Manual',
-          status: 'processing'
-        });
-        showToast('✅ পেমেন্ট কনফর্ম! অ্যাডমিন শীঘ্রই ভেরিফাই করবেন।', 'success');
-        closePaymentModal();
-        cart = [];
-        localStorage.removeItem('cart');
-        updateCartUI();
-        toggleCart();
-      } catch (err) {
-        errorDiv.textContent = '⚠️ ' + err.message;
-        errorDiv.classList.remove('hidden');
-        showToast('⚠️ ' + err.message, 'error');
-      }
-    });
-
+    // checkout ফাংশন (components.js-এর ডামি ফাংশনকে ওভাররাইড)
     window.checkout = async () => {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
       if (cart.length === 0) {
         showToast('🛒 আপনার কার্ট খালি', 'warning');
         return;
@@ -294,7 +194,12 @@
         openAuthModal('signin');
         return;
       }
-      await loadPaymentSettings();
+      // পেমেন্ট সেটিংস লোড
+      let paymentSettings = { bkash: '', nagad: '', usdt: '' };
+      try {
+        const docSnap = await getDoc(doc(db, 'settings', 'payment'));
+        if (docSnap.exists()) paymentSettings = docSnap.data();
+      } catch (e) { console.error(e); }
       if (!paymentSettings.bkash && !paymentSettings.nagad && !paymentSettings.usdt) {
         showToast('⚠️ পেমেন্ট পদ্ধতি সেট করা হয়নি। অ্যাডমিনের সাথে যোগাযোগ করুন।', 'error');
         return;
@@ -310,11 +215,65 @@
       };
       try {
         const docRef = await addDoc(collection(db, 'orders'), orderData);
-        openPaymentModal(docRef.id);
+        window.openPaymentModal(docRef.id, paymentSettings);
       } catch (err) {
         showToast('⚠️ ' + err.message, 'error');
       }
     };
+
+    // পেমেন্ট মডাল ফাংশন
+    window.openPaymentModal = (orderId, settings) => {
+      const numbersDiv = document.getElementById('paymentNumbers');
+      let html = '';
+      if (settings.bkash) html += `<p><i class="fas fa-mobile-alt text-blue-500"></i> BKash: <strong>${settings.bkash}</strong></p>`;
+      if (settings.nagad) html += `<p><i class="fas fa-mobile-alt text-orange-500"></i> Nagad: <strong>${settings.nagad}</strong></p>`;
+      if (settings.usdt) html += `<p><i class="fab fa-bitcoin text-yellow-500"></i> USDT (BEP20): <strong>${settings.usdt}</strong></p>`;
+      if (!html) html = '<p class="text-gray-500">পেমেন্ট পদ্ধতি সেট করা হয়নি। অ্যাডমিনের সাথে যোগাযোগ করুন।</p>';
+      numbersDiv.innerHTML = html;
+      document.getElementById('paymentModal').classList.remove('hidden');
+      document.getElementById('paymentError').classList.add('hidden');
+      document.getElementById('transactionId').value = '';
+      // orderId সংরক্ষণ
+      document.getElementById('paymentForm').dataset.orderId = orderId;
+    };
+    window.closePaymentModal = () => {
+      document.getElementById('paymentModal').classList.add('hidden');
+    };
+
+    document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const txnId = document.getElementById('transactionId').value.trim();
+      const errorDiv = document.getElementById('paymentError');
+      const orderId = e.target.dataset.orderId;
+      errorDiv.classList.add('hidden');
+      if (!txnId) {
+        errorDiv.textContent = 'দয়া করে ট্রানজেকশন ID দিন।';
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+      if (!orderId) {
+        errorDiv.textContent = 'অর্ডার পাওয়া যায়নি।';
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+      try {
+        await updateDoc(doc(db, 'orders', orderId), {
+          transactionId: txnId,
+          paymentMethod: 'Manual',
+          status: 'processing'
+        });
+        showToast('✅ পেমেন্ট কনফর্ম! অ্যাডমিন শীঘ্রই ভেরিফাই করবেন।', 'success');
+        closePaymentModal();
+        // কার্ট খালি
+        localStorage.removeItem('cart');
+        if (typeof window.updateCartUI === 'function') window.updateCartUI();
+        if (typeof window.toggleCart === 'function') window.toggleCart();
+      } catch (err) {
+        errorDiv.textContent = '⚠️ ' + err.message;
+        errorDiv.classList.remove('hidden');
+        showToast('⚠️ ' + err.message, 'error');
+      }
+    });
   </script>
 </body>
 </html>

@@ -79,10 +79,11 @@
 
   <script type="module">
     import { auth, db, collection, addDoc, serverTimestamp, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, doc, setDoc, getDoc } from './firebase-config.js';
-    import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge } from './components.js';
+    import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar } from './components.js';
 
     renderNavbar();
     renderFooter();
+    renderCartSidebar();  // ✅ কার্ট সাইডবার যোগ
     updateCartBadge();
 
     window.showToast = (message, type = 'success') => {

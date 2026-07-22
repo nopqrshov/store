@@ -12,6 +12,8 @@
     .main { margin-left:260px; padding:2rem; }
     .nav-item { display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:12px; cursor:pointer; transition:0.2s; color:#3a3a3c; }
     .nav-item:hover, .nav-item.active { background:#f0f0f5; color:#007AFF; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
   </style>
 </head>
 <body>
@@ -133,14 +135,20 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// ট্যাব সুইচ
+// ===== ট্যাব সুইচ =====
 document.querySelectorAll('.nav-item').forEach(item => {
   item.addEventListener('click', () => {
+    // সব নেভ আইটেম থেকে active ক্লাস রিমুভ
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     item.classList.add('active');
-    const tab = item.dataset.tab;
+    
+    // সব ট্যাব কনটেন্ট লুকান
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.getElementById('tab-'+tab).classList.add('active');
+    
+    // সংশ্লিষ্ট ট্যাব দেখান
+    const tab = item.dataset.tab;
+    const target = document.getElementById('tab-'+tab);
+    if (target) target.classList.add('active');
   });
 });
 
