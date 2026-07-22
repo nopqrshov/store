@@ -352,20 +352,44 @@
       }
     });
 
-    // ===== CHAT LOGIC =====
+    // ===== CHAT LOGIC (FIXED) =====
     const chatMessages = document.getElementById('chatMessages');
     const chatForm = document.getElementById('chatForm');
     const chatInput = document.getElementById('chatInput');
     const chatSendBtn = document.getElementById('chatSendBtn');
     let currentUser = null;
     let conversationId = null;
-
-    // Unsubscribe function
     let unsubMessages = null;
 
+    // Helper to render messages
+    function renderMessages(msgs) {
+      if (!msgs || msgs.length === 0) {
+        chatMessages.innerHTML = `<div class="empty-state"><i class="fas fa-comment-dots"></i><span>No messages yet. Start the conversation!</span></div>`;
+        return;
+      }
+      let html = '';
+      msgs.forEach(m => {
+        const isSent = m.fromUserId === currentUser?.uid;
+        const time = m.timestamp?.toDate?.()?.toLocaleString('en-US', { hour: '2-digit', minute: '2-digit' }) || '';
+        let statusHtml = '';
+        if (isSent) {
+          const readStatus = m.read ? '✓✓' : '✓';
+          statusHtml = `<span class="msg-status">${readStatus}</span>`;
+        }
+        html += `
+          <div class="chat-msg ${isSent ? 'sent' : 'received'}">
+            ${m.content}
+            <div class="msg-time">${time} ${statusHtml}</div>
+          </div>
+        `;
+      });
+      chatMessages.innerHTML = html;
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Auth state
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        // not logged in, redirect to home or show login prompt
         window.location.href = 'index.html';
         return;
       }
@@ -375,7 +399,7 @@
       const displayName = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
       updateNavbarAuth(user, displayName);
 
-      // Build conversation ID
+      // Build conversation ID – must match admin's pattern
       conversationId = `conv_${user.uid}_admin`;
 
       // Listen to messages for this conversation
@@ -399,34 +423,11 @@
             await updateDoc(doc(db, 'messages', m.id), { read: true, readAt: serverTimestamp() });
           });
         }
+      }, (error) => {
+        console.error('Snapshot error:', error);
+        showToast('Error loading messages: ' + error.message, 'error');
       });
     });
-
-    function renderMessages(msgs) {
-      if (!msgs || msgs.length === 0) {
-        chatMessages.innerHTML = `<div class="empty-state"><i class="fas fa-comment-dots"></i><span>No messages yet. Start the conversation!</span></div>`;
-        return;
-      }
-      let html = '';
-      msgs.forEach(m => {
-        const isSent = m.fromUserId === currentUser?.uid;
-        const time = m.timestamp?.toDate?.()?.toLocaleString('en-US', { hour: '2-digit', minute: '2-digit' }) || '';
-        // For sent messages, show read status if admin has read it
-        let statusHtml = '';
-        if (isSent) {
-          const readStatus = m.read ? '✓✓' : '✓';
-          statusHtml = `<span class="msg-status">${readStatus}</span>`;
-        }
-        html += `
-          <div class="chat-msg ${isSent ? 'sent' : 'received'}">
-            ${m.content}
-            <div class="msg-time">${time} ${statusHtml}</div>
-          </div>
-        `;
-      });
-      chatMessages.innerHTML = html;
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
 
     // Send message
     chatForm.addEventListener('submit', async (e) => {
@@ -437,6 +438,11 @@
         showToast('Please sign in first.', 'warning');
         return;
       }
+      if (!conversationId) {
+        showToast('Conversation not ready. Please refresh.', 'error');
+        return;
+      }
+
       setLoading(chatSendBtn, true);
       try {
         await addDoc(collection(db, 'messages'), {
@@ -450,8 +456,10 @@
         });
         chatInput.value = '';
         // message will appear via snapshot
+        showToast('Message sent', 'success');
       } catch (err) {
-        showToast('Error: ' + err.message, 'error');
+        console.error('Send error:', err);
+        showToast('Error sending message: ' + err.message, 'error');
       } finally {
         setLoading(chatSendBtn, false);
         chatInput.focus();
@@ -465,10 +473,7 @@
       window.location.href = 'index.html';
     };
 
-    // ===== Expose for navbar (if needed) =====
-    window.handleLogout = window.handleLogout;
-
-    // ===== clean up on page unload =====
+    // ===== cleanup =====
     window.addEventListener('beforeunload', () => {
       if (unsubMessages) unsubMessages();
     });
