@@ -4,10 +4,199 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Messages – SWD Store</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ----- messenger layout (user side) ----- */
+    .messenger-wrap {
+      display: flex;
+      flex-direction: column;
+      height: 70vh;
+      min-height: 460px;
+      background: #fff;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+    }
+    .chat-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+      font-weight: 600;
+      background: #fafafc;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .chat-header .chat-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .chat-header .chat-info {
+      flex: 1;
+    }
+    .chat-header .chat-info .name {
+      font-weight: 600;
+      color: #1c1c1e;
+    }
+    .chat-header .chat-info .status {
+      font-size: 0.75rem;
+      color: #34C759;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: #f8f9fc;
+    }
+    .chat-msg {
+      max-width: 78%;
+      padding: 10px 16px;
+      border-radius: 18px;
+      font-size: 0.95rem;
+      word-wrap: break-word;
+      position: relative;
+      animation: fadeUp 0.2s ease;
+    }
+    .chat-msg.sent {
+      align-self: flex-end;
+      background: #007AFF;
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-msg.received {
+      align-self: flex-start;
+      background: #fff;
+      color: #1c1c1e;
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    }
+    .chat-msg .msg-time {
+      font-size: 0.6rem;
+      opacity: 0.6;
+      margin-top: 4px;
+      text-align: right;
+    }
+    .chat-msg.sent .msg-time {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    .chat-msg .msg-status {
+      font-size: 0.6rem;
+      margin-left: 6px;
+      opacity: 0.6;
+    }
+
+    .chat-input-wrap {
+      display: flex;
+      gap: 10px;
+      padding: 12px 20px;
+      border-top: 1px solid rgba(0, 0, 0, 0.04);
+      background: #fff;
+      flex-shrink: 0;
+    }
+    .chat-input-wrap input {
+      flex: 1;
+      padding: 12px 18px;
+      border-radius: 30px;
+      border: 1.5px solid rgba(60, 60, 67, 0.08);
+      font-size: 0.95rem;
+      transition: 0.2s;
+      background: #f5f5f8;
+    }
+    .chat-input-wrap input:focus {
+      outline: none;
+      border-color: #007AFF;
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.06);
+    }
+    .chat-input-wrap button {
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .chat-input-wrap button:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);
+    }
+    .chat-input-wrap button:disabled {
+      opacity: 0.5;
+      transform: none !important;
+    }
+
+    .empty-state {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #8e8e93;
+      font-size: 0.95rem;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .empty-state i {
+      font-size: 2.4rem;
+      opacity: 0.3;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .chat-messages::-webkit-scrollbar {
+      width: 4px;
+    }
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: #d0d0d5;
+      border-radius: 10px;
+    }
+    .chat-messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    @media (max-width: 640px) {
+      .chat-msg {
+        max-width: 92%;
+      }
+      .messenger-wrap {
+        height: 75vh;
+        min-height: 400px;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -16,12 +205,31 @@
 
     <main class="main-content">
       <section class="pt-28 pb-16 px-6 max-w-3xl mx-auto">
-        <h1 class="text-3xl font-bold text-gray-900">Support Chat</h1>
-        <div class="glass-card mt-6">
-          <div id="chatMessages" class="chat-container"></div>
-          <form id="chatForm" class="mt-4 flex gap-2">
-            <input type="text" id="chatInput" placeholder="Type a message..." class="form-input flex-1" required />
-            <button type="submit" class="btn-primary"><i class="fas fa-paper-plane"></i></button>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Support Chat</h1>
+        <p class="text-gray-500 mb-6">Chat directly with our support team.</p>
+
+        <div class="messenger-wrap">
+          <!-- header -->
+          <div class="chat-header">
+            <div class="chat-avatar"><i class="fas fa-headset"></i></div>
+            <div class="chat-info">
+              <div class="name">Admin Support</div>
+              <div class="status"><i class="fas fa-circle text-green-500 text-xs"></i> Online</div>
+            </div>
+          </div>
+
+          <!-- messages -->
+          <div class="chat-messages" id="chatMessages">
+            <div class="empty-state">
+              <i class="fas fa-inbox"></i>
+              <span>No messages yet. Start the conversation!</span>
+            </div>
+          </div>
+
+          <!-- input -->
+          <form class="chat-input-wrap" id="chatForm">
+            <input type="text" id="chatInput" placeholder="Type a message..." required autocomplete="off" />
+            <button type="submit" id="chatSendBtn"><i class="fas fa-paper-plane"></i></button>
           </form>
         </div>
       </section>
@@ -30,7 +238,7 @@
     <div id="footer-placeholder"></div>
   </div>
 
-  <!-- অথ মডাল -->
+  <!-- Auth Modal -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
       <div class="flex justify-between items-center mb-4">
@@ -53,163 +261,217 @@
   <div id="toast-container"></div>
 
   <script type="module">
-    import { auth, db, collection, query, where, onSnapshot, addDoc, serverTimestamp, orderBy, signOut, onAuthStateChanged, doc, getDoc, signInWithEmailAndPassword, createUserWithEmailAndPassword, setDoc } from './firebase-config.js';
-import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar, setLoading } from './components.js';
+    import {
+      auth,
+      db,
+      collection,
+      doc,
+      getDoc,
+      setDoc,
+      addDoc,
+      onSnapshot,
+      query,
+      where,
+      orderBy,
+      serverTimestamp,
+      signOut,
+      onAuthStateChanged,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      updateDoc
+    } from './firebase-config.js';
+    import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar, setLoading } from './components.js';
 
-renderNavbar();
-renderFooter();
-renderCartSidebar();
-updateCartBadge();
+    renderNavbar();
+    renderFooter();
+    renderCartSidebar();
+    updateCartBadge();
 
-window.showToast = (message, type = 'success') => {
-  const container = document.getElementById('toast-container');
-  if (!container) return;
-  const toast = document.createElement('div');
-  const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
-  toast.className = `toast ${type}`;
-  toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
-  container.appendChild(toast);
-  setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
-};
+    // ===== Toast =====
+    window.showToast = (message, type = 'success') => {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
+      container.appendChild(toast);
+      setTimeout(() => { toast.classList.add('hide');
+        setTimeout(() => toast.remove(), 400); }, 4500);
+    };
 
-// অথ মডাল (setLoading সহ)
-let currentAuthMode = 'signin';
-window.openAuthModal = (mode) => {
-  currentAuthMode = mode;
-  document.getElementById('authModalTitle').textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
-  document.getElementById('authToggleText').textContent = mode === 'signin' ? "Don't have an account?" : "Already have an account?";
-  document.getElementById('authToggleLink').textContent = mode === 'signin' ? 'Sign Up' : 'Sign In';
-  document.getElementById('authError').classList.add('hidden');
-  document.getElementById('authModal').classList.remove('hidden');
-};
-window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
-document.getElementById('authToggleLink').addEventListener('click', (e) => {
-  e.preventDefault();
-  currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
-  window.openAuthModal(currentAuthMode);
-});
-
-const authForm = document.getElementById('authForm');
-const authSubmitBtn = authForm.querySelector('button[type="submit"]');
-authForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = document.getElementById('authEmail').value.trim();
-  const password = document.getElementById('authPassword').value.trim();
-  const errorDiv = document.getElementById('authError');
-  errorDiv.classList.add('hidden');
-  setLoading(authSubmitBtn, true, 'Continue');
-  try {
-    let userCred;
-    if (currentAuthMode === 'signin') {
-      userCred = await signInWithEmailAndPassword(auth, email, password);
-      showToast('✅ সাইন ইন সফল!', 'success');
-    } else {
-      userCred = await createUserWithEmailAndPassword(auth, email, password);
-      await setDoc(doc(db, 'users', userCred.user.uid), {
-        email, displayName: email.split('@')[0], role: 'user', createdAt: new Date().toISOString()
-      });
-      showToast('✅ অ্যাকাউন্ট তৈরি হয়েছে!', 'success');
-    }
-    closeAuthModal();
-    authForm.reset();
-  } catch (error) {
-    errorDiv.textContent = error.message;
-    errorDiv.classList.remove('hidden');
-    showToast('⚠️ ' + error.message, 'error');
-  } finally {
-    setLoading(authSubmitBtn, false);
-  }
-});
-
-// ===== CHAT =====
-let snapshot1 = null;
-let snapshot2 = null;
-const chatMessages = document.getElementById('chatMessages');
-
-function renderMergedMessages(user) {
-  const map = new Map();
-  if (snapshot1) {
-    snapshot1.forEach(doc => map.set(doc.id, { id: doc.id, ...doc.data() }));
-  }
-  if (snapshot2) {
-    snapshot2.forEach(doc => map.set(doc.id, { id: doc.id, ...doc.data() }));
-  }
-  const sorted = Array.from(map.values()).sort((a, b) => {
-    const ta = a.timestamp?.toDate?.() || new Date(0);
-    const tb = b.timestamp?.toDate?.() || new Date(0);
-    return ta - tb;
-  });
-  chatMessages.innerHTML = '';
-  sorted.forEach(msg => {
-    const isUser = msg.fromUserId === user.uid;
-    const div = document.createElement('div');
-    div.className = isUser ? 'msg-user' : 'msg-admin';
-    div.innerHTML = `${msg.content}<div class="msg-time">${msg.timestamp?.toDate?.()?.toLocaleTimeString() || ''}</div>`;
-    chatMessages.appendChild(div);
-  });
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = 'index.html';
-    return;
-  }
-  const userDoc = await getDoc(doc(db, 'users', user.uid));
-  const displayName = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
-  updateNavbarAuth(user, displayName);
-
-  const q1 = query(
-    collection(db, 'messages'),
-    where('participants', 'array-contains', user.uid),
-    orderBy('timestamp', 'asc')
-  );
-  onSnapshot(q1, (snap) => {
-    snapshot1 = snap;
-    renderMergedMessages(user);
-  });
-
-  const q2 = query(
-    collection(db, 'messages'),
-    where('participants', 'array-contains', 'all'),
-    orderBy('timestamp', 'asc')
-  );
-  onSnapshot(q2, (snap) => {
-    snapshot2 = snap;
-    renderMergedMessages(user);
-  });
-});
-
-const chatForm = document.getElementById('chatForm');
-const chatSendBtn = chatForm.querySelector('button[type="submit"]');
-chatForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const content = document.getElementById('chatInput').value.trim();
-  if (!content) return;
-  const user = auth.currentUser;
-  if (!user) return showToast('আপনি লগইন নেই', 'error');
-  setLoading(chatSendBtn, true);
-  try {
-    await addDoc(collection(db, 'messages'), {
-      fromUserId: user.uid,
-      toUserId: 'admin',
-      content,
-      timestamp: serverTimestamp(),
-      participants: [user.uid, 'admin'],
-      read: false
+    // ===== Auth Modal (same as other pages) =====
+    let currentAuthMode = 'signin';
+    window.openAuthModal = (mode) => {
+      currentAuthMode = mode;
+      document.getElementById('authModalTitle').textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
+      document.getElementById('authToggleText').textContent = mode === 'signin' ? "Don't have an account?" : "Already have an account?";
+      document.getElementById('authToggleLink').textContent = mode === 'signin' ? 'Sign Up' : 'Sign In';
+      document.getElementById('authError').classList.add('hidden');
+      document.getElementById('authModal').classList.remove('hidden');
+    };
+    window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
+    document.getElementById('authToggleLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
+      window.openAuthModal(currentAuthMode);
     });
-    document.getElementById('chatInput').value = '';
-  } catch (err) {
-    showToast('⚠️ ' + err.message, 'error');
-  } finally {
-    setLoading(chatSendBtn, false);
-  }
-});
 
-window.handleLogout = async () => {
-  await signOut(auth);
-  window.location.href = 'index.html';
-};
+    const authForm = document.getElementById('authForm');
+    const authSubmitBtn = authForm.querySelector('button[type="submit"]');
+    authForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value.trim();
+      const errorDiv = document.getElementById('authError');
+      errorDiv.classList.add('hidden');
+      setLoading(authSubmitBtn, true, 'Continue');
+      try {
+        let userCred;
+        if (currentAuthMode === 'signin') {
+          userCred = await signInWithEmailAndPassword(auth, email, password);
+          showToast('✅ Signed in!', 'success');
+        } else {
+          userCred = await createUserWithEmailAndPassword(auth, email, password);
+          await setDoc(doc(db, 'users', userCred.user.uid), {
+            email,
+            displayName: email.split('@')[0],
+            role: 'user',
+            createdAt: new Date().toISOString()
+          });
+          showToast('✅ Account created!', 'success');
+        }
+        closeAuthModal();
+        authForm.reset();
+      } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.classList.remove('hidden');
+        showToast('⚠️ ' + error.message, 'error');
+      } finally {
+        setLoading(authSubmitBtn, false);
+      }
+    });
+
+    // ===== CHAT LOGIC =====
+    const chatMessages = document.getElementById('chatMessages');
+    const chatForm = document.getElementById('chatForm');
+    const chatInput = document.getElementById('chatInput');
+    const chatSendBtn = document.getElementById('chatSendBtn');
+    let currentUser = null;
+    let conversationId = null;
+
+    // Unsubscribe function
+    let unsubMessages = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        // not logged in, redirect to home or show login prompt
+        window.location.href = 'index.html';
+        return;
+      }
+      currentUser = user;
+      // update navbar
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const displayName = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
+      updateNavbarAuth(user, displayName);
+
+      // Build conversation ID
+      conversationId = `conv_${user.uid}_admin`;
+
+      // Listen to messages for this conversation
+      if (unsubMessages) unsubMessages();
+      const q = query(
+        collection(db, 'messages'),
+        where('conversationId', '==', conversationId),
+        orderBy('timestamp', 'asc')
+      );
+      unsubMessages = onSnapshot(q, (snapshot) => {
+        const msgs = [];
+        snapshot.forEach(doc => {
+          msgs.push({ id: doc.id, ...doc.data() });
+        });
+        renderMessages(msgs);
+
+        // Mark admin messages as read when user opens chat
+        const unreadAdminMsgs = msgs.filter(m => m.fromUserId === 'admin' && !m.read);
+        if (unreadAdminMsgs.length > 0) {
+          unreadAdminMsgs.forEach(async (m) => {
+            await updateDoc(doc(db, 'messages', m.id), { read: true, readAt: serverTimestamp() });
+          });
+        }
+      });
+    });
+
+    function renderMessages(msgs) {
+      if (!msgs || msgs.length === 0) {
+        chatMessages.innerHTML = `<div class="empty-state"><i class="fas fa-comment-dots"></i><span>No messages yet. Start the conversation!</span></div>`;
+        return;
+      }
+      let html = '';
+      msgs.forEach(m => {
+        const isSent = m.fromUserId === currentUser?.uid;
+        const time = m.timestamp?.toDate?.()?.toLocaleString('en-US', { hour: '2-digit', minute: '2-digit' }) || '';
+        // For sent messages, show read status if admin has read it
+        let statusHtml = '';
+        if (isSent) {
+          const readStatus = m.read ? '✓✓' : '✓';
+          statusHtml = `<span class="msg-status">${readStatus}</span>`;
+        }
+        html += `
+          <div class="chat-msg ${isSent ? 'sent' : 'received'}">
+            ${m.content}
+            <div class="msg-time">${time} ${statusHtml}</div>
+          </div>
+        `;
+      });
+      chatMessages.innerHTML = html;
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Send message
+    chatForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const content = chatInput.value.trim();
+      if (!content) return;
+      if (!currentUser) {
+        showToast('Please sign in first.', 'warning');
+        return;
+      }
+      setLoading(chatSendBtn, true);
+      try {
+        await addDoc(collection(db, 'messages'), {
+          conversationId: conversationId,
+          fromUserId: currentUser.uid,
+          toUserId: 'admin',
+          content,
+          timestamp: serverTimestamp(),
+          read: false,
+          participants: [currentUser.uid, 'admin']
+        });
+        chatInput.value = '';
+        // message will appear via snapshot
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      } finally {
+        setLoading(chatSendBtn, false);
+        chatInput.focus();
+      }
+    });
+
+    // ===== Logout =====
+    window.handleLogout = async () => {
+      if (unsubMessages) unsubMessages();
+      await signOut(auth);
+      window.location.href = 'index.html';
+    };
+
+    // ===== Expose for navbar (if needed) =====
+    window.handleLogout = window.handleLogout;
+
+    // ===== clean up on page unload =====
+    window.addEventListener('beforeunload', () => {
+      if (unsubMessages) unsubMessages();
+    });
   </script>
 </body>
 </html>
