@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
   <style>
-    /* আপনার স্টাইল (index থেকে কপি) – সংক্ষেপে */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family: 'Inter', sans-serif; background: #f2f4f7; color: #1c1c1e; }
     .glass { background: rgba(255,255,255,0.6); backdrop-filter: blur(20px); border:1px solid rgba(255,255,255,0.6); }
@@ -73,7 +72,6 @@
     <h1 class="text-3xl font-bold text-gray-900">Fix My Website</h1>
     <p class="text-gray-500 mt-2">Describe your issue in detail. We'll get back to you within 24 hours.</p>
     <form id="fixForm" class="mt-8 space-y-5">
-      <!-- আপনার ফর্ম (আগের মতো) -->
       <div>
         <label class="block text-sm font-semibold text-gray-700">Your Name *</label>
         <input type="text" id="fixName" required class="form-input" />
@@ -137,9 +135,103 @@
     renderNavbar();
     renderFooter();
 
-    // TOAST, ফর্ম সাবমিট, অথ মডাল – আগের কোড ঠিক রাখুন
-    // শুধু onAuthStateChanged-এ updateNavbarAuth ব্যবহার করুন
+    // ===== TOAST =====
+    window.showToast = (message, type = 'success') => {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.add('hide');
+        setTimeout(() => toast.remove(), 400);
+      }, 4500);
+    };
 
+    // ===== ফর্ম সাবমিট (fixRequests) =====
+    document.getElementById('fixForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('fixName').value.trim();
+      const email = document.getElementById('fixEmail').value.trim();
+      const phone = document.getElementById('fixPhone').value.trim();
+      const url = document.getElementById('fixUrl').value.trim();
+      const problem = document.getElementById('fixProblem').value.trim();
+      const imageLink = document.getElementById('fixImageLink').value.trim();
+      const feedback = document.getElementById('fixFeedback');
+
+      if (!name || !email || !problem) {
+        feedback.className = 'block text-sm font-medium p-4 rounded-xl bg-red-50 text-red-600 border border-red-200';
+        feedback.textContent = 'দয়া করে নাম, ইমেইল ও সমস্যা বিবরণ দিন।';
+        showToast('⚠️ দয়া করে নাম, ইমেইল ও সমস্যা বিবরণ দিন।', 'error');
+        return;
+      }
+
+      try {
+        await addDoc(collection(db, 'fixRequests'), {
+          name, email, phone, url, problem, imageLink,
+          status: 'pending',
+          timestamp: serverTimestamp(),
+          read: false
+        });
+        feedback.className = 'block text-sm font-medium p-4 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200';
+        feedback.textContent = '✅ আপনার রিকোয়েস্ট সফলভাবে জমা হয়েছে। শীঘ্রই যোগাযোগ করা হবে।';
+        showToast('✅ আপনার রিকোয়েস্ট সফলভাবে জমা হয়েছে!', 'success');
+        document.getElementById('fixForm').reset();
+        setTimeout(() => feedback.className = 'hidden', 8000);
+      } catch (error) {
+        feedback.className = 'block text-sm font-medium p-4 rounded-xl bg-red-50 text-red-600 border border-red-200';
+        feedback.textContent = '⚠️ কিছু সমস্যা হয়েছে, আবার চেষ্টা করুন।';
+        showToast('⚠️ কিছু সমস্যা হয়েছে, আবার চেষ্টা করুন।', 'error');
+        console.error(error);
+      }
+    });
+
+    // ===== AUTH =====
+    let currentAuthMode = 'signin';
+    window.openAuthModal = (mode) => {
+      currentAuthMode = mode;
+      document.getElementById('authModalTitle').textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
+      document.getElementById('authToggleText').textContent = mode === 'signin' ? "Don't have an account?" : "Already have an account?";
+      document.getElementById('authToggleLink').textContent = mode === 'signin' ? 'Sign Up' : 'Sign In';
+      document.getElementById('authError').classList.add('hidden');
+      document.getElementById('authModal').classList.remove('hidden');
+    };
+    window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
+    document.getElementById('authToggleLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
+      window.openAuthModal(currentAuthMode);
+    });
+    document.getElementById('authForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value.trim();
+      const errorDiv = document.getElementById('authError');
+      errorDiv.classList.add('hidden');
+      try {
+        let userCred;
+        if (currentAuthMode === 'signin') {
+          userCred = await signInWithEmailAndPassword(auth, email, password);
+          showToast('✅ সাইন ইন সফল!', 'success');
+        } else {
+          userCred = await createUserWithEmailAndPassword(auth, email, password);
+          await setDoc(doc(db, 'users', userCred.user.uid), {
+            email, displayName: email.split('@')[0], role: 'user', createdAt: new Date().toISOString()
+          });
+          showToast('✅ অ্যাকাউন্ট তৈরি হয়েছে!', 'success');
+        }
+        closeAuthModal();
+        document.getElementById('authForm').reset();
+      } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.classList.remove('hidden');
+        showToast('⚠️ ' + error.message, 'error');
+      }
+    });
+
+    // ===== AUTH STATE =====
     onAuthStateChanged(auth, async (user) => {
       let name = null;
       if (user) {
@@ -153,8 +245,6 @@
       await signOut(auth);
       showToast('✅ লগআউট সফল', 'success');
     };
-
-    // বাকি ফাংশন (showToast, openAuthModal, closeAuthModal, fixForm submit) আগের মতো
   </script>
 </body>
 </html>

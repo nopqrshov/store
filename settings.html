@@ -85,18 +85,31 @@
     </div>
   </section>
 
+  <!-- অথ মডাল -->
+  <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+      <div class="flex justify-between items-center mb-4">
+        <h3 id="authModalTitle" class="text-2xl font-bold">Sign In</h3>
+        <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+      </div>
+      <form id="authForm" class="space-y-4">
+        <input type="email" id="authEmail" placeholder="Email" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
+        <input type="password" id="authPassword" placeholder="Password" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
+        <button type="submit" class="btn-primary w-full justify-center">Continue</button>
+      </form>
+      <p class="mt-4 text-sm text-gray-500 text-center">
+        <span id="authToggleText">Don't have an account?</span>
+        <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
+      </p>
+      <div id="authError" class="text-red-500 text-sm mt-2 hidden"></div>
+    </div>
+  </div>
+
   <div id="footer-placeholder"></div>
   <div id="toast-container"></div>
 
   <script type="module">
-    import { 
-      auth, signOut, onAuthStateChanged, 
-      reauthenticateWithCredential, 
-      EmailAuthProvider, 
-      updatePassword, 
-      deleteUser,
-      doc, getDoc
-    } from './firebase-config.js';
+    import { auth, signOut, reauthenticateWithCredential, EmailAuthProvider, updatePassword, deleteUser, onAuthStateChanged, doc, getDoc, signInWithEmailAndPassword, createUserWithEmailAndPassword, setDoc } from './firebase-config.js';
     import { renderNavbar, renderFooter, updateNavbarAuth } from './components.js';
 
     renderNavbar();
@@ -111,8 +124,54 @@
       toast.className = `toast ${type}`;
       toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
       container.appendChild(toast);
-      setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
+      setTimeout(() => {
+        toast.classList.add('hide');
+        setTimeout(() => toast.remove(), 400);
+      }, 4500);
     };
+
+    // ===== AUTH =====
+    let currentAuthMode = 'signin';
+    window.openAuthModal = (mode) => {
+      currentAuthMode = mode;
+      document.getElementById('authModalTitle').textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
+      document.getElementById('authToggleText').textContent = mode === 'signin' ? "Don't have an account?" : "Already have an account?";
+      document.getElementById('authToggleLink').textContent = mode === 'signin' ? 'Sign Up' : 'Sign In';
+      document.getElementById('authError').classList.add('hidden');
+      document.getElementById('authModal').classList.remove('hidden');
+    };
+    window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
+    document.getElementById('authToggleLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
+      window.openAuthModal(currentAuthMode);
+    });
+    document.getElementById('authForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value.trim();
+      const errorDiv = document.getElementById('authError');
+      errorDiv.classList.add('hidden');
+      try {
+        let userCred;
+        if (currentAuthMode === 'signin') {
+          userCred = await signInWithEmailAndPassword(auth, email, password);
+          showToast('✅ সাইন ইন সফল!', 'success');
+        } else {
+          userCred = await createUserWithEmailAndPassword(auth, email, password);
+          await setDoc(doc(db, 'users', userCred.user.uid), {
+            email, displayName: email.split('@')[0], role: 'user', createdAt: new Date().toISOString()
+          });
+          showToast('✅ অ্যাকাউন্ট তৈরি হয়েছে!', 'success');
+        }
+        closeAuthModal();
+        document.getElementById('authForm').reset();
+      } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.classList.remove('hidden');
+        showToast('⚠️ ' + error.message, 'error');
+      }
+    });
 
     // ===== AUTH STATE =====
     onAuthStateChanged(auth, async (user) => {
@@ -121,8 +180,7 @@
         return;
       }
       const userDoc = await getDoc(doc(db, 'users', user.uid));
-      const name = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
-      updateNavbarAuth(user, name);
+      updateNavbarAuth(user, userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0]);
     });
 
     // ===== পাসওয়ার্ড পরিবর্তন =====
@@ -158,7 +216,6 @@
       }
     };
 
-    // ===== LOGOUT =====
     window.handleLogout = async () => {
       await signOut(auth);
       window.location.href = 'index.html';
