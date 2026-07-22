@@ -28,6 +28,9 @@
     .cart-sidebar.open { right:0; }
     .cart-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.2); backdrop-filter:blur(4px); z-index:199; display:none; }
     .cart-overlay.open { display:block; }
+    .form-input { width:100%; padding:14px 18px; border:1.5px solid rgba(60,60,67,0.08); border-radius:14px; font-size:1rem; background:rgba(255,255,255,0.8); }
+    .form-input:focus { outline:none; border-color:#007AFF; box-shadow:0 0 0 4px rgba(0,122,255,0.08); }
+
     #toast-container {
       position: fixed;
       bottom: 30px;
@@ -75,7 +78,7 @@
 </head>
 <body>
 
-<!-- নেভবার (লিংক আপডেট) -->
+<!-- নেভবার -->
 <nav class="fixed top-0 left-0 w-full glass z-50 h-16 md:h-20 flex items-center px-6 sm:px-8 lg:px-12">
   <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
     <a href="index.html" class="text-xl md:text-2xl font-bold text-gray-900">
@@ -148,11 +151,35 @@
   </div>
 </div>
 
+<!-- ✅ পেমেন্ট মডাল (নতুন) -->
+<div id="paymentModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[300] hidden">
+  <div class="bg-white rounded-2xl p-8 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-2xl font-bold">Complete Payment</h3>
+      <button onclick="closePaymentModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="paymentDetails" class="space-y-3 text-sm bg-gray-50 p-4 rounded-xl">
+      <p class="font-semibold">Send payment to any of these:</p>
+      <div id="paymentNumbers" class="space-y-2"></div>
+    </div>
+    <form id="paymentForm" class="mt-4 space-y-4">
+      <div>
+        <label class="block text-sm font-semibold text-gray-700">Transaction ID *</label>
+        <input type="text" id="transactionId" placeholder="Enter your payment transaction ID" required class="form-input" />
+      </div>
+      <button type="submit" class="btn-primary w-full justify-center">
+        <i class="fas fa-check"></i> Confirm Payment
+      </button>
+      <div id="paymentError" class="text-red-500 text-sm hidden"></div>
+    </form>
+  </div>
+</div>
+
 <!-- টোস্ট -->
 <div id="toast-container"></div>
 
 <script type="module">
-import { auth, db, collection, doc, getDocs, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, query, where, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setDoc, getDoc } from './firebase-config.js';
+import { auth, db, collection, doc, getDoc, getDocs, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, query, where, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setDoc } from './firebase-config.js';
 
 // ===== TOAST =====
 window.showToast = (message, type = 'success') => {
@@ -264,6 +291,8 @@ const renderProducts = () => {
   `).join('');
 };
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
+let currentOrderId = null; // পেমেন্ট মডালের জন্য
+
 const updateCartUI = () => {
   document.getElementById('cartCount').textContent = cart.length;
   const cartItemsDiv = document.getElementById('cartItems');
@@ -306,7 +335,76 @@ window.toggleCart = () => {
 };
 updateCartUI();
 
-window.checkout = () => {
+// ===== PAYMENT MODAL (গ্রুপ ৩) =====
+let paymentSettings = { bkash: '', nagad: '', usdt: '' };
+
+// পেমেন্ট সেটিংস লোড
+const loadPaymentSettings = async () => {
+  try {
+    const docSnap = await getDoc(doc(db, 'settings', 'payment'));
+    if (docSnap.exists()) {
+      paymentSettings = docSnap.data();
+    }
+  } catch (e) { console.error(e); }
+};
+
+window.openPaymentModal = (orderId) => {
+  currentOrderId = orderId;
+  const modal = document.getElementById('paymentModal');
+  const numbersDiv = document.getElementById('paymentNumbers');
+  let html = '';
+  if (paymentSettings.bkash) html += `<p><i class="fas fa-mobile-alt text-blue-500"></i> BKash: <strong>${paymentSettings.bkash}</strong></p>`;
+  if (paymentSettings.nagad) html += `<p><i class="fas fa-mobile-alt text-orange-500"></i> Nagad: <strong>${paymentSettings.nagad}</strong></p>`;
+  if (paymentSettings.usdt) html += `<p><i class="fab fa-bitcoin text-yellow-500"></i> USDT (BEP20): <strong>${paymentSettings.usdt}</strong></p>`;
+  if (!html) html = '<p class="text-gray-500">পেমেন্ট পদ্ধতি সেট করা হয়নি। অ্যাডমিনের সাথে যোগাযোগ করুন।</p>';
+  numbersDiv.innerHTML = html;
+  modal.classList.remove('hidden');
+  document.getElementById('paymentError').classList.add('hidden');
+  document.getElementById('transactionId').value = '';
+};
+
+window.closePaymentModal = () => {
+  document.getElementById('paymentModal').classList.add('hidden');
+  currentOrderId = null;
+};
+
+document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const txnId = document.getElementById('transactionId').value.trim();
+  const errorDiv = document.getElementById('paymentError');
+  errorDiv.classList.add('hidden');
+  if (!txnId) {
+    errorDiv.textContent = 'দয়া করে ট্রানজেকশন ID দিন।';
+    errorDiv.classList.remove('hidden');
+    return;
+  }
+  if (!currentOrderId) {
+    errorDiv.textContent = 'অর্ডার পাওয়া যায়নি।';
+    errorDiv.classList.remove('hidden');
+    return;
+  }
+  try {
+    await updateDoc(doc(db, 'orders', currentOrderId), {
+      transactionId: txnId,
+      paymentMethod: 'Manual',
+      status: 'processing'
+    });
+    showToast('✅ পেমেন্ট কনফর্ম! অ্যাডমিন শীঘ্রই ভেরিফাই করবেন।', 'success');
+    closePaymentModal();
+    // কার্ট খালি করুন
+    cart = [];
+    localStorage.removeItem('cart');
+    updateCartUI();
+    toggleCart(); // কার্ট সাইডবার বন্ধ করুন
+  } catch (err) {
+    errorDiv.textContent = '⚠️ ' + err.message;
+    errorDiv.classList.remove('hidden');
+    showToast('⚠️ ' + err.message, 'error');
+  }
+});
+
+// ===== CHECKOUT (পেমেন্ট মডাল খুলবে) =====
+window.checkout = async () => {
   if (cart.length === 0) {
     showToast('🛒 আপনার কার্ট খালি', 'warning');
     return;
@@ -315,6 +413,12 @@ window.checkout = () => {
   if (!user) {
     showToast('⚠️ চেকআউট করতে দয়া করে সাইন ইন করুন', 'error');
     openAuthModal('signin');
+    return;
+  }
+  // পেমেন্ট সেটিংস লোড করুন
+  await loadPaymentSettings();
+  if (!paymentSettings.bkash && !paymentSettings.nagad && !paymentSettings.usdt) {
+    showToast('⚠️ পেমেন্ট পদ্ধতি সেট করা হয়নি। অ্যাডমিনের সাথে যোগাযোগ করুন।', 'error');
     return;
   }
   const orderData = {
@@ -326,13 +430,13 @@ window.checkout = () => {
     transactionId: '',
     createdAt: serverTimestamp(),
   };
-  addDoc(collection(db, 'orders'), orderData).then(() => {
-    showToast('🎉 অর্ডার সফল! দয়া করে পেমেন্ট সম্পন্ন করুন।', 'success');
-    cart = [];
-    localStorage.removeItem('cart');
-    updateCartUI();
-    toggleCart();
-  }).catch(err => showToast('⚠️ ' + err.message, 'error'));
+  try {
+    const docRef = await addDoc(collection(db, 'orders'), orderData);
+    // পেমেন্ট মডাল খুলুন
+    openPaymentModal(docRef.id);
+  } catch (err) {
+    showToast('⚠️ ' + err.message, 'error');
+  }
 };
 </script>
 </body>

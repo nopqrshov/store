@@ -21,11 +21,14 @@
     .form-input:focus { outline:none; border-color:#007AFF; }
     .tab-content { display:none; }
     .tab-content.active { display:block; }
+    .badge-pending { background:#FF9500; color:white; padding:2px 10px; border-radius:60px; font-size:0.7rem; }
+    .badge-processing { background:#007AFF; color:white; padding:2px 10px; border-radius:60px; font-size:0.7rem; }
+    .badge-completed { background:#34C759; color:white; padding:2px 10px; border-radius:60px; font-size:0.7rem; }
   </style>
 </head>
 <body>
 
-<!-- সাইডবার -->
+<!-- সাইডবার (অপরিবর্তিত) -->
 <div class="sidebar">
   <h2 class="text-xl font-bold text-gray-900 mb-6">SWD Admin</h2>
   <div class="space-y-1">
@@ -55,14 +58,13 @@
     </div>
   </div>
 
-  <!-- পণ্য ব্যবস্থাপনা -->
+  <!-- পণ্য -->
   <div id="tab-products" class="tab-content">
     <div class="flex justify-between items-center">
       <h2 class="text-2xl font-bold">Products</h2>
       <button onclick="openProductModal()" class="btn-primary"><i class="fas fa-plus"></i> Add Product</button>
     </div>
     <div id="productList" class="grid grid-cols-3 gap-4 mt-4"></div>
-    <!-- মডাল -->
     <div id="productModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
       <div class="bg-white rounded-2xl p-8 max-w-md w-full">
         <h3 id="productModalTitle" class="text-xl font-bold">Add Product</h3>
@@ -79,7 +81,7 @@
     </div>
   </div>
 
-  <!-- অর্ডার -->
+  <!-- অর্ডার (✅ ট্রানজেকশন ID দেখানো হচ্ছে) -->
   <div id="tab-orders" class="tab-content">
     <h2 class="text-2xl font-bold">Orders</h2>
     <div id="orderList" class="space-y-4 mt-4"></div>
@@ -91,7 +93,7 @@
     <div id="userList" class="grid grid-cols-3 gap-4 mt-4"></div>
   </div>
 
-  <!-- মেসেজ (পোর্টফোলিও কন্টাক্ট) -->
+  <!-- মেসেজ -->
   <div id="tab-messages" class="tab-content">
     <h2 class="text-2xl font-bold">Contact Messages</h2>
     <div id="messageList" class="space-y-3 mt-4"></div>
@@ -119,21 +121,14 @@
 </div>
 
 <script type="module">
-// ✅ ফিক্স ১: সব প্রয়োজনীয় ফাংশন ইমপোর্ট করা হয়েছে (doc, getDoc, setDoc সহ)
 import { auth, db, collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc, onSnapshot, query, where } from './firebase-config.js';
-
-// চেক অ্যাডমিন
 import { onAuthStateChanged } from './firebase-config.js';
+
 onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = 'admin-login.html';
-    return;
-  }
+  if (!user) { window.location.href = 'admin-login.html'; return; }
   const userDoc = await getDoc(doc(db, 'users', user.uid));
   if (!userDoc.exists() || userDoc.data().role !== 'admin') {
-    alert('Unauthorized');
-    auth.signOut();
-    window.location.href = 'admin-login.html';
+    alert('Unauthorized'); auth.signOut(); window.location.href = 'admin-login.html';
   }
 });
 
@@ -148,12 +143,10 @@ document.querySelectorAll('.nav-item').forEach(item => {
   });
 });
 
-// ===== ড্যাশবোর্ড কাউন্ট + পণ্য লোড (একসাথে) =====
+// ===== ড্যাশবোর্ড কাউন্ট + পণ্য =====
 const productList = document.getElementById('productList');
 onSnapshot(collection(db, 'products'), (snapshot) => {
-  // ✅ ফিক্স ২: ড্যাশবোর্ডে প্রোডাক্ট কাউন্ট আপডেট
   document.getElementById('totalProducts').innerText = snapshot.size;
-  
   let html = '';
   snapshot.forEach(doc => {
     const p = doc.data();
@@ -167,7 +160,6 @@ onSnapshot(collection(db, 'products'), (snapshot) => {
   productList.innerHTML = html || '<p class="text-gray-500">No products yet.</p>';
 });
 
-// ✅ ফিক্স ৩: editProduct ফাংশন (এখন সম্পূর্ণ)
 window.editProduct = async (id) => {
   const docSnap = await getDoc(doc(db, 'products', id));
   if (docSnap.exists()) {
@@ -181,16 +173,10 @@ window.editProduct = async (id) => {
     document.getElementById('productModal').classList.remove('hidden');
   }
 };
-
-// পণ্য অ্যাড/এডিট
 window.openProductModal = (id) => {
   document.getElementById('productModal').classList.remove('hidden');
-  if (id) {
-    editProduct(id);
-  } else {
-    document.getElementById('productModalTitle').innerText = 'Add Product';
-    document.getElementById('prodId').value = '';
-  }
+  if (id) editProduct(id);
+  else { document.getElementById('productModalTitle').innerText = 'Add Product'; document.getElementById('prodId').value = ''; }
 };
 window.closeProductModal = () => {
   document.getElementById('productModal').classList.add('hidden');
@@ -205,11 +191,8 @@ document.getElementById('productForm').addEventListener('submit', async (e) => {
   const id = document.getElementById('prodId').value;
   if (!name || !price) return alert('Name and price required.');
   try {
-    if (id) {
-      await updateDoc(doc(db, 'products', id), { name, desc, price, category });
-    } else {
-      await addDoc(collection(db, 'products'), { name, desc, price, category });
-    }
+    if (id) await updateDoc(doc(db, 'products', id), { name, desc, price, category });
+    else await addDoc(collection(db, 'products'), { name, desc, price, category });
     closeProductModal();
   } catch (err) { alert(err.message); }
 });
@@ -217,23 +200,30 @@ window.deleteProduct = async (id) => {
   if (confirm('Delete this product?')) await deleteDoc(doc(db, 'products', id));
 };
 
-// ===== অর্ডার লোড + কাউন্ট =====
+// ===== অর্ডার (✅ ট্রানজেকশন ID সহ) =====
 const orderList = document.getElementById('orderList');
 onSnapshot(collection(db, 'orders'), (snapshot) => {
-  // ✅ ফিক্স ৪: ড্যাশবোর্ডে অর্ডার কাউন্ট
   document.getElementById('totalOrders').innerText = snapshot.size;
-  
   let html = '';
   snapshot.forEach(doc => {
     const o = doc.data();
-    html += `<div class="glass-card flex justify-between items-center">
-      <div><span class="font-bold">${o.userId}</span> - $${o.total} - <span class="text-sm text-gray-500">${o.status}</span></div>
-      <div>
-        <select onchange="updateOrderStatus('${doc.id}', this.value)" class="border rounded p-1">
-          <option value="pending" ${o.status==='pending'?'selected':''}>Pending</option>
-          <option value="processing" ${o.status==='processing'?'selected':''}>Processing</option>
-          <option value="completed" ${o.status==='completed'?'selected':''}>Completed</option>
-        </select>
+    const statusClass = o.status === 'pending' ? 'badge-pending' : o.status === 'processing' ? 'badge-processing' : 'badge-completed';
+    html += `<div class="glass-card">
+      <div class="flex flex-wrap justify-between items-start gap-2">
+        <div>
+          <p class="font-bold">User: ${o.userId}</p>
+          <p class="text-sm">Total: $${o.total}</p>
+          ${o.transactionId ? `<p class="text-xs text-gray-500">Txn ID: ${o.transactionId}</p>` : '<p class="text-xs text-red-400">Payment pending</p>'}
+          ${o.paymentMethod ? `<p class="text-xs text-gray-400">Method: ${o.paymentMethod}</p>` : ''}
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="${statusClass} px-2 py-1 rounded-full text-xs">${o.status}</span>
+          <select onchange="updateOrderStatus('${doc.id}', this.value)" class="border rounded p-1 text-sm">
+            <option value="pending" ${o.status==='pending'?'selected':''}>Pending</option>
+            <option value="processing" ${o.status==='processing'?'selected':''}>Processing</option>
+            <option value="completed" ${o.status==='completed'?'selected':''}>Completed</option>
+          </select>
+        </div>
       </div>
     </div>`;
   });
@@ -243,7 +233,7 @@ window.updateOrderStatus = async (id, status) => {
   await updateDoc(doc(db, 'orders', id), { status });
 };
 
-// ===== ইউজার লোড =====
+// ===== ইউজার =====
 const userList = document.getElementById('userList');
 onSnapshot(collection(db, 'users'), (snapshot) => {
   let html = '';
@@ -254,12 +244,10 @@ onSnapshot(collection(db, 'users'), (snapshot) => {
   userList.innerHTML = html;
 });
 
-// ===== মেসেজ লোড + কাউন্ট =====
+// ===== মেসেজ =====
 const messageList = document.getElementById('messageList');
 onSnapshot(collection(db, 'contactMessages'), (snapshot) => {
-  // ✅ ফিক্স ৫: ড্যাশবোর্ডে মেসেজ কাউন্ট
   document.getElementById('totalMessages').innerText = snapshot.size;
-  
   let html = '';
   snapshot.forEach(doc => {
     const m = doc.data();
@@ -268,12 +256,10 @@ onSnapshot(collection(db, 'contactMessages'), (snapshot) => {
   messageList.innerHTML = html || '<p class="text-gray-500">No messages.</p>';
 });
 
-// ===== ফিক্স রিকোয়েস্ট লোড + কাউন্ট =====
+// ===== ফিক্স রিকোয়েস্ট =====
 const fixRequestList = document.getElementById('fixRequestList');
 onSnapshot(collection(db, 'fixRequests'), (snapshot) => {
-  // ✅ ফিক্স ৬: ড্যাশবোর্ডে ফিক্স রিকোয়েস্ট কাউন্ট
   document.getElementById('totalFixRequests').innerText = snapshot.size;
-  
   let html = '';
   snapshot.forEach(doc => {
     const f = doc.data();
@@ -282,7 +268,7 @@ onSnapshot(collection(db, 'fixRequests'), (snapshot) => {
   fixRequestList.innerHTML = html || '<p class="text-gray-500">No fix requests.</p>';
 });
 
-// ===== সেটিংস (setDoc ফিক্স) =====
+// ===== সেটিংস =====
 document.getElementById('settingsForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const bkash = document.getElementById('bkashNumber').value.trim();
@@ -291,15 +277,11 @@ document.getElementById('settingsForm').addEventListener('submit', async (e) => 
   try {
     await setDoc(doc(db, 'settings', 'payment'), { bkash, nagad, usdt });
     alert('Settings saved!');
-  } catch (err) {
-    alert('Error: ' + err.message);
-  }
+  } catch (err) { alert('Error: ' + err.message); }
 });
 
 // ===== লগআউট =====
 window.logoutAdmin = () => { auth.signOut(); window.location.href = 'admin-login.html'; };
-
 </script>
-
 </body>
 </html>
