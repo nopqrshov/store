@@ -96,14 +96,6 @@
     renderNavbar();
     renderFooter();
 
-    const cartIcon = document.getElementById('cartIconLink');
-    if (cartIcon) {
-      cartIcon.addEventListener('click', (e) => {
-        e.preventDefault();
-        toggleCart();
-      });
-    }
-
     window.showToast = (message, type = 'success') => {
       const container = document.getElementById('toast-container');
       if (!container) return;
