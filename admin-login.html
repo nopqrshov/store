@@ -6,6 +6,7 @@
   <title>Admin Login</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
   <style>
     body { background: #f2f4f7; font-family: 'Inter', sans-serif; }
     .glass { background: rgba(255,255,255,0.6); backdrop-filter: blur(20px); border:1px solid rgba(255,255,255,0.6); }
@@ -27,10 +28,8 @@
 </div>
 
 <script type="module">
-// ✅ ফিক্স: db, doc, getDoc ইমপোর্ট করা হয়েছে
 import { auth, db, signInWithEmailAndPassword, onAuthStateChanged, doc, getDoc } from './firebase-config.js';
 
-// যদি ইতিমধ্যে লগইন করা থাকে এবং অ্যাডমিন হয়, তাহলে সরাসরি প্যানেলে পাঠান
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     try {
@@ -47,7 +46,6 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// ফর্ম সাবমিট
 document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = document.getElementById('adminEmail').value.trim();
@@ -58,7 +56,6 @@ document.getElementById('adminLoginForm').addEventListener('submit', async (e) =
   try {
     const userCred = await signInWithEmailAndPassword(auth, email, password);
     const user = userCred.user;
-    
     const userDoc = await getDoc(doc(db, 'users', user.uid));
     if (userDoc.exists() && userDoc.data().role === 'admin') {
       window.location.href = 'admin-panel.html';

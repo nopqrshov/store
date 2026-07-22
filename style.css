@@ -1,0 +1,375 @@
+/* ===== style.css ===== */
+/* সব পেজের জন্য কমন স্টাইল */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f2f4f7;
+  color: #1c1c1e;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== গ্লাসমরফিজম ===== */
+.glass {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 16px;
+  padding: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.glass-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
+}
+
+/* ===== বাটন ===== */
+.btn-primary {
+  background: linear-gradient(135deg, #007AFF, #5856D6);
+  color: #fff;
+  padding: 12px 28px;
+  border-radius: 60px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 122, 255, 0.35);
+}
+
+.btn-outline {
+  background: transparent;
+  color: #1c1c1e;
+  padding: 12px 28px;
+  border-radius: 60px;
+  font-weight: 600;
+  border: 1.5px solid rgba(60, 60, 67, 0.08);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.btn-outline:hover {
+  background: rgba(0, 122, 255, 0.04);
+  border-color: #007AFF;
+  color: #007AFF;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #FF3B30, #FF6B6B);
+  color: #fff;
+  padding: 12px 28px;
+  border-radius: 60px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.btn-danger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(255, 59, 48, 0.35);
+}
+
+/* ===== টেক্সট ===== */
+.gradient-text {
+  background: linear-gradient(135deg, #007AFF, #AF52DE);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ===== নেভবার ===== */
+.nav-link {
+  position: relative;
+  font-weight: 500;
+  color: #3a3a3c;
+  transition: color 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+}
+.nav-link:hover {
+  color: #007AFF;
+}
+
+/* ===== ড্রপডাউন ===== */
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+  padding: 8px 0;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  z-index: 100;
+}
+.dropdown-menu a {
+  display: block;
+  padding: 10px 20px;
+  color: #1c1c1e;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: background 0.2s ease;
+}
+.dropdown-menu a:hover {
+  background: #f0f0f5;
+}
+.dropdown-menu.show {
+  display: block;
+}
+
+/* ===== প্রোফাইল অ্যাভাটার ===== */
+.profile-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #007AFF, #5856D6);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ===== কার্ট ব্যাজ ===== */
+.cart-badge {
+  background: #FF3B30;
+  color: white;
+  border-radius: 50%;
+  padding: 1px 6px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  line-height: 1.4;
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  min-width: 18px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(255, 59, 48, 0.3);
+}
+
+/* ===== কার্ট সাইডবার ===== */
+.cart-sidebar {
+  position: fixed;
+  right: -400px;
+  top: 0;
+  width: 380px;
+  height: 100%;
+  background: white;
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.1);
+  transition: right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 200;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+.cart-sidebar.open {
+  right: 0;
+}
+.cart-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 199;
+  display: none;
+}
+.cart-overlay.open {
+  display: block;
+}
+
+/* ===== ফর্ম ইনপুট ===== */
+.form-input {
+  width: 100%;
+  padding: 14px 18px;
+  border: 1.5px solid rgba(60, 60, 67, 0.08);
+  border-radius: 14px;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+  font-family: 'Inter', sans-serif;
+}
+.form-input:focus {
+  outline: none;
+  border-color: #007AFF;
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.08);
+  background: #ffffff;
+}
+
+/* ===== ফুটার সোশ্যাল আইকন ===== */
+.social-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 60px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  color: #3a3a3c;
+  text-decoration: none;
+  border: 1px solid rgba(60, 60, 67, 0.08);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.social-icon:hover {
+  background: #007AFF;
+  color: #fff;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 122, 255, 0.2);
+  border-color: #007AFF;
+}
+
+/* ===== ফ্লেক্স লেআউট (ফুটার নিচে) ===== */
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.main-content {
+  flex: 1 0 auto;
+}
+
+/* ===== টোস্ট ===== */
+#toast-container {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 380px;
+  width: 100%;
+}
+.toast {
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1c1c1e;
+  transform: translateX(calc(100% + 30px));
+  animation: slideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.toast.success {
+  border-left: 4px solid #34C759;
+}
+.toast.error {
+  border-left: 4px solid #FF3B30;
+}
+.toast.warning {
+  border-left: 4px solid #FF9500;
+}
+.toast i {
+  font-size: 1.2rem;
+}
+.toast.success i {
+  color: #34C759;
+}
+.toast.error i {
+  color: #FF3B30;
+}
+.toast.warning i {
+  color: #FF9500;
+}
+@keyframes slideIn {
+  to {
+    transform: translateX(0);
+  }
+}
+.toast.hide {
+  animation: slideOut 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+@keyframes slideOut {
+  to {
+    transform: translateX(calc(100% + 30px));
+    opacity: 0;
+  }
+}
+
+/* ===== অর্ডার ব্যাজ ===== */
+.badge-pending {
+  background: #FF9500;
+  color: white;
+  padding: 2px 10px;
+  border-radius: 60px;
+  font-size: 0.7rem;
+}
+.badge-processing {
+  background: #007AFF;
+  color: white;
+  padding: 2px 10px;
+  border-radius: 60px;
+  font-size: 0.7rem;
+}
+.badge-completed {
+  background: #34C759;
+  color: white;
+  padding: 2px 10px;
+  border-radius: 60px;
+  font-size: 0.7rem;
+}
+
+/* ===== চ্যাট স্টাইল ===== */
+.chat-container {
+  max-height: 65vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px;
+}
+.msg-user {
+  align-self: flex-end;
+  background: #007AFF;
+  color: white;
+  border-radius: 18px 18px 0 18px;
+  padding: 10px 16px;
+  max-width: 80%;
+}
+.msg-admin {
+  align-self: flex-start;
+  background: #e5e5ea;
+  color: #1c1c1e;
+  border-radius: 18px 18px 18px 0;
+  padding: 10px 16px;
+  max-width: 80%;
+}
+.msg-time {
+  font-size: 0.6rem;
+  opacity: 0.7;
+  margin-top: 4px;
+  text-align: right;
+}

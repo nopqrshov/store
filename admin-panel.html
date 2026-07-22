@@ -6,34 +6,17 @@
   <title>Admin Panel – SWD Store</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="style.css" />
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: 'Inter', sans-serif; background: #f2f4f7; color: #1c1c1e; }
-    .glass { background: rgba(255,255,255,0.6); backdrop-filter: blur(20px); border:1px solid rgba(255,255,255,0.6); }
-    .btn-primary { background: linear-gradient(135deg,#007AFF,#5856D6); color:#fff; padding:10px 20px; border-radius:60px; font-weight:600; border:none; cursor:pointer; transition:0.3s; }
-    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(0,122,255,0.35); }
+    /* admin-panel এর জন্য আলাদা স্টাইল */
     .sidebar { width:260px; height:100vh; position:fixed; top:0; left:0; background:white; border-right:1px solid rgba(0,0,0,0.04); padding:1.5rem; overflow-y:auto; }
     .main { margin-left:260px; padding:2rem; }
     .nav-item { display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:12px; cursor:pointer; transition:0.2s; color:#3a3a3c; }
     .nav-item:hover, .nav-item.active { background:#f0f0f5; color:#007AFF; }
-    .glass-card { background:rgba(255,255,255,0.72); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.7); border-radius:16px; padding:1.5rem; }
-    .form-input { width:100%; padding:12px 16px; border:1.5px solid rgba(60,60,67,0.08); border-radius:12px; font-size:1rem; background:rgba(255,255,255,0.8); }
-    .form-input:focus { outline:none; border-color:#007AFF; }
-    .tab-content { display:none; }
-    .tab-content.active { display:block; }
-    .badge-pending { background:#FF9500; color:white; padding:2px 10px; border-radius:60px; font-size:0.7rem; }
-    .badge-processing { background:#007AFF; color:white; padding:2px 10px; border-radius:60px; font-size:0.7rem; }
-    .badge-completed { background:#34C759; color:white; padding:2px 10px; border-radius:60px; font-size:0.7rem; }
-    /* চ্যাট স্টাইল */
-    .chat-container { max-height: 60vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 4px; }
-    .msg-admin { align-self: flex-end; background: #007AFF; color: white; border-radius: 18px 18px 0 18px; padding: 10px 16px; max-width: 80%; }
-    .msg-user { align-self: flex-start; background: #e5e5ea; color: #1c1c1e; border-radius: 18px 18px 18px 0; padding: 10px 16px; max-width: 80%; }
-    .msg-time { font-size: 0.6rem; opacity: 0.7; margin-top: 4px; text-align: right; }
   </style>
 </head>
 <body>
 
-<!-- সাইডবার -->
 <div class="sidebar">
   <h2 class="text-xl font-bold text-gray-900 mb-6">SWD Admin</h2>
   <div class="space-y-1">
@@ -44,7 +27,6 @@
     <div class="nav-item" data-tab="messages"><i class="fas fa-envelope"></i> Messages</div>
     <div class="nav-item" data-tab="fixrequests"><i class="fas fa-wrench"></i> Fix Requests</div>
     <div class="nav-item" data-tab="settings"><i class="fas fa-cog"></i> Settings</div>
-    <!-- ✅ নতুন: Support Chat -->
     <div class="nav-item" data-tab="supportchat"><i class="fas fa-comments"></i> Support Chat</div>
   </div>
   <div class="absolute bottom-6 left-6">
@@ -52,7 +34,6 @@
   </div>
 </div>
 
-<!-- মূল কন্টেন্ট -->
 <div class="main">
   <!-- ড্যাশবোর্ড -->
   <div id="tab-dashboard" class="tab-content active">
@@ -100,7 +81,7 @@
     <div id="userList" class="grid grid-cols-3 gap-4 mt-4"></div>
   </div>
 
-  <!-- মেসেজ (কন্টাক্ট ফর্ম) -->
+  <!-- মেসেজ -->
   <div id="tab-messages" class="tab-content">
     <h2 class="text-2xl font-bold">Contact Messages</h2>
     <div id="messageList" class="space-y-3 mt-4"></div>
@@ -126,7 +107,7 @@
     </form>
   </div>
 
-  <!-- ✅ Support Chat (নতুন ট্যাব) -->
+  <!-- Support Chat -->
   <div id="tab-supportchat" class="tab-content">
     <h2 class="text-2xl font-bold">Support Chat</h2>
     <div class="glass-card mt-4">
@@ -143,7 +124,6 @@
 import { auth, db, collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc, onSnapshot, query, where, orderBy, serverTimestamp } from './firebase-config.js';
 import { onAuthStateChanged } from './firebase-config.js';
 
-// ===== অ্যাডমিন চেক =====
 onAuthStateChanged(auth, async (user) => {
   if (!user) { window.location.href = 'admin-login.html'; return; }
   const userDoc = await getDoc(doc(db, 'users', user.uid));
@@ -152,7 +132,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// ===== ট্যাব সুইচ =====
+// ট্যাব সুইচ
 document.querySelectorAll('.nav-item').forEach(item => {
   item.addEventListener('click', () => {
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -300,12 +280,11 @@ document.getElementById('settingsForm').addEventListener('submit', async (e) => 
   } catch (err) { alert('Error: ' + err.message); }
 });
 
-// ===== ✅ সাপোর্ট চ্যাট (অ্যাডমিন রিপ্লাই) =====
+// ===== সাপোর্ট চ্যাট =====
 const adminChatContainer = document.getElementById('adminChatContainer');
 const adminChatForm = document.getElementById('adminChatForm');
 const adminChatInput = document.getElementById('adminChatInput');
 
-// লোড সব মেসেজ যেখানে participants-এ 'admin' আছে
 onSnapshot(
   query(collection(db, 'messages'), where('participants', 'array-contains', 'admin'), orderBy('timestamp', 'asc')),
   (snapshot) => {
@@ -322,7 +301,6 @@ onSnapshot(
   }
 );
 
-// অ্যাডমিন রিপ্লাই পাঠানো
 adminChatForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const content = adminChatInput.value.trim();
@@ -330,7 +308,7 @@ adminChatForm.addEventListener('submit', async (e) => {
   try {
     await addDoc(collection(db, 'messages'), {
       fromUserId: 'admin',
-      toUserId: 'all', // সব ইউজারের কাছে যাবে
+      toUserId: 'all',
       content,
       timestamp: serverTimestamp(),
       participants: ['admin', 'all'],
@@ -342,7 +320,6 @@ adminChatForm.addEventListener('submit', async (e) => {
   }
 });
 
-// ===== লগআউট =====
 window.logoutAdmin = () => { auth.signOut(); window.location.href = 'admin-login.html'; };
 </script>
 </body>
