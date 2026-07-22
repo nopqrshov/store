@@ -27,7 +27,8 @@
 </div>
 
 <script type="module">
-import { auth, signInWithEmailAndPassword, onAuthStateChanged, doc, getDoc } from './firebase-config.js';
+// ✅ ফিক্স: db, doc, getDoc ইমপোর্ট করা হয়েছে
+import { auth, db, signInWithEmailAndPassword, onAuthStateChanged, doc, getDoc } from './firebase-config.js';
 
 // যদি ইতিমধ্যে লগইন করা থাকে এবং অ্যাডমিন হয়, তাহলে সরাসরি প্যানেলে পাঠান
 onAuthStateChanged(auth, async (user) => {
@@ -37,7 +38,6 @@ onAuthStateChanged(auth, async (user) => {
       if (userDoc.exists() && userDoc.data().role === 'admin') {
         window.location.href = 'admin-panel.html';
       } else {
-        // অ্যাডমিন না হলে লগআউট করে দিন
         alert('আপনার অ্যাডমিন অনুমতি নেই।');
         auth.signOut();
       }
@@ -59,13 +59,10 @@ document.getElementById('adminLoginForm').addEventListener('submit', async (e) =
     const userCred = await signInWithEmailAndPassword(auth, email, password);
     const user = userCred.user;
     
-    // অ্যাডমিন চেক
     const userDoc = await getDoc(doc(db, 'users', user.uid));
     if (userDoc.exists() && userDoc.data().role === 'admin') {
-      // ✅ সফল লগইন – সরাসরি রিডাইরেক্ট
       window.location.href = 'admin-panel.html';
     } else {
-      // অ্যাডমিন না হলে লগআউট ও এরর দেখান
       await auth.signOut();
       errorDiv.textContent = 'আপনার অ্যাডমিন অনুমতি নেই।';
       errorDiv.classList.remove('hidden');

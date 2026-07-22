@@ -7,7 +7,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <style>
-    /* বেসিক স্টাইল */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family: 'Inter', sans-serif; background: #f2f4f7; color: #1c1c1e; }
     .glass { background: rgba(255,255,255,0.6); backdrop-filter: blur(20px); border:1px solid rgba(255,255,255,0.6); }
@@ -120,7 +119,8 @@
 </div>
 
 <script type="module">
-import { auth, db, collection, doc, getDocs, addDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, where } from './firebase-config.js';
+// ✅ ফিক্স ১: সব প্রয়োজনীয় ফাংশন ইমপোর্ট করা হয়েছে (doc, getDoc, setDoc সহ)
+import { auth, db, collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc, onSnapshot, query, where } from './firebase-config.js';
 
 // চেক অ্যাডমিন
 import { onAuthStateChanged } from './firebase-config.js';
@@ -148,9 +148,12 @@ document.querySelectorAll('.nav-item').forEach(item => {
   });
 });
 
-// পণ্য লোড
+// ===== ড্যাশবোর্ড কাউন্ট + পণ্য লোড (একসাথে) =====
 const productList = document.getElementById('productList');
 onSnapshot(collection(db, 'products'), (snapshot) => {
+  // ✅ ফিক্স ২: ড্যাশবোর্ডে প্রোডাক্ট কাউন্ট আপডেট
+  document.getElementById('totalProducts').innerText = snapshot.size;
+  
   let html = '';
   snapshot.forEach(doc => {
     const p = doc.data();
@@ -164,11 +167,29 @@ onSnapshot(collection(db, 'products'), (snapshot) => {
   productList.innerHTML = html || '<p class="text-gray-500">No products yet.</p>';
 });
 
+// ✅ ফিক্স ৩: editProduct ফাংশন (এখন সম্পূর্ণ)
+window.editProduct = async (id) => {
+  const docSnap = await getDoc(doc(db, 'products', id));
+  if (docSnap.exists()) {
+    const data = docSnap.data();
+    document.getElementById('prodId').value = id;
+    document.getElementById('prodName').value = data.name;
+    document.getElementById('prodDesc').value = data.desc || '';
+    document.getElementById('prodPrice').value = data.price;
+    document.getElementById('prodCategory').value = data.category || '';
+    document.getElementById('productModalTitle').innerText = 'Edit Product';
+    document.getElementById('productModal').classList.remove('hidden');
+  }
+};
+
 // পণ্য অ্যাড/এডিট
 window.openProductModal = (id) => {
   document.getElementById('productModal').classList.remove('hidden');
   if (id) {
-    // এডিট মোড
+    editProduct(id);
+  } else {
+    document.getElementById('productModalTitle').innerText = 'Add Product';
+    document.getElementById('prodId').value = '';
   }
 };
 window.closeProductModal = () => {
@@ -196,9 +217,12 @@ window.deleteProduct = async (id) => {
   if (confirm('Delete this product?')) await deleteDoc(doc(db, 'products', id));
 };
 
-// অর্ডার লোড
+// ===== অর্ডার লোড + কাউন্ট =====
 const orderList = document.getElementById('orderList');
 onSnapshot(collection(db, 'orders'), (snapshot) => {
+  // ✅ ফিক্স ৪: ড্যাশবোর্ডে অর্ডার কাউন্ট
+  document.getElementById('totalOrders').innerText = snapshot.size;
+  
   let html = '';
   snapshot.forEach(doc => {
     const o = doc.data();
@@ -219,7 +243,7 @@ window.updateOrderStatus = async (id, status) => {
   await updateDoc(doc(db, 'orders', id), { status });
 };
 
-// ইউজার লোড
+// ===== ইউজার লোড =====
 const userList = document.getElementById('userList');
 onSnapshot(collection(db, 'users'), (snapshot) => {
   let html = '';
@@ -230,9 +254,12 @@ onSnapshot(collection(db, 'users'), (snapshot) => {
   userList.innerHTML = html;
 });
 
-// মেসেজ লোড (পোর্টফোলিও কন্টাক্ট)
+// ===== মেসেজ লোড + কাউন্ট =====
 const messageList = document.getElementById('messageList');
 onSnapshot(collection(db, 'contactMessages'), (snapshot) => {
+  // ✅ ফিক্স ৫: ড্যাশবোর্ডে মেসেজ কাউন্ট
+  document.getElementById('totalMessages').innerText = snapshot.size;
+  
   let html = '';
   snapshot.forEach(doc => {
     const m = doc.data();
@@ -241,9 +268,12 @@ onSnapshot(collection(db, 'contactMessages'), (snapshot) => {
   messageList.innerHTML = html || '<p class="text-gray-500">No messages.</p>';
 });
 
-// ফিক্স রিকোয়েস্ট লোড
+// ===== ফিক্স রিকোয়েস্ট লোড + কাউন্ট =====
 const fixRequestList = document.getElementById('fixRequestList');
 onSnapshot(collection(db, 'fixRequests'), (snapshot) => {
+  // ✅ ফিক্স ৬: ড্যাশবোর্ডে ফিক্স রিকোয়েস্ট কাউন্ট
+  document.getElementById('totalFixRequests').innerText = snapshot.size;
+  
   let html = '';
   snapshot.forEach(doc => {
     const f = doc.data();
@@ -252,21 +282,23 @@ onSnapshot(collection(db, 'fixRequests'), (snapshot) => {
   fixRequestList.innerHTML = html || '<p class="text-gray-500">No fix requests.</p>';
 });
 
-// সেটিংস
+// ===== সেটিংস (setDoc ফিক্স) =====
 document.getElementById('settingsForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const bkash = document.getElementById('bkashNumber').value.trim();
   const nagad = document.getElementById('nagadNumber').value.trim();
   const usdt = document.getElementById('usdtAddress').value.trim();
-  await setDoc(doc(db, 'settings', 'payment'), { bkash, nagad, usdt });
-  alert('Settings saved!');
+  try {
+    await setDoc(doc(db, 'settings', 'payment'), { bkash, nagad, usdt });
+    alert('Settings saved!');
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
 });
 
-// লগআউট
+// ===== লগআউট =====
 window.logoutAdmin = () => { auth.signOut(); window.location.href = 'admin-login.html'; };
 
-// ড্যাশবোর্ড কাউন্ট
-// (সংক্ষেপে)
 </script>
 
 </body>
