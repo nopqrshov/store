@@ -126,6 +126,7 @@ import {
   auth, db, collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc, 
   onSnapshot, query, where, orderBy, serverTimestamp, signOut, onAuthStateChanged 
 } from './firebase-config.js';
+import { setLoading } from './components.js';
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) { window.location.href = 'admin-login.html'; return; }
@@ -138,14 +139,9 @@ onAuthStateChanged(auth, async (user) => {
 // ===== ট্যাব সুইচ =====
 document.querySelectorAll('.nav-item').forEach(item => {
   item.addEventListener('click', () => {
-    // সব নেভ আইটেম থেকে active ক্লাস রিমুভ
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     item.classList.add('active');
-    
-    // সব ট্যাব কনটেন্ট লুকান
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    
-    // সংশ্লিষ্ট ট্যাব দেখান
     const tab = item.dataset.tab;
     const target = document.getElementById('tab-'+tab);
     if (target) target.classList.add('active');
@@ -191,7 +187,11 @@ window.closeProductModal = () => {
   document.getElementById('productModal').classList.add('hidden');
   document.getElementById('productForm').reset();
 };
-document.getElementById('productForm').addEventListener('submit', async (e) => {
+
+// প্রোডাক্ট ফর্মে লোডিং
+const productForm = document.getElementById('productForm');
+const productSubmitBtn = productForm.querySelector('button[type="submit"]');
+productForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const name = document.getElementById('prodName').value.trim();
   const desc = document.getElementById('prodDesc').value.trim();
@@ -199,12 +199,16 @@ document.getElementById('productForm').addEventListener('submit', async (e) => {
   const category = document.getElementById('prodCategory').value.trim();
   const id = document.getElementById('prodId').value;
   if (!name || !price) return alert('Name and price required.');
+  
+  setLoading(productSubmitBtn, true, 'Save');
   try {
     if (id) await updateDoc(doc(db, 'products', id), { name, desc, price, category });
     else await addDoc(collection(db, 'products'), { name, desc, price, category });
     closeProductModal();
   } catch (err) { alert(err.message); }
+  finally { setLoading(productSubmitBtn, false); }
 });
+
 window.deleteProduct = async (id) => {
   if (confirm('Delete this product?')) await deleteDoc(doc(db, 'products', id));
 };
@@ -278,21 +282,26 @@ onSnapshot(collection(db, 'fixRequests'), (snapshot) => {
 });
 
 // ===== সেটিংস =====
-document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+const settingsForm = document.getElementById('settingsForm');
+const settingsBtn = settingsForm.querySelector('button[type="submit"]');
+settingsForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const bkash = document.getElementById('bkashNumber').value.trim();
   const nagad = document.getElementById('nagadNumber').value.trim();
   const usdt = document.getElementById('usdtAddress').value.trim();
+  setLoading(settingsBtn, true, 'Save Settings');
   try {
     await setDoc(doc(db, 'settings', 'payment'), { bkash, nagad, usdt });
     alert('Settings saved!');
   } catch (err) { alert('Error: ' + err.message); }
+  finally { setLoading(settingsBtn, false); }
 });
 
 // ===== সাপোর্ট চ্যাট =====
 const adminChatContainer = document.getElementById('adminChatContainer');
 const adminChatForm = document.getElementById('adminChatForm');
 const adminChatInput = document.getElementById('adminChatInput');
+const chatSendBtn = adminChatForm.querySelector('button[type="submit"]');
 
 onSnapshot(
   query(collection(db, 'messages'), where('participants', 'array-contains', 'admin'), orderBy('timestamp', 'asc')),
@@ -314,6 +323,7 @@ adminChatForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const content = adminChatInput.value.trim();
   if (!content) return;
+  setLoading(chatSendBtn, true);
   try {
     await addDoc(collection(db, 'messages'), {
       fromUserId: 'admin',
@@ -324,9 +334,8 @@ adminChatForm.addEventListener('submit', async (e) => {
       read: false
     });
     adminChatInput.value = '';
-  } catch (err) {
-    alert('Error: ' + err.message);
-  }
+  } catch (err) { alert('Error: ' + err.message); }
+  finally { setLoading(chatSendBtn, false); }
 });
 
 window.logoutAdmin = () => { signOut(auth); window.location.href = 'admin-login.html'; };

@@ -53,7 +53,29 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 8px 30px rgba(0, 122, 255, 0.35);
 }
+/* ===== লোডিং স্পিনার ===== */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
+/* বাটন ডিজেবল স্টাইল */
+.btn-primary:disabled,
+.btn-outline:disabled,
+.btn-danger:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
 .btn-outline {
   background: transparent;
   color: #1c1c1e;

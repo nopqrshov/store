@@ -54,153 +54,162 @@
 
   <script type="module">
     import { auth, db, collection, query, where, onSnapshot, addDoc, serverTimestamp, orderBy, signOut, onAuthStateChanged, doc, getDoc, signInWithEmailAndPassword, createUserWithEmailAndPassword, setDoc } from './firebase-config.js';
-    import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar } from './components.js';
+import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar, setLoading } from './components.js';
 
-    renderNavbar();
-    renderFooter();
-    renderCartSidebar();  // ✅ কার্ট সাইডবার যোগ
-    updateCartBadge();
+renderNavbar();
+renderFooter();
+renderCartSidebar();
+updateCartBadge();
 
-    window.showToast = (message, type = 'success') => {
-      const container = document.getElementById('toast-container');
-      if (!container) return;
-      const toast = document.createElement('div');
-      const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
-      toast.className = `toast ${type}`;
-      toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
-      container.appendChild(toast);
-      setTimeout(() => {
-        toast.classList.add('hide');
-        setTimeout(() => toast.remove(), 400);
-      }, 4500);
-    };
+window.showToast = (message, type = 'success') => {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const toast = document.createElement('div');
+  const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
+};
 
-    let currentAuthMode = 'signin';
-    window.openAuthModal = (mode) => {
-      currentAuthMode = mode;
-      document.getElementById('authModalTitle').textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
-      document.getElementById('authToggleText').textContent = mode === 'signin' ? "Don't have an account?" : "Already have an account?";
-      document.getElementById('authToggleLink').textContent = mode === 'signin' ? 'Sign Up' : 'Sign In';
-      document.getElementById('authError').classList.add('hidden');
-      document.getElementById('authModal').classList.remove('hidden');
-    };
-    window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
-    document.getElementById('authToggleLink').addEventListener('click', (e) => {
-      e.preventDefault();
-      currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
-      window.openAuthModal(currentAuthMode);
-    });
-    document.getElementById('authForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('authEmail').value.trim();
-      const password = document.getElementById('authPassword').value.trim();
-      const errorDiv = document.getElementById('authError');
-      errorDiv.classList.add('hidden');
-      try {
-        let userCred;
-        if (currentAuthMode === 'signin') {
-          userCred = await signInWithEmailAndPassword(auth, email, password);
-          showToast('✅ সাইন ইন সফল!', 'success');
-        } else {
-          userCred = await createUserWithEmailAndPassword(auth, email, password);
-          await setDoc(doc(db, 'users', userCred.user.uid), {
-            email, displayName: email.split('@')[0], role: 'user', createdAt: new Date().toISOString()
-          });
-          showToast('✅ অ্যাকাউন্ট তৈরি হয়েছে!', 'success');
-        }
-        closeAuthModal();
-        document.getElementById('authForm').reset();
-      } catch (error) {
-        errorDiv.textContent = error.message;
-        errorDiv.classList.remove('hidden');
-        showToast('⚠️ ' + error.message, 'error');
-      }
-    });
+// অথ মডাল (setLoading সহ)
+let currentAuthMode = 'signin';
+window.openAuthModal = (mode) => {
+  currentAuthMode = mode;
+  document.getElementById('authModalTitle').textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
+  document.getElementById('authToggleText').textContent = mode === 'signin' ? "Don't have an account?" : "Already have an account?";
+  document.getElementById('authToggleLink').textContent = mode === 'signin' ? 'Sign Up' : 'Sign In';
+  document.getElementById('authError').classList.add('hidden');
+  document.getElementById('authModal').classList.remove('hidden');
+};
+window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
+document.getElementById('authToggleLink').addEventListener('click', (e) => {
+  e.preventDefault();
+  currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
+  window.openAuthModal(currentAuthMode);
+});
 
-    // ===== CHAT =====
-    let snapshot1 = null;
-    let snapshot2 = null;
-    const chatMessages = document.getElementById('chatMessages');
-
-    function renderMergedMessages(user) {
-      const map = new Map();
-      if (snapshot1) {
-        snapshot1.forEach(doc => map.set(doc.id, { id: doc.id, ...doc.data() }));
-      }
-      if (snapshot2) {
-        snapshot2.forEach(doc => map.set(doc.id, { id: doc.id, ...doc.data() }));
-      }
-      const sorted = Array.from(map.values()).sort((a, b) => {
-        const ta = a.timestamp?.toDate?.() || new Date(0);
-        const tb = b.timestamp?.toDate?.() || new Date(0);
-        return ta - tb;
+const authForm = document.getElementById('authForm');
+const authSubmitBtn = authForm.querySelector('button[type="submit"]');
+authForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value.trim();
+  const errorDiv = document.getElementById('authError');
+  errorDiv.classList.add('hidden');
+  setLoading(authSubmitBtn, true, 'Continue');
+  try {
+    let userCred;
+    if (currentAuthMode === 'signin') {
+      userCred = await signInWithEmailAndPassword(auth, email, password);
+      showToast('✅ সাইন ইন সফল!', 'success');
+    } else {
+      userCred = await createUserWithEmailAndPassword(auth, email, password);
+      await setDoc(doc(db, 'users', userCred.user.uid), {
+        email, displayName: email.split('@')[0], role: 'user', createdAt: new Date().toISOString()
       });
-      chatMessages.innerHTML = '';
-      sorted.forEach(msg => {
-        const isUser = msg.fromUserId === user.uid;
-        const div = document.createElement('div');
-        div.className = isUser ? 'msg-user' : 'msg-admin';
-        div.innerHTML = `${msg.content}<div class="msg-time">${msg.timestamp?.toDate?.()?.toLocaleTimeString() || ''}</div>`;
-        chatMessages.appendChild(div);
-      });
-      chatMessages.scrollTop = chatMessages.scrollHeight;
+      showToast('✅ অ্যাকাউন্ট তৈরি হয়েছে!', 'success');
     }
+    closeAuthModal();
+    authForm.reset();
+  } catch (error) {
+    errorDiv.textContent = error.message;
+    errorDiv.classList.remove('hidden');
+    showToast('⚠️ ' + error.message, 'error');
+  } finally {
+    setLoading(authSubmitBtn, false);
+  }
+});
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = 'index.html';
-        return;
-      }
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      const displayName = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
-      updateNavbarAuth(user, displayName);
+// ===== CHAT =====
+let snapshot1 = null;
+let snapshot2 = null;
+const chatMessages = document.getElementById('chatMessages');
 
-      const q1 = query(
-        collection(db, 'messages'),
-        where('participants', 'array-contains', user.uid),
-        orderBy('timestamp', 'asc')
-      );
-      onSnapshot(q1, (snap) => {
-        snapshot1 = snap;
-        renderMergedMessages(user);
-      });
+function renderMergedMessages(user) {
+  const map = new Map();
+  if (snapshot1) {
+    snapshot1.forEach(doc => map.set(doc.id, { id: doc.id, ...doc.data() }));
+  }
+  if (snapshot2) {
+    snapshot2.forEach(doc => map.set(doc.id, { id: doc.id, ...doc.data() }));
+  }
+  const sorted = Array.from(map.values()).sort((a, b) => {
+    const ta = a.timestamp?.toDate?.() || new Date(0);
+    const tb = b.timestamp?.toDate?.() || new Date(0);
+    return ta - tb;
+  });
+  chatMessages.innerHTML = '';
+  sorted.forEach(msg => {
+    const isUser = msg.fromUserId === user.uid;
+    const div = document.createElement('div');
+    div.className = isUser ? 'msg-user' : 'msg-admin';
+    div.innerHTML = `${msg.content}<div class="msg-time">${msg.timestamp?.toDate?.()?.toLocaleTimeString() || ''}</div>`;
+    chatMessages.appendChild(div);
+  });
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
 
-      const q2 = query(
-        collection(db, 'messages'),
-        where('participants', 'array-contains', 'all'),
-        orderBy('timestamp', 'asc')
-      );
-      onSnapshot(q2, (snap) => {
-        snapshot2 = snap;
-        renderMergedMessages(user);
-      });
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = 'index.html';
+    return;
+  }
+  const userDoc = await getDoc(doc(db, 'users', user.uid));
+  const displayName = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
+  updateNavbarAuth(user, displayName);
+
+  const q1 = query(
+    collection(db, 'messages'),
+    where('participants', 'array-contains', user.uid),
+    orderBy('timestamp', 'asc')
+  );
+  onSnapshot(q1, (snap) => {
+    snapshot1 = snap;
+    renderMergedMessages(user);
+  });
+
+  const q2 = query(
+    collection(db, 'messages'),
+    where('participants', 'array-contains', 'all'),
+    orderBy('timestamp', 'asc')
+  );
+  onSnapshot(q2, (snap) => {
+    snapshot2 = snap;
+    renderMergedMessages(user);
+  });
+});
+
+const chatForm = document.getElementById('chatForm');
+const chatSendBtn = chatForm.querySelector('button[type="submit"]');
+chatForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const content = document.getElementById('chatInput').value.trim();
+  if (!content) return;
+  const user = auth.currentUser;
+  if (!user) return showToast('আপনি লগইন নেই', 'error');
+  setLoading(chatSendBtn, true);
+  try {
+    await addDoc(collection(db, 'messages'), {
+      fromUserId: user.uid,
+      toUserId: 'admin',
+      content,
+      timestamp: serverTimestamp(),
+      participants: [user.uid, 'admin'],
+      read: false
     });
+    document.getElementById('chatInput').value = '';
+  } catch (err) {
+    showToast('⚠️ ' + err.message, 'error');
+  } finally {
+    setLoading(chatSendBtn, false);
+  }
+});
 
-    document.getElementById('chatForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const content = document.getElementById('chatInput').value.trim();
-      if (!content) return;
-      const user = auth.currentUser;
-      if (!user) return showToast('আপনি লগইন নেই', 'error');
-      try {
-        await addDoc(collection(db, 'messages'), {
-          fromUserId: user.uid,
-          toUserId: 'admin',
-          content,
-          timestamp: serverTimestamp(),
-          participants: [user.uid, 'admin'],
-          read: false
-        });
-        document.getElementById('chatInput').value = '';
-      } catch (err) {
-        showToast('⚠️ ' + err.message, 'error');
-      }
-    });
-
-    window.handleLogout = async () => {
-      await signOut(auth);
-      window.location.href = 'index.html';
-    };
+window.handleLogout = async () => {
+  await signOut(auth);
+  window.location.href = 'index.html';
+};
   </script>
 </body>
 </html>

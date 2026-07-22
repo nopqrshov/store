@@ -46,12 +46,18 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+const loginForm = document.getElementById('adminLoginForm');
+const loginBtn = loginForm.querySelector('button[type="submit"]');
+loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   const email = document.getElementById('adminEmail').value.trim();
   const password = document.getElementById('adminPassword').value.trim();
   const errorDiv = document.getElementById('adminLoginError');
   errorDiv.classList.add('hidden');
+
+  // লোডিং শুরু
+  loginBtn.disabled = true;
+  loginBtn.innerHTML = '<span class="spinner"></span> Logging in...';
 
   try {
     const userCred = await signInWithEmailAndPassword(auth, email, password);
@@ -67,6 +73,9 @@ document.getElementById('adminLoginForm').addEventListener('submit', async (e) =
   } catch (err) {
     errorDiv.textContent = err.message;
     errorDiv.classList.remove('hidden');
+  } finally {
+    loginBtn.disabled = false;
+    loginBtn.innerHTML = 'Login';
   }
 });
 </script>

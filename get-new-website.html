@@ -26,8 +26,6 @@
     <div id="footer-placeholder"></div>
   </div>
 
-  <!-- ⚠️ কার্ট সাইডবার এখান থেকে সরানো হয়েছে – এখন components.js থেকে রেন্ডার হবে -->
-
   <!-- অথ মডাল -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
@@ -75,14 +73,16 @@
   <div id="toast-container"></div>
 
   <script type="module">
+    // ✅ setLoading ইম্পোর্ট যোগ করুন
     import { auth, db, collection, doc, getDoc, onSnapshot, addDoc, updateDoc, serverTimestamp, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setDoc } from './firebase-config.js';
-    import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar } from './components.js';
+    import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar, setLoading } from './components.js';
 
     renderNavbar();
     renderFooter();
-    renderCartSidebar();  // ✅ কার্ট সাইডবার রেন্ডার (components.js থেকে)
+    renderCartSidebar();
     updateCartBadge();
 
+    // ===== টোস্ট =====
     window.showToast = (message, type = 'success') => {
       const container = document.getElementById('toast-container');
       if (!container) return;
@@ -94,6 +94,7 @@
       setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
     };
 
+    // ===== অথ মডাল =====
     let currentAuthMode = 'signin';
     window.openAuthModal = (mode) => {
       currentAuthMode = mode;
@@ -104,17 +105,24 @@
       document.getElementById('authModal').classList.remove('hidden');
     };
     window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
+
     document.getElementById('authToggleLink').addEventListener('click', (e) => {
       e.preventDefault();
       currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
       window.openAuthModal(currentAuthMode);
     });
-    document.getElementById('authForm').addEventListener('submit', async (e) => {
+
+    // ✅ অথ ফর্মে লোডিং
+    const authForm = document.getElementById('authForm');
+    const authSubmitBtn = authForm.querySelector('button[type="submit"]');
+    authForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('authEmail').value.trim();
       const password = document.getElementById('authPassword').value.trim();
       const errorDiv = document.getElementById('authError');
       errorDiv.classList.add('hidden');
+
+      setLoading(authSubmitBtn, true, 'Continue');
       try {
         let userCred;
         if (currentAuthMode === 'signin') {
@@ -128,14 +136,17 @@
           showToast('✅ অ্যাকাউন্ট তৈরি হয়েছে!', 'success');
         }
         closeAuthModal();
-        document.getElementById('authForm').reset();
+        authForm.reset();
       } catch (error) {
         errorDiv.textContent = error.message;
         errorDiv.classList.remove('hidden');
         showToast('⚠️ ' + error.message, 'error');
+      } finally {
+        setLoading(authSubmitBtn, false);
       }
     });
 
+    // ===== অথ স্টেট =====
     onAuthStateChanged(auth, async (user) => {
       let name = null;
       if (user) {
@@ -150,6 +161,7 @@
       showToast('✅ লগআউট সফল', 'success');
     };
 
+    // ===== প্রোডাক্ট লোড =====
     const productGrid = document.getElementById('productGrid');
     let products = [];
     onSnapshot(collection(db, 'products'), (snapshot) => {
@@ -168,20 +180,18 @@
       `).join('');
     };
 
-    // ===== কার্ট ফাংশন (components.js-এর সাথে সমন্বয়) =====
+    // ===== কার্ট ফাংশন =====
     window.addToCart = (productId) => {
       const product = products.find(p => p.id === productId);
       if (!product) return;
       const cart = JSON.parse(localStorage.getItem('cart')) || [];
       cart.push({ id: product.id, name: product.name, price: product.price });
       localStorage.setItem('cart', JSON.stringify(cart));
-      if (typeof window.updateCartUI === 'function') {
-        window.updateCartUI();  // components.js থেকে UI আপডেট
-      }
+      if (typeof window.updateCartUI === 'function') window.updateCartUI();
       showToast(`✅ "${product.name}" কার্টে যোগ হয়েছে`, 'success');
     };
 
-    // checkout ফাংশন (components.js-এর ডামি ফাংশনকে ওভাররাইড)
+    // ✅ চেকআউট ফাংশন (লোডিং সহ)
     window.checkout = async () => {
       const cart = JSON.parse(localStorage.getItem('cart')) || [];
       if (cart.length === 0) {
@@ -194,34 +204,42 @@
         openAuthModal('signin');
         return;
       }
-      // পেমেন্ট সেটিংস লোড
-      let paymentSettings = { bkash: '', nagad: '', usdt: '' };
+
+      // ⭐ বাটনটি এখনই খুঁজুন (কারণ সাইডবার ওপেন থাকবে)
+      const checkoutBtn = document.querySelector('#cartSidebar .btn-primary');
+      if (checkoutBtn) setLoading(checkoutBtn, true, 'Proceed to Checkout');
+
       try {
+        let paymentSettings = { bkash: '', nagad: '', usdt: '' };
         const docSnap = await getDoc(doc(db, 'settings', 'payment'));
         if (docSnap.exists()) paymentSettings = docSnap.data();
-      } catch (e) { console.error(e); }
-      if (!paymentSettings.bkash && !paymentSettings.nagad && !paymentSettings.usdt) {
-        showToast('⚠️ পেমেন্ট পদ্ধতি সেট করা হয়নি। অ্যাডমিনের সাথে যোগাযোগ করুন।', 'error');
-        return;
-      }
-      const orderData = {
-        userId: user.uid,
-        items: cart,
-        total: cart.reduce((sum, i) => sum + i.price, 0),
-        status: 'pending',
-        paymentMethod: '',
-        transactionId: '',
-        createdAt: serverTimestamp(),
-      };
-      try {
+
+        if (!paymentSettings.bkash && !paymentSettings.nagad && !paymentSettings.usdt) {
+          showToast('⚠️ পেমেন্ট পদ্ধতি সেট করা হয়নি। অ্যাডমিনের সাথে যোগাযোগ করুন।', 'error');
+          if (checkoutBtn) setLoading(checkoutBtn, false);
+          return;
+        }
+
+        const orderData = {
+          userId: user.uid,
+          items: cart,
+          total: cart.reduce((sum, i) => sum + i.price, 0),
+          status: 'pending',
+          paymentMethod: '',
+          transactionId: '',
+          createdAt: serverTimestamp(),
+        };
         const docRef = await addDoc(collection(db, 'orders'), orderData);
         window.openPaymentModal(docRef.id, paymentSettings);
+
+        if (checkoutBtn) setLoading(checkoutBtn, false); // মডাল খোলার পর লোডিং বন্ধ
       } catch (err) {
         showToast('⚠️ ' + err.message, 'error');
+        if (checkoutBtn) setLoading(checkoutBtn, false);
       }
     };
 
-    // পেমেন্ট মডাল ফাংশন
+    // ===== পেমেন্ট মডাল =====
     window.openPaymentModal = (orderId, settings) => {
       const numbersDiv = document.getElementById('paymentNumbers');
       let html = '';
@@ -233,19 +251,22 @@
       document.getElementById('paymentModal').classList.remove('hidden');
       document.getElementById('paymentError').classList.add('hidden');
       document.getElementById('transactionId').value = '';
-      // orderId সংরক্ষণ
       document.getElementById('paymentForm').dataset.orderId = orderId;
     };
     window.closePaymentModal = () => {
       document.getElementById('paymentModal').classList.add('hidden');
     };
 
-    document.getElementById('paymentForm').addEventListener('submit', async (e) => {
+    // ✅ পেমেন্ট ফর্মে লোডিং
+    const paymentForm = document.getElementById('paymentForm');
+    const paySubmitBtn = paymentForm.querySelector('button[type="submit"]');
+    paymentForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const txnId = document.getElementById('transactionId').value.trim();
       const errorDiv = document.getElementById('paymentError');
       const orderId = e.target.dataset.orderId;
       errorDiv.classList.add('hidden');
+
       if (!txnId) {
         errorDiv.textContent = 'দয়া করে ট্রানজেকশন ID দিন।';
         errorDiv.classList.remove('hidden');
@@ -256,6 +277,8 @@
         errorDiv.classList.remove('hidden');
         return;
       }
+
+      setLoading(paySubmitBtn, true, 'Confirm Payment');
       try {
         await updateDoc(doc(db, 'orders', orderId), {
           transactionId: txnId,
@@ -264,7 +287,6 @@
         });
         showToast('✅ পেমেন্ট কনফর্ম! অ্যাডমিন শীঘ্রই ভেরিফাই করবেন।', 'success');
         closePaymentModal();
-        // কার্ট খালি
         localStorage.removeItem('cart');
         if (typeof window.updateCartUI === 'function') window.updateCartUI();
         if (typeof window.toggleCart === 'function') window.toggleCart();
@@ -272,6 +294,8 @@
         errorDiv.textContent = '⚠️ ' + err.message;
         errorDiv.classList.remove('hidden');
         showToast('⚠️ ' + err.message, 'error');
+      } finally {
+        setLoading(paySubmitBtn, false);
       }
     });
   </script>

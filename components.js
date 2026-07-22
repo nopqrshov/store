@@ -200,3 +200,18 @@ window.removeFromCart = function(index) {
 window.checkout = window.checkout || function() {
   alert('Please go to the Store page to checkout.');
 };
+// ===== লোডিং কন্ট্রোল =====
+export function setLoading(button, isLoading, originalText = null) {
+  if (!button) return;
+  if (isLoading) {
+    button.disabled = true;
+    button._originalText = originalText || button.innerHTML;
+    button.innerHTML = `<span class="spinner"></span> Loading...`;
+  } else {
+    button.disabled = false;
+    if (button._originalText) {
+      button.innerHTML = button._originalText;
+      delete button._originalText;
+    }
+  }
+}

@@ -58,111 +58,120 @@
 
   <script type="module">
     import { auth, db, doc, getDoc, updateDoc, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, setDoc } from './firebase-config.js';
-    import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar } from './components.js';
+import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar, setLoading } from './components.js';
 
-    renderNavbar();
-    renderFooter();
-    renderCartSidebar();  // ✅ কার্ট সাইডবার যোগ
-    updateCartBadge();
+renderNavbar();
+renderFooter();
+renderCartSidebar();
+updateCartBadge();
 
-    window.showToast = (message, type = 'success') => {
-      const container = document.getElementById('toast-container');
-      if (!container) return;
-      const toast = document.createElement('div');
-      const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
-      toast.className = `toast ${type}`;
-      toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
-      container.appendChild(toast);
-      setTimeout(() => {
-        toast.classList.add('hide');
-        setTimeout(() => toast.remove(), 400);
-      }, 4500);
-    };
+window.showToast = (message, type = 'success') => {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const toast = document.createElement('div');
+  const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
+};
 
-    let currentAuthMode = 'signin';
-    window.openAuthModal = (mode) => {
-      currentAuthMode = mode;
-      document.getElementById('authModalTitle').textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
-      document.getElementById('authToggleText').textContent = mode === 'signin' ? "Don't have an account?" : "Already have an account?";
-      document.getElementById('authToggleLink').textContent = mode === 'signin' ? 'Sign Up' : 'Sign In';
-      document.getElementById('authError').classList.add('hidden');
-      document.getElementById('authModal').classList.remove('hidden');
-    };
-    window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
-    document.getElementById('authToggleLink').addEventListener('click', (e) => {
-      e.preventDefault();
-      currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
-      window.openAuthModal(currentAuthMode);
-    });
-    document.getElementById('authForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('authEmail').value.trim();
-      const password = document.getElementById('authPassword').value.trim();
-      const errorDiv = document.getElementById('authError');
-      errorDiv.classList.add('hidden');
-      try {
-        let userCred;
-        if (currentAuthMode === 'signin') {
-          userCred = await signInWithEmailAndPassword(auth, email, password);
-          showToast('✅ সাইন ইন সফল!', 'success');
-        } else {
-          userCred = await createUserWithEmailAndPassword(auth, email, password);
-          await setDoc(doc(db, 'users', userCred.user.uid), {
-            email, displayName: email.split('@')[0], role: 'user', createdAt: new Date().toISOString()
-          });
-          showToast('✅ অ্যাকাউন্ট তৈরি হয়েছে!', 'success');
-        }
-        closeAuthModal();
-        document.getElementById('authForm').reset();
-      } catch (error) {
-        errorDiv.textContent = error.message;
-        errorDiv.classList.remove('hidden');
-        showToast('⚠️ ' + error.message, 'error');
-      }
-    });
+// অথ মডাল (setLoading সহ)
+let currentAuthMode = 'signin';
+window.openAuthModal = (mode) => {
+  currentAuthMode = mode;
+  document.getElementById('authModalTitle').textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
+  document.getElementById('authToggleText').textContent = mode === 'signin' ? "Don't have an account?" : "Already have an account?";
+  document.getElementById('authToggleLink').textContent = mode === 'signin' ? 'Sign Up' : 'Sign In';
+  document.getElementById('authError').classList.add('hidden');
+  document.getElementById('authModal').classList.remove('hidden');
+};
+window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
+document.getElementById('authToggleLink').addEventListener('click', (e) => {
+  e.preventDefault();
+  currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
+  window.openAuthModal(currentAuthMode);
+});
 
-    const profileEmail = document.getElementById('profileEmail');
-    const profileName = document.getElementById('profileName');
+const authForm = document.getElementById('authForm');
+const authSubmitBtn = authForm.querySelector('button[type="submit"]');
+authForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value.trim();
+  const errorDiv = document.getElementById('authError');
+  errorDiv.classList.add('hidden');
+  setLoading(authSubmitBtn, true, 'Continue');
+  try {
+    let userCred;
+    if (currentAuthMode === 'signin') {
+      userCred = await signInWithEmailAndPassword(auth, email, password);
+      showToast('✅ সাইন ইন সফল!', 'success');
+    } else {
+      userCred = await createUserWithEmailAndPassword(auth, email, password);
+      await setDoc(doc(db, 'users', userCred.user.uid), {
+        email, displayName: email.split('@')[0], role: 'user', createdAt: new Date().toISOString()
+      });
+      showToast('✅ অ্যাকাউন্ট তৈরি হয়েছে!', 'success');
+    }
+    closeAuthModal();
+    authForm.reset();
+  } catch (error) {
+    errorDiv.textContent = error.message;
+    errorDiv.classList.remove('hidden');
+    showToast('⚠️ ' + error.message, 'error');
+  } finally {
+    setLoading(authSubmitBtn, false);
+  }
+});
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = 'index.html';
-        return;
-      }
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        profileEmail.textContent = data.email || user.email;
-        profileName.textContent = data.displayName || 'No name';
-      }
-      updateNavbarAuth(user, userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0]);
-    });
+const profileEmail = document.getElementById('profileEmail');
+const profileName = document.getElementById('profileName');
 
-    window.editName = () => {
-      document.getElementById('editNameForm').classList.toggle('hidden');
-    };
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = 'index.html';
+    return;
+  }
+  const userDoc = await getDoc(doc(db, 'users', user.uid));
+  if (userDoc.exists()) {
+    const data = userDoc.data();
+    profileEmail.textContent = data.email || user.email;
+    profileName.textContent = data.displayName || 'No name';
+  }
+  updateNavbarAuth(user, userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0]);
+});
 
-    document.getElementById('editNameForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const newName = document.getElementById('newDisplayName').value.trim();
-      if (!newName) return showToast('দয়া করে একটি নাম দিন', 'error');
-      const user = auth.currentUser;
-      if (!user) return;
-      try {
-        await updateDoc(doc(db, 'users', user.uid), { displayName: newName });
-        profileName.textContent = newName;
-        showToast('✅ নাম আপডেট হয়েছে', 'success');
-        document.getElementById('editNameForm').classList.add('hidden');
-        updateNavbarAuth(user, newName);
-      } catch (err) {
-        showToast('⚠️ ' + err.message, 'error');
-      }
-    });
+window.editName = () => {
+  document.getElementById('editNameForm').classList.toggle('hidden');
+};
 
-    window.handleLogout = async () => {
-      await signOut(auth);
-      window.location.href = 'index.html';
-    };
+const editNameForm = document.getElementById('editNameForm');
+const editNameBtn = editNameForm.querySelector('button[type="submit"]');
+editNameForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const newName = document.getElementById('newDisplayName').value.trim();
+  if (!newName) return showToast('দয়া করে একটি নাম দিন', 'error');
+  const user = auth.currentUser;
+  if (!user) return;
+  setLoading(editNameBtn, true, 'Update Name');
+  try {
+    await updateDoc(doc(db, 'users', user.uid), { displayName: newName });
+    profileName.textContent = newName;
+    showToast('✅ নাম আপডেট হয়েছে', 'success');
+    editNameForm.classList.add('hidden');
+    updateNavbarAuth(user, newName);
+  } catch (err) {
+    showToast('⚠️ ' + err.message, 'error');
+  } finally {
+    setLoading(editNameBtn, false);
+  }
+});
+
+window.handleLogout = async () => {
+  await signOut(auth);
+  window.location.href = 'index.html';
+};
   </script>
 </body>
 </html>
