@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* admin-panel এর জন্য আলাদা স্টাইল */
     .sidebar { width:260px; height:100vh; position:fixed; top:0; left:0; background:white; border-right:1px solid rgba(0,0,0,0.04); padding:1.5rem; overflow-y:auto; }
     .main { margin-left:260px; padding:2rem; }
     .nav-item { display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:12px; cursor:pointer; transition:0.2s; color:#3a3a3c; }
@@ -121,14 +120,16 @@
 </div>
 
 <script type="module">
-import { auth, db, collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc, onSnapshot, query, where, orderBy, serverTimestamp } from './firebase-config.js';
-import { onAuthStateChanged } from './firebase-config.js';
+import { 
+  auth, db, collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc, 
+  onSnapshot, query, where, orderBy, serverTimestamp, signOut, onAuthStateChanged 
+} from './firebase-config.js';
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) { window.location.href = 'admin-login.html'; return; }
   const userDoc = await getDoc(doc(db, 'users', user.uid));
   if (!userDoc.exists() || userDoc.data().role !== 'admin') {
-    alert('Unauthorized'); auth.signOut(); window.location.href = 'admin-login.html';
+    alert('Unauthorized'); signOut(auth); window.location.href = 'admin-login.html';
   }
 });
 
@@ -320,7 +321,7 @@ adminChatForm.addEventListener('submit', async (e) => {
   }
 });
 
-window.logoutAdmin = () => { auth.signOut(); window.location.href = 'admin-login.html'; };
+window.logoutAdmin = () => { signOut(auth); window.location.href = 'admin-login.html'; };
 </script>
 </body>
 </html>

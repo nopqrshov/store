@@ -30,8 +30,8 @@ export function renderNavbar() {
           <a href="messages.html" class="text-gray-700 hover:text-blue-500 text-xl" title="Messages">
             <i class="fas fa-envelope"></i>
           </a>
-          <!-- ✅ কার্ট আইকন: href সরিয়ে onclick যোগ -->
-          <a href="#" onclick="toggleCart()" class="text-gray-700 hover:text-blue-500 text-xl relative" title="Cart">
+          <!-- ✅ কার্ট আইকন – onclick সরিয়ে event listener ব্যবহার -->
+          <a href="#" class="cart-toggle text-gray-700 hover:text-blue-500 text-xl relative" title="Cart">
             <i class="fas fa-shopping-cart"></i>
             <span id="cartCount" class="cart-badge">0</span>
           </a>
@@ -65,6 +65,19 @@ export function renderNavbar() {
       dropdown.classList.remove('show');
     }
   });
+
+  // ✅ কার্ট টগল – event listener + fallback
+  const cartToggle = document.querySelector('#navbar-placeholder .cart-toggle');
+  if (cartToggle) {
+    cartToggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (typeof window.toggleCart === 'function') {
+        window.toggleCart();
+      } else {
+        window.location.href = 'get-new-website.html';
+      }
+    });
+  }
 
   updateCartBadge();
 }

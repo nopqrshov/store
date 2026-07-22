@@ -118,34 +118,64 @@
       }
     });
 
-    // ===== AUTH STATE & CHAT =====
+    // ===== AUTH STATE & CHAT (দুটি কোয়েরি মার্জ) =====
+    let snapshot1 = null;
+    let snapshot2 = null;
+    const chatMessages = document.getElementById('chatMessages');
+
+    function renderMergedMessages(user) {
+      const map = new Map();
+      if (snapshot1) {
+        snapshot1.forEach(doc => map.set(doc.id, { id: doc.id, ...doc.data() }));
+      }
+      if (snapshot2) {
+        snapshot2.forEach(doc => map.set(doc.id, { id: doc.id, ...doc.data() }));
+      }
+      const sorted = Array.from(map.values()).sort((a, b) => {
+        const ta = a.timestamp?.toDate?.() || new Date(0);
+        const tb = b.timestamp?.toDate?.() || new Date(0);
+        return ta - tb;
+      });
+      chatMessages.innerHTML = '';
+      sorted.forEach(msg => {
+        const isUser = msg.fromUserId === user.uid;
+        const div = document.createElement('div');
+        div.className = isUser ? 'msg-user' : 'msg-admin';
+        div.innerHTML = `${msg.content}<div class="msg-time">${msg.timestamp?.toDate?.()?.toLocaleTimeString() || ''}</div>`;
+        chatMessages.appendChild(div);
+      });
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = 'index.html';
         return;
       }
-      let name = null;
       const userDoc = await getDoc(doc(db, 'users', user.uid));
-      name = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
-      updateNavbarAuth(user, name);
+      const displayName = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
+      updateNavbarAuth(user, displayName);
 
-      const q = query(
+      // Query 1: যেখানে user participant
+      const q1 = query(
         collection(db, 'messages'),
         where('participants', 'array-contains', user.uid),
         orderBy('timestamp', 'asc')
       );
-      onSnapshot(q, (snapshot) => {
-        const chatMessages = document.getElementById('chatMessages');
-        chatMessages.innerHTML = '';
-        snapshot.forEach(doc => {
-          const msg = doc.data();
-          const isUser = msg.fromUserId === user.uid;
-          const div = document.createElement('div');
-          div.className = isUser ? 'msg-user' : 'msg-admin';
-          div.innerHTML = `${msg.content}<div class="msg-time">${msg.timestamp?.toDate?.()?.toLocaleTimeString() || ''}</div>`;
-          chatMessages.appendChild(div);
-        });
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+      onSnapshot(q1, (snap) => {
+        snapshot1 = snap;
+        renderMergedMessages(user);
+      });
+
+      // Query 2: যেখানে 'all' participant (broadcast)
+      const q2 = query(
+        collection(db, 'messages'),
+        where('participants', 'array-contains', 'all'),
+        orderBy('timestamp', 'asc')
+      );
+      onSnapshot(q2, (snap) => {
+        snapshot2 = snap;
+        renderMergedMessages(user);
       });
     });
 
