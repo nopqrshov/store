@@ -24,6 +24,8 @@
     .dropdown-menu a:hover { background:#f0f0f5; }
     .dropdown-menu.show { display:block; }
     .profile-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#007AFF,#5856D6); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; cursor:pointer; }
+    .social-icon { display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:60px; background:rgba(255,255,255,0.8); backdrop-filter:blur(4px); color:#3a3a3c; text-decoration:none; border:1px solid rgba(60,60,67,0.08); transition:0.3s; }
+    .social-icon:hover { background:#007AFF; color:#fff; transform:translateY(-4px); box-shadow:0 8px 20px rgba(0,122,255,0.2); border-color:#007AFF; }
     #toast-container {
       position: fixed;
       bottom: 30px;
@@ -65,117 +67,91 @@
 </head>
 <body>
 
-<!-- নেভবার (index.html থেকে কপি) -->
-<nav class="fixed top-0 left-0 w-full glass z-50 h-16 md:h-20 flex items-center px-6 sm:px-8 lg:px-12">
-  <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
-    <a href="index.html" class="text-xl md:text-2xl font-bold text-gray-900">
-      SWD <span class="gradient-text">Store</span>
-    </a>
-    <div class="hidden md:flex items-center gap-6">
-      <a href="index.html" class="nav-link text-sm">Home</a>
-      <a href="get-new-website.html" class="nav-link text-sm">Store</a>
-      <a href="fix-website.html" class="nav-link text-sm">Fix</a>
-    </div>
-    <div class="flex items-center gap-4">
-      <a href="messages.html" class="text-gray-700 hover:text-blue-500 text-xl" title="Messages"><i class="fas fa-envelope"></i></a>
-      <div id="auth-buttons" class="flex items-center gap-3">
-        <a href="#" onclick="openAuthModal('signin')" class="nav-link text-sm">Sign In</a>
-        <a href="#" onclick="openAuthModal('signup')" class="btn-primary text-sm py-2 px-5">Get Started</a>
+  <div id="navbar-placeholder"></div>
+
+  <section class="pt-28 pb-16 px-6 max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-900">My Profile</h1>
+    <div class="glass-card mt-6">
+      <div id="profileInfo" class="space-y-4">
+        <p><span class="font-semibold">Email:</span> <span id="profileEmail">Loading...</span></p>
+        <p><span class="font-semibold">Display Name:</span> <span id="profileName">Loading...</span></p>
+        <button onclick="editName()" class="text-blue-600 text-sm"><i class="fas fa-edit"></i> Edit Name</button>
       </div>
-      <div id="profile-section" class="relative hidden">
-        <div class="profile-avatar" id="profileAvatar">S</div>
-        <div class="dropdown-menu" id="dropdownMenu">
-          <a href="my-profile.html"><i class="fas fa-user mr-2"></i> My Profile</a>
-          <a href="my-orders.html"><i class="fas fa-box mr-2"></i> My Orders</a>
-          <a href="settings.html"><i class="fas fa-cog mr-2"></i> Settings</a>
-          <a href="#" onclick="handleLogout()"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
-        </div>
-      </div>
+      <form id="editNameForm" class="hidden mt-4 space-y-3">
+        <input type="text" id="newDisplayName" placeholder="New Display Name" class="form-input" required />
+        <button type="submit" class="btn-primary">Update Name</button>
+      </form>
     </div>
-  </div>
-</nav>
+  </section>
 
-<!-- কন্টেন্ট -->
-<section class="pt-28 pb-16 px-6 max-w-2xl mx-auto">
-  <h1 class="text-3xl font-bold text-gray-900">My Profile</h1>
-  <div class="glass-card mt-6">
-    <div id="profileInfo" class="space-y-4">
-      <p><span class="font-semibold">Email:</span> <span id="profileEmail">Loading...</span></p>
-      <p><span class="font-semibold">Display Name:</span> <span id="profileName">Loading...</span></p>
-      <button onclick="editName()" class="text-blue-600 text-sm"><i class="fas fa-edit"></i> Edit Name</button>
-    </div>
-    <form id="editNameForm" class="hidden mt-4 space-y-3">
-      <input type="text" id="newDisplayName" placeholder="New Display Name" class="form-input" required />
-      <button type="submit" class="btn-primary">Update Name</button>
-    </form>
-  </div>
-</section>
+  <div id="footer-placeholder"></div>
+  <div id="toast-container"></div>
 
-<!-- টোস্ট -->
-<div id="toast-container"></div>
+  <script type="module">
+    import { auth, db, doc, getDoc, updateDoc, onAuthStateChanged, signOut } from './firebase-config.js';
+    import { renderNavbar, renderFooter, updateNavbarAuth } from './components.js';
 
-<script type="module">
-import { auth, db, doc, getDoc, updateDoc, onAuthStateChanged, signOut } from './firebase-config.js';
+    renderNavbar();
+    renderFooter();
 
-// ===== TOAST =====
-window.showToast = (message, type = 'success') => {
-  const container = document.getElementById('toast-container');
-  if (!container) return;
-  const toast = document.createElement('div');
-  const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
-  toast.className = `toast ${type}`;
-  toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
-  container.appendChild(toast);
-  setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
-};
+    // ===== TOAST =====
+    window.showToast = (message, type = 'success') => {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
+      container.appendChild(toast);
+      setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
+    };
 
-// ===== প্রোফাইল লোড =====
-const profileEmail = document.getElementById('profileEmail');
-const profileName = document.getElementById('profileName');
+    // ===== প্রোফাইল লোড =====
+    const profileEmail = document.getElementById('profileEmail');
+    const profileName = document.getElementById('profileName');
 
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = 'index.html';
-    return;
-  }
-  const userDoc = await getDoc(doc(db, 'users', user.uid));
-  if (userDoc.exists()) {
-    const data = userDoc.data();
-    profileEmail.textContent = data.email || user.email;
-    profileName.textContent = data.displayName || 'No name';
-  }
-});
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = 'index.html';
+        return;
+      }
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      if (userDoc.exists()) {
+        const data = userDoc.data();
+        profileEmail.textContent = data.email || user.email;
+        profileName.textContent = data.displayName || 'No name';
+        updateNavbarAuth(user, data.displayName || user.email.split('@')[0]);
+      }
+    });
 
-// ===== নাম পরিবর্তন =====
-window.editName = () => {
-  document.getElementById('editNameForm').classList.toggle('hidden');
-};
+    // ===== নাম পরিবর্তন =====
+    window.editName = () => {
+      document.getElementById('editNameForm').classList.toggle('hidden');
+    };
 
-document.getElementById('editNameForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const newName = document.getElementById('newDisplayName').value.trim();
-  if (!newName) return showToast('দয়া করে একটি নাম দিন', 'error');
-  const user = auth.currentUser;
-  if (!user) return;
-  try {
-    await updateDoc(doc(db, 'users', user.uid), { displayName: newName });
-    profileName.textContent = newName;
-    showToast('✅ নাম আপডেট হয়েছে', 'success');
-    document.getElementById('editNameForm').classList.add('hidden');
-  } catch (err) {
-    showToast('⚠️ ' + err.message, 'error');
-  }
-});
+    document.getElementById('editNameForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const newName = document.getElementById('newDisplayName').value.trim();
+      if (!newName) return showToast('দয়া করে একটি নাম দিন', 'error');
+      const user = auth.currentUser;
+      if (!user) return;
+      try {
+        await updateDoc(doc(db, 'users', user.uid), { displayName: newName });
+        profileName.textContent = newName;
+        showToast('✅ নাম আপডেট হয়েছে', 'success');
+        document.getElementById('editNameForm').classList.add('hidden');
+        // Navbar আপডেট
+        updateNavbarAuth(user, newName);
+      } catch (err) {
+        showToast('⚠️ ' + err.message, 'error');
+      }
+    });
 
-// ===== LOGOUT (global) =====
-window.handleLogout = async () => {
-  await signOut(auth);
-  window.location.href = 'index.html';
-};
-
-// ===== DROPDOWN & PROFILE AVATAR (same as index) =====
-// এখানে index.html-এর মতো প্রোফাইল অ্যাভাটার ও ড্রপডাউন কোড কপি করুন (সংক্ষেপে)
-// (যদি চান, উপরের নেভবারে ইতিমধ্যে আছে, তাই আলাদা প্রয়োজন নেই)
-</script>
+    // ===== LOGOUT =====
+    window.handleLogout = async () => {
+      await signOut(auth);
+      window.location.href = 'index.html';
+    };
+  </script>
 </body>
 </html>

@@ -25,8 +25,9 @@
     .dropdown-menu a:hover { background:#f0f0f5; }
     .dropdown-menu.show { display:block; }
     .profile-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#007AFF,#5856D6); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; cursor:pointer; }
+    .social-icon { display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:60px; background:rgba(255,255,255,0.8); backdrop-filter:blur(4px); color:#3a3a3c; text-decoration:none; border:1px solid rgba(60,60,67,0.08); transition:0.3s; }
+    .social-icon:hover { background:#007AFF; color:#fff; transform:translateY(-4px); box-shadow:0 8px 20px rgba(0,122,255,0.2); border-color:#007AFF; }
 
-    /* টোস্ট */
     #toast-container {
       position: fixed;
       bottom: 30px;
@@ -61,210 +62,168 @@
     .toast.success i { color: #34C759; }
     .toast.error i { color: #FF3B30; }
     .toast.warning i { color: #FF9500; }
-    @keyframes slideIn {
-      to { transform: translateX(0); }
-    }
-    .toast.hide {
-      animation: slideOut 0.4s cubic-bezier(0.25,0.46,0.45,0.94) forwards;
-    }
-    @keyframes slideOut {
-      to { transform: translateX(calc(100% + 30px)); opacity: 0; }
-    }
+    @keyframes slideIn { to { transform: translateX(0); } }
+    .toast.hide { animation: slideOut 0.4s cubic-bezier(0.25,0.46,0.45,0.94) forwards; }
+    @keyframes slideOut { to { transform: translateX(calc(100% + 30px)); opacity: 0; } }
   </style>
 </head>
 <body>
 
-<!-- নেভবার -->
-<nav class="fixed top-0 left-0 w-full glass z-50 h-16 md:h-20 flex items-center px-6 sm:px-8 lg:px-12">
-  <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
-    <a href="index.html" class="text-xl md:text-2xl font-bold text-gray-900">
-      SWD <span class="gradient-text">Store</span>
-    </a>
-    <div class="hidden md:flex items-center gap-6">
-      <a href="index.html" class="nav-link text-sm">Home</a>
-      <a href="get-new-website.html" class="nav-link text-sm">Store</a>
-      <a href="fix-website.html" class="nav-link text-sm">Fix</a>
-    </div>
-    <div class="flex items-center gap-4">
-      <!-- ✅ মেসেজ আইকন (কার্টের বামে) -->
-      <a href="messages.html" class="text-gray-700 hover:text-blue-500 text-xl" title="Messages">
-        <i class="fas fa-envelope"></i>
-      </a>
-      <div id="auth-buttons" class="flex items-center gap-3">
-        <a href="#" onclick="openAuthModal('signin')" class="nav-link text-sm">Sign In</a>
-        <a href="#" onclick="openAuthModal('signup')" class="btn-primary text-sm py-2 px-5">Get Started</a>
+  <!-- নেভবার প্লেসহোল্ডার -->
+  <div id="navbar-placeholder"></div>
+
+  <!-- হিরো সেকশন -->
+  <section class="pt-32 pb-16 px-6 min-h-screen flex items-center">
+    <div class="max-w-7xl mx-auto text-center">
+      <h1 class="text-5xl md:text-7xl font-bold text-gray-900 leading-tight">
+        Build Your <span class="gradient-text">Dream Website</span> Today
+      </h1>
+      <p class="text-xl text-gray-500 mt-4 max-w-2xl mx-auto">
+        Choose from ready-made packages or get a fully custom solution. Fast, reliable, and modern.
+      </p>
+      <div class="mt-10 flex flex-wrap justify-center gap-4">
+        <a href="get-new-website.html" class="btn-primary"><i class="fas fa-shopping-cart"></i> Explore Store</a>
+        <a href="fix-website.html" class="btn-outline"><i class="fas fa-wrench"></i> Fix My Site</a>
       </div>
-      <div id="profile-section" class="relative hidden">
-        <div class="profile-avatar" id="profileAvatar">S</div>
-        <div class="dropdown-menu" id="dropdownMenu">
-          <a href="my-profile.html"><i class="fas fa-user mr-2"></i> My Profile</a>
-          <a href="my-orders.html"><i class="fas fa-box mr-2"></i> My Orders</a>
-          <a href="settings.html"><i class="fas fa-cog mr-2"></i> Settings</a>
-          <a href="#" onclick="handleLogout()"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
+      <div class="mt-16 grid md:grid-cols-3 gap-6 text-left">
+        <div class="glass-card">
+          <i class="fas fa-file-code text-3xl text-blue-500"></i>
+          <h3 class="font-bold mt-2">Static Website</h3>
+          <p class="text-sm text-gray-500">Perfect for portfolios & small business.</p>
+          <span class="block mt-2 font-bold text-gray-800">From $60</span>
+        </div>
+        <div class="glass-card">
+          <i class="fas fa-layer-group text-3xl text-blue-500"></i>
+          <h3 class="font-bold mt-2">Single Page App</h3>
+          <p class="text-sm text-gray-500">Interactive SPA with React/Vue.</p>
+          <span class="block mt-2 font-bold text-gray-800">From $120</span>
+        </div>
+        <div class="glass-card">
+          <i class="fas fa-database text-3xl text-blue-500"></i>
+          <h3 class="font-bold mt-2">Dynamic Website</h3>
+          <p class="text-sm text-gray-500">Full CMS, blog, e‑commerce ready.</p>
+          <span class="block mt-2 font-bold text-gray-800">From $250</span>
         </div>
       </div>
     </div>
-  </div>
-</nav>
+  </section>
 
-<!-- হিরো সেকশন (অপরিবর্তিত) -->
-<section class="pt-32 pb-16 px-6 min-h-screen flex items-center">
-  <div class="max-w-7xl mx-auto text-center">
-    <h1 class="text-5xl md:text-7xl font-bold text-gray-900 leading-tight">
-      Build Your <span class="gradient-text">Dream Website</span> Today
-    </h1>
-    <p class="text-xl text-gray-500 mt-4 max-w-2xl mx-auto">
-      Choose from ready-made packages or get a fully custom solution. Fast, reliable, and modern.
-    </p>
-    <div class="mt-10 flex flex-wrap justify-center gap-4">
-      <a href="get-new-website.html" class="btn-primary"><i class="fas fa-shopping-cart"></i> Explore Store</a>
-      <a href="fix-website.html" class="btn-outline"><i class="fas fa-wrench"></i> Fix My Site</a>
-    </div>
-    <div class="mt-16 grid md:grid-cols-3 gap-6 text-left">
-      <div class="glass-card">
-        <i class="fas fa-file-code text-3xl text-blue-500"></i>
-        <h3 class="font-bold mt-2">Static Website</h3>
-        <p class="text-sm text-gray-500">Perfect for portfolios & small business.</p>
-        <span class="block mt-2 font-bold text-gray-800">From $60</span>
+  <!-- অথ মডাল -->
+  <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+      <div class="flex justify-between items-center mb-4">
+        <h3 id="authModalTitle" class="text-2xl font-bold">Sign In</h3>
+        <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
       </div>
-      <div class="glass-card">
-        <i class="fas fa-layer-group text-3xl text-blue-500"></i>
-        <h3 class="font-bold mt-2">Single Page App</h3>
-        <p class="text-sm text-gray-500">Interactive SPA with React/Vue.</p>
-        <span class="block mt-2 font-bold text-gray-800">From $120</span>
-      </div>
-      <div class="glass-card">
-        <i class="fas fa-database text-3xl text-blue-500"></i>
-        <h3 class="font-bold mt-2">Dynamic Website</h3>
-        <p class="text-sm text-gray-500">Full CMS, blog, e‑commerce ready.</p>
-        <span class="block mt-2 font-bold text-gray-800">From $250</span>
-      </div>
+      <form id="authForm" class="space-y-4">
+        <input type="email" id="authEmail" placeholder="Email" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
+        <input type="password" id="authPassword" placeholder="Password" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
+        <button type="submit" class="btn-primary w-full justify-center">Continue</button>
+      </form>
+      <p class="mt-4 text-sm text-gray-500 text-center">
+        <span id="authToggleText">Don't have an account?</span>
+        <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
+      </p>
+      <div id="authError" class="text-red-500 text-sm mt-2 hidden"></div>
     </div>
   </div>
-</section>
 
-<!-- অথ মডাল (অপরিবর্তিত) -->
-<div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-  <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
-    <div class="flex justify-between items-center mb-4">
-      <h3 id="authModalTitle" class="text-2xl font-bold">Sign In</h3>
-      <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
-    </div>
-    <form id="authForm" class="space-y-4">
-      <input type="email" id="authEmail" placeholder="Email" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
-      <input type="password" id="authPassword" placeholder="Password" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
-      <button type="submit" class="btn-primary w-full justify-center">Continue</button>
-    </form>
-    <p class="mt-4 text-sm text-gray-500 text-center">
-      <span id="authToggleText">Don't have an account?</span>
-      <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
-    </p>
-    <div id="authError" class="text-red-500 text-sm mt-2 hidden"></div>
-  </div>
-</div>
+  <!-- ফুটার প্লেসহোল্ডার -->
+  <div id="footer-placeholder"></div>
+  <!-- টোস্ট -->
+  <div id="toast-container"></div>
 
-<!-- টোস্ট -->
-<div id="toast-container"></div>
+  <script type="module">
+    import { auth, db, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, doc, setDoc, getDoc } from './firebase-config.js';
+    import { renderNavbar, renderFooter, updateNavbarAuth } from './components.js';
 
-<script type="module">
-import { auth, db, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, doc, setDoc, getDoc } from './firebase-config.js';
+    // ===== রেন্ডার নেভবার ও ফুটার =====
+    renderNavbar();
+    renderFooter();
 
-// ===== TOAST =====
-window.showToast = (message, type = 'success') => {
-  const container = document.getElementById('toast-container');
-  if (!container) return;
-  const toast = document.createElement('div');
-  const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
-  toast.className = `toast ${type}`;
-  toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
-  container.appendChild(toast);
-  setTimeout(() => {
-    toast.classList.add('hide');
-    setTimeout(() => toast.remove(), 400);
-  }, 4500);
-};
+    // ===== TOAST =====
+    window.showToast = (message, type = 'success') => {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.add('hide');
+        setTimeout(() => toast.remove(), 400);
+      }, 4500);
+    };
 
-// ===== AUTH =====
-const authBtns = document.getElementById('auth-buttons');
-const profileSection = document.getElementById('profile-section');
-const profileAvatar = document.getElementById('profileAvatar');
-const dropdownMenu = document.getElementById('dropdownMenu');
-const authModal = document.getElementById('authModal');
-const authForm = document.getElementById('authForm');
-const authEmail = document.getElementById('authEmail');
-const authPassword = document.getElementById('authPassword');
-const authModalTitle = document.getElementById('authModalTitle');
-const authToggleLink = document.getElementById('authToggleLink');
-const authToggleText = document.getElementById('authToggleText');
-const authError = document.getElementById('authError');
+    // ===== AUTH =====
+    const authModal = document.getElementById('authModal');
+    const authForm = document.getElementById('authForm');
+    const authEmail = document.getElementById('authEmail');
+    const authPassword = document.getElementById('authPassword');
+    const authModalTitle = document.getElementById('authModalTitle');
+    const authToggleLink = document.getElementById('authToggleLink');
+    const authToggleText = document.getElementById('authToggleText');
+    const authError = document.getElementById('authError');
+    let currentAuthMode = 'signin';
 
-let currentAuthMode = 'signin';
+    window.openAuthModal = (mode) => {
+      currentAuthMode = mode;
+      authModalTitle.textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
+      authToggleText.textContent = mode === 'signin' ? "Don't have an account?" : "Already have an account?";
+      authToggleLink.textContent = mode === 'signin' ? 'Sign Up' : 'Sign In';
+      authError.classList.add('hidden');
+      authModal.classList.remove('hidden');
+    };
+    window.closeAuthModal = () => authModal.classList.add('hidden');
 
-window.openAuthModal = (mode) => {
-  currentAuthMode = mode;
-  authModalTitle.textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
-  authToggleText.textContent = mode === 'signin' ? "Don't have an account?" : "Already have an account?";
-  authToggleLink.textContent = mode === 'signin' ? 'Sign Up' : 'Sign In';
-  authError.classList.add('hidden');
-  authModal.classList.remove('hidden');
-};
-window.closeAuthModal = () => authModal.classList.add('hidden');
+    authToggleLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
+      window.openAuthModal(currentAuthMode);
+    });
 
-authToggleLink.addEventListener('click', (e) => {
-  e.preventDefault();
-  currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
-  window.openAuthModal(currentAuthMode);
-});
+    authForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = authEmail.value.trim();
+      const password = authPassword.value.trim();
+      authError.classList.add('hidden');
+      try {
+        let userCred;
+        if (currentAuthMode === 'signin') {
+          userCred = await signInWithEmailAndPassword(auth, email, password);
+          showToast('✅ সাইন ইন সফল!', 'success');
+        } else {
+          userCred = await createUserWithEmailAndPassword(auth, email, password);
+          await setDoc(doc(db, 'users', userCred.user.uid), {
+            email, displayName: email.split('@')[0], role: 'user', createdAt: new Date().toISOString()
+          });
+          showToast('✅ অ্যাকাউন্ট তৈরি হয়েছে!', 'success');
+        }
+        closeAuthModal();
+        authForm.reset();
+      } catch (error) {
+        authError.textContent = error.message;
+        authError.classList.remove('hidden');
+        showToast('⚠️ ' + error.message, 'error');
+      }
+    });
 
-authForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = authEmail.value.trim();
-  const password = authPassword.value.trim();
-  authError.classList.add('hidden');
-  try {
-    let userCred;
-    if (currentAuthMode === 'signin') {
-      userCred = await signInWithEmailAndPassword(auth, email, password);
-      showToast('✅ সাইন ইন সফল!', 'success');
-    } else {
-      userCred = await createUserWithEmailAndPassword(auth, email, password);
-      await setDoc(doc(db, 'users', userCred.user.uid), {
-        email, displayName: email.split('@')[0], role: 'user', createdAt: new Date().toISOString()
-      });
-      showToast('✅ অ্যাকাউন্ট তৈরি হয়েছে!', 'success');
-    }
-    closeAuthModal();
-    authForm.reset();
-  } catch (error) {
-    authError.textContent = error.message;
-    authError.classList.remove('hidden');
-    showToast('⚠️ ' + error.message, 'error');
-  }
-});
+    // ===== AUTH STATE =====
+    onAuthStateChanged(auth, async (user) => {
+      let name = null;
+      if (user) {
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        name = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
+      }
+      updateNavbarAuth(user, name);
+    });
 
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    authBtns.classList.add('hidden');
-    profileSection.classList.remove('hidden');
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
-    const name = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
-    profileAvatar.textContent = name.charAt(0).toUpperCase();
-  } else {
-    authBtns.classList.remove('hidden');
-    profileSection.classList.add('hidden');
-  }
-});
-
-profileAvatar.addEventListener('click', () => dropdownMenu.classList.toggle('show'));
-document.addEventListener('click', (e) => {
-  if (!profileSection.contains(e.target)) dropdownMenu.classList.remove('show');
-});
-
-window.handleLogout = async () => {
-  await signOut(auth);
-  dropdownMenu.classList.remove('show');
-  showToast('✅ লগআউট সফল', 'success');
-};
-</script>
+    // ===== LOGOUT =====
+    window.handleLogout = async () => {
+      await signOut(auth);
+      showToast('✅ লগআউট সফল', 'success');
+    };
+  </script>
 </body>
 </html>

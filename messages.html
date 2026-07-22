@@ -24,6 +24,8 @@
     .dropdown-menu a:hover { background:#f0f0f5; }
     .dropdown-menu.show { display:block; }
     .profile-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#007AFF,#5856D6); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; cursor:pointer; }
+    .social-icon { display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:60px; background:rgba(255,255,255,0.8); backdrop-filter:blur(4px); color:#3a3a3c; text-decoration:none; border:1px solid rgba(60,60,67,0.08); transition:0.3s; }
+    .social-icon:hover { background:#007AFF; color:#fff; transform:translateY(-4px); box-shadow:0 8px 20px rgba(0,122,255,0.2); border-color:#007AFF; }
     #toast-container {
       position: fixed;
       bottom: 30px;
@@ -70,124 +72,100 @@
 </head>
 <body>
 
-<!-- নেভবার -->
-<nav class="fixed top-0 left-0 w-full glass z-50 h-16 md:h-20 flex items-center px-6 sm:px-8 lg:px-12">
-  <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
-    <a href="index.html" class="text-xl md:text-2xl font-bold text-gray-900">
-      SWD <span class="gradient-text">Store</span>
-    </a>
-    <div class="hidden md:flex items-center gap-6">
-      <a href="index.html" class="nav-link text-sm">Home</a>
-      <a href="get-new-website.html" class="nav-link text-sm">Store</a>
-      <a href="fix-website.html" class="nav-link text-sm">Fix</a>
+  <div id="navbar-placeholder"></div>
+
+  <section class="pt-28 pb-16 px-6 max-w-3xl mx-auto">
+    <h1 class="text-3xl font-bold text-gray-900">Support Chat</h1>
+    <div class="glass-card mt-6">
+      <div id="chatMessages" class="chat-container"></div>
+      <form id="chatForm" class="mt-4 flex gap-2">
+        <input type="text" id="chatInput" placeholder="Type a message..." class="form-input flex-1" required />
+        <button type="submit" class="btn-primary"><i class="fas fa-paper-plane"></i></button>
+      </form>
     </div>
-    <div class="flex items-center gap-4">
-      <a href="messages.html" class="text-gray-700 hover:text-blue-500 text-xl"><i class="fas fa-envelope"></i></a>
-      <div id="auth-buttons" class="flex items-center gap-3">
-        <a href="#" onclick="openAuthModal('signin')" class="nav-link text-sm">Sign In</a>
-        <a href="#" onclick="openAuthModal('signup')" class="btn-primary text-sm py-2 px-5">Get Started</a>
-      </div>
-      <div id="profile-section" class="relative hidden">
-        <div class="profile-avatar" id="profileAvatar">S</div>
-        <div class="dropdown-menu" id="dropdownMenu">
-          <a href="my-profile.html"><i class="fas fa-user mr-2"></i> My Profile</a>
-          <a href="my-orders.html"><i class="fas fa-box mr-2"></i> My Orders</a>
-          <a href="settings.html"><i class="fas fa-cog mr-2"></i> Settings</a>
-          <a href="#" onclick="handleLogout()"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</nav>
+  </section>
 
-<!-- চ্যাট কন্টেন্ট -->
-<section class="pt-28 pb-16 px-6 max-w-3xl mx-auto">
-  <h1 class="text-3xl font-bold text-gray-900">Support Chat</h1>
-  <div class="glass-card mt-6">
-    <div id="chatMessages" class="chat-container"></div>
-    <form id="chatForm" class="mt-4 flex gap-2">
-      <input type="text" id="chatInput" placeholder="Type a message..." class="form-input flex-1" required />
-      <button type="submit" class="btn-primary"><i class="fas fa-paper-plane"></i></button>
-    </form>
-  </div>
-</section>
+  <div id="footer-placeholder"></div>
+  <div id="toast-container"></div>
 
-<!-- টোস্ট -->
-<div id="toast-container"></div>
+  <script type="module">
+    import { auth, db, collection, query, where, onSnapshot, addDoc, serverTimestamp, orderBy, signOut, onAuthStateChanged, doc, getDoc } from './firebase-config.js';
+    import { renderNavbar, renderFooter, updateNavbarAuth } from './components.js';
 
-<script type="module">
-import { auth, db, collection, query, where, onSnapshot, addDoc, serverTimestamp, orderBy, signOut } from './firebase-config.js';
+    renderNavbar();
+    renderFooter();
 
-// ===== TOAST =====
-window.showToast = (message, type = 'success') => {
-  const container = document.getElementById('toast-container');
-  if (!container) return;
-  const toast = document.createElement('div');
-  const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
-  toast.className = `toast ${type}`;
-  toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
-  container.appendChild(toast);
-  setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
-};
+    // ===== TOAST =====
+    window.showToast = (message, type = 'success') => {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
+      container.appendChild(toast);
+      setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
+    };
 
-// ===== চ্যাট লোড =====
-const chatMessages = document.getElementById('chatMessages');
-const chatForm = document.getElementById('chatForm');
-const chatInput = document.getElementById('chatInput');
+    // ===== AUTH STATE =====
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = 'index.html';
+        return;
+      }
+      let name = null;
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      name = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
+      updateNavbarAuth(user, name);
 
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    window.location.href = 'index.html';
-    return;
-  }
-  // মেসেজ লোড (যেখানে fromUserId = user.uid অথবা toUserId = user.uid)
-  const q = query(
-    collection(db, 'messages'),
-    where('participants', 'array-contains', user.uid),
-    orderBy('timestamp', 'asc')
-  );
-  onSnapshot(q, (snapshot) => {
-    chatMessages.innerHTML = '';
-    snapshot.forEach(doc => {
-      const msg = doc.data();
-      const isUser = msg.fromUserId === user.uid;
-      const div = document.createElement('div');
-      div.className = isUser ? 'msg-user' : 'msg-admin';
-      div.innerHTML = `${msg.content}<div class="msg-time">${msg.timestamp?.toDate?.()?.toLocaleTimeString() || ''}</div>`;
-      chatMessages.appendChild(div);
+      // মেসেজ লোড (যেখানে fromUserId = user.uid অথবা toUserId = user.uid)
+      const q = query(
+        collection(db, 'messages'),
+        where('participants', 'array-contains', user.uid),
+        orderBy('timestamp', 'asc')
+      );
+      onSnapshot(q, (snapshot) => {
+        const chatMessages = document.getElementById('chatMessages');
+        chatMessages.innerHTML = '';
+        snapshot.forEach(doc => {
+          const msg = doc.data();
+          const isUser = msg.fromUserId === user.uid;
+          const div = document.createElement('div');
+          div.className = isUser ? 'msg-user' : 'msg-admin';
+          div.innerHTML = `${msg.content}<div class="msg-time">${msg.timestamp?.toDate?.()?.toLocaleTimeString() || ''}</div>`;
+          chatMessages.appendChild(div);
+        });
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      });
     });
-    // স্ক্রল ডাউন
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  });
-});
 
-// ===== মেসেজ পাঠানো =====
-chatForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const content = chatInput.value.trim();
-  if (!content) return;
-  const user = auth.currentUser;
-  if (!user) return showToast('আপনি লগইন নেই', 'error');
-  try {
-    await addDoc(collection(db, 'messages'), {
-      fromUserId: user.uid,
-      toUserId: 'admin', // অ্যাডমিনের জন্য বিশেষ ID (বা চাইলে 'admin' স্ট্রিং)
-      content,
-      timestamp: serverTimestamp(),
-      participants: [user.uid, 'admin'],
-      read: false
+    // ===== মেসেজ পাঠানো =====
+    document.getElementById('chatForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const content = document.getElementById('chatInput').value.trim();
+      if (!content) return;
+      const user = auth.currentUser;
+      if (!user) return showToast('আপনি লগইন নেই', 'error');
+      try {
+        await addDoc(collection(db, 'messages'), {
+          fromUserId: user.uid,
+          toUserId: 'admin',
+          content,
+          timestamp: serverTimestamp(),
+          participants: [user.uid, 'admin'],
+          read: false
+        });
+        document.getElementById('chatInput').value = '';
+      } catch (err) {
+        showToast('⚠️ ' + err.message, 'error');
+      }
     });
-    chatInput.value = '';
-  } catch (err) {
-    showToast('⚠️ ' + err.message, 'error');
-  }
-});
 
-// ===== LOGOUT =====
-window.handleLogout = async () => {
-  await signOut(auth);
-  window.location.href = 'index.html';
-};
-</script>
+    // ===== LOGOUT =====
+    window.handleLogout = async () => {
+      await signOut(auth);
+      window.location.href = 'index.html';
+    };
+  </script>
 </body>
 </html>
