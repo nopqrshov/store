@@ -33,6 +33,10 @@
     .social-icon { display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:60px; background:rgba(255,255,255,0.8); backdrop-filter:blur(4px); color:#3a3a3c; text-decoration:none; border:1px solid rgba(60,60,67,0.08); transition:0.3s; }
     .social-icon:hover { background:#007AFF; color:#fff; transform:translateY(-4px); box-shadow:0 8px 20px rgba(0,122,255,0.2); border-color:#007AFF; }
 
+    /* ফ্লেক্স লেআউট */
+    .page-wrapper { display: flex; flex-direction: column; min-height: 100vh; }
+    .main-content { flex: 1 0 auto; }
+
     #toast-container {
       position: fixed;
       bottom: 30px;
@@ -74,15 +78,20 @@
 </head>
 <body>
 
-  <div id="navbar-placeholder"></div>
+  <div class="page-wrapper">
+    <div id="navbar-placeholder"></div>
 
-  <!-- মূল কন্টেন্ট -->
-  <section class="pt-24 pb-12 px-6">
-    <div class="max-w-7xl mx-auto">
-      <h1 class="text-3xl font-bold text-gray-900">Choose Your Website Package</h1>
-      <div id="productGrid" class="grid md:grid-cols-3 gap-6 mt-8"></div>
-    </div>
-  </section>
+    <main class="main-content">
+      <section class="pt-24 pb-12 px-6">
+        <div class="max-w-7xl mx-auto">
+          <h1 class="text-3xl font-bold text-gray-900">Choose Your Website Package</h1>
+          <div id="productGrid" class="grid md:grid-cols-3 gap-6 mt-8"></div>
+        </div>
+      </section>
+    </main>
+
+    <div id="footer-placeholder"></div>
+  </div>
 
   <!-- কার্ট সাইডবার -->
   <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
@@ -145,9 +154,6 @@
     </div>
   </div>
 
-  <!-- ফুটার প্লেসহোল্ডার -->
-  <div id="footer-placeholder"></div>
-  <!-- টোস্ট -->
   <div id="toast-container"></div>
 
   <script type="module">
@@ -215,7 +221,7 @@
       }
     });
 
-    // ===== AUTH STATE (নেভবার আপডেট) =====
+    // ===== AUTH STATE =====
     onAuthStateChanged(auth, async (user) => {
       let name = null;
       if (user) {
@@ -252,7 +258,10 @@
     let currentOrderId = null;
 
     const updateCartUI = () => {
-      document.getElementById('cartCount').textContent = cart.length;
+      // নেভবারের কার্ট ব্যাজ আপডেট (components.js-এ আছে)
+      const cartBadge = document.getElementById('cartCount');
+      if (cartBadge) cartBadge.textContent = cart.length;
+      // সাইডবার আপডেট
       const cartItemsDiv = document.getElementById('cartItems');
       if (cart.length === 0) {
         cartItemsDiv.innerHTML = '<p class="text-gray-500">Your cart is empty.</p>';

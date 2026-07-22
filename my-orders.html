@@ -26,6 +26,9 @@
     .profile-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#007AFF,#5856D6); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; cursor:pointer; }
     .social-icon { display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:60px; background:rgba(255,255,255,0.8); backdrop-filter:blur(4px); color:#3a3a3c; text-decoration:none; border:1px solid rgba(60,60,67,0.08); transition:0.3s; }
     .social-icon:hover { background:#007AFF; color:#fff; transform:translateY(-4px); box-shadow:0 8px 20px rgba(0,122,255,0.2); border-color:#007AFF; }
+    .cart-badge { background:#007AFF; color:white; border-radius:50%; padding:2px 8px; font-size:0.7rem; font-weight:700; }
+    .page-wrapper { display: flex; flex-direction: column; min-height: 100vh; }
+    .main-content { flex: 1 0 auto; }
     #toast-container {
       position: fixed;
       bottom: 30px;
@@ -70,12 +73,18 @@
 </head>
 <body>
 
-  <div id="navbar-placeholder"></div>
+  <div class="page-wrapper">
+    <div id="navbar-placeholder"></div>
 
-  <section class="pt-28 pb-16 px-6 max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold text-gray-900">My Orders</h1>
-    <div id="orderList" class="mt-6 space-y-4"></div>
-  </section>
+    <main class="main-content">
+      <section class="pt-28 pb-16 px-6 max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900">My Orders</h1>
+        <div id="orderList" class="mt-6 space-y-4"></div>
+      </section>
+    </main>
+
+    <div id="footer-placeholder"></div>
+  </div>
 
   <!-- অথ মডাল -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
@@ -97,7 +106,6 @@
     </div>
   </div>
 
-  <div id="footer-placeholder"></div>
   <div id="toast-container"></div>
 
   <script type="module">

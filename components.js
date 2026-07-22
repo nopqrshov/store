@@ -18,8 +18,9 @@ export function renderNavbar() {
           <a href="messages.html" class="text-gray-700 hover:text-blue-500 text-xl" title="Messages">
             <i class="fas fa-envelope"></i>
           </a>
-          <a href="get-new-website.html" class="text-gray-700 hover:text-blue-500 text-xl" title="Cart">
+          <a href="get-new-website.html" class="text-gray-700 hover:text-blue-500 text-xl relative" title="Cart">
             <i class="fas fa-shopping-cart"></i>
+            <span id="cartCount" class="cart-badge absolute -top-2 -right-3">0</span>
           </a>
           <div id="auth-buttons" class="flex items-center gap-3">
             <a href="#" onclick="window.openAuthModal('signin')" class="nav-link text-sm">Sign In</a>
@@ -40,7 +41,7 @@ export function renderNavbar() {
   `;
   document.getElementById('navbar-placeholder').innerHTML = navbarHTML;
 
-  // প্রোফাইল অ্যাভাটার & ড্রপডাউন ইভেন্ট (সব পেজের জন্য)
+  // প্রোফাইল অ্যাভাটার & ড্রপডাউন ইভেন্ট
   const avatar = document.getElementById('profileAvatar');
   const dropdown = document.getElementById('dropdownMenu');
   if (avatar) {
@@ -53,16 +54,16 @@ export function renderNavbar() {
   });
 }
 
-// ফুটার রেন্ডার
+// ফুটার রেন্ডার (পোর্টফোলিও লিংক)
 export function renderFooter() {
   const footerHTML = `
-    <footer class="glass border-t border-gray-200/30 py-8 px-6 sm:px-8 lg:px-12 mt-12">
+    <footer class="glass border-t border-gray-200/30 py-8 px-6 sm:px-8 lg:px-12 mt-auto">
       <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
         <div class="font-medium text-gray-700">
           &copy; 2026 SWD Store. All rights reserved.
         </div>
         <div class="flex items-center gap-4">
-          <a href="index.html" class="text-blue-600 hover:underline font-medium">SWD Store</a>
+          <a href="https://shovon337.github.io/web-developer" target="_blank" class="text-blue-600 hover:underline font-medium">Portfolio</a>
           <a href="https://github.com/shovon337" target="_blank" class="social-icon" aria-label="GitHub">
             <i class="fab fa-github"></i>
           </a>
@@ -76,7 +77,7 @@ export function renderFooter() {
   document.getElementById('footer-placeholder').innerHTML = footerHTML;
 }
 
-// Auth স্টেট আপডেট (নেভবারের বাটন/প্রোফাইল টগল)
+// Auth স্টেট আপডেট
 export function updateNavbarAuth(user, displayName) {
   const authBtns = document.getElementById('auth-buttons');
   const profileSection = document.getElementById('profile-section');

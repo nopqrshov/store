@@ -25,6 +25,9 @@
     .nav-link:hover { color:#007AFF; }
     .social-icon { display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:60px; background:rgba(255,255,255,0.8); backdrop-filter:blur(4px); color:#3a3a3c; text-decoration:none; border:1px solid rgba(60,60,67,0.08); transition:0.3s; }
     .social-icon:hover { background:#007AFF; color:#fff; transform:translateY(-4px); box-shadow:0 8px 20px rgba(0,122,255,0.2); border-color:#007AFF; }
+    .cart-badge { background:#007AFF; color:white; border-radius:50%; padding:2px 8px; font-size:0.7rem; font-weight:700; }
+    .page-wrapper { display: flex; flex-direction: column; min-height: 100vh; }
+    .main-content { flex: 1 0 auto; }
     #toast-container {
       position: fixed;
       bottom: 30px;
@@ -66,43 +69,49 @@
 </head>
 <body>
 
-  <div id="navbar-placeholder"></div>
+  <div class="page-wrapper">
+    <div id="navbar-placeholder"></div>
 
-  <section class="pt-28 pb-16 px-6 max-w-3xl mx-auto">
-    <h1 class="text-3xl font-bold text-gray-900">Fix My Website</h1>
-    <p class="text-gray-500 mt-2">Describe your issue in detail. We'll get back to you within 24 hours.</p>
-    <form id="fixForm" class="mt-8 space-y-5">
-      <div>
-        <label class="block text-sm font-semibold text-gray-700">Your Name *</label>
-        <input type="text" id="fixName" required class="form-input" />
-      </div>
-      <div>
-        <label class="block text-sm font-semibold text-gray-700">Email *</label>
-        <input type="email" id="fixEmail" required class="form-input" />
-      </div>
-      <div>
-        <label class="block text-sm font-semibold text-gray-700">Phone</label>
-        <input type="tel" id="fixPhone" class="form-input" />
-      </div>
-      <div>
-        <label class="block text-sm font-semibold text-gray-700">Website URL (if any)</label>
-        <input type="url" id="fixUrl" class="form-input" placeholder="https://example.com" />
-      </div>
-      <div>
-        <label class="block text-sm font-semibold text-gray-700">Describe the problem *</label>
-        <textarea id="fixProblem" rows="5" required class="form-input resize-y" placeholder="What's broken? Slow speed? Error messages?"></textarea>
-      </div>
-      <div>
-        <label class="block text-sm font-semibold text-gray-700">Screenshot / Image (Google Drive link)</label>
-        <input type="text" id="fixImageLink" class="form-input" placeholder="Paste your Google Drive share link here" />
-        <p class="text-xs text-gray-400 mt-1">Upload image to Google Drive, get shareable link, and paste here.</p>
-      </div>
-      <button type="submit" class="btn-primary w-full justify-center">
-        <i class="fas fa-paper-plane"></i> Submit Fix Request
-      </button>
-      <div id="fixFeedback" class="hidden text-sm font-medium p-4 rounded-xl"></div>
-    </form>
-  </section>
+    <main class="main-content">
+      <section class="pt-28 pb-16 px-6 max-w-3xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900">Fix My Website</h1>
+        <p class="text-gray-500 mt-2">Describe your issue in detail. We'll get back to you within 24 hours.</p>
+        <form id="fixForm" class="mt-8 space-y-5">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700">Your Name *</label>
+            <input type="text" id="fixName" required class="form-input" />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700">Email *</label>
+            <input type="email" id="fixEmail" required class="form-input" />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700">Phone</label>
+            <input type="tel" id="fixPhone" class="form-input" />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700">Website URL (if any)</label>
+            <input type="url" id="fixUrl" class="form-input" placeholder="https://example.com" />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700">Describe the problem *</label>
+            <textarea id="fixProblem" rows="5" required class="form-input resize-y" placeholder="What's broken? Slow speed? Error messages?"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700">Screenshot / Image (Google Drive link)</label>
+            <input type="text" id="fixImageLink" class="form-input" placeholder="Paste your Google Drive share link here" />
+            <p class="text-xs text-gray-400 mt-1">Upload image to Google Drive, get shareable link, and paste here.</p>
+          </div>
+          <button type="submit" class="btn-primary w-full justify-center">
+            <i class="fas fa-paper-plane"></i> Submit Fix Request
+          </button>
+          <div id="fixFeedback" class="hidden text-sm font-medium p-4 rounded-xl"></div>
+        </form>
+      </section>
+    </main>
+
+    <div id="footer-placeholder"></div>
+  </div>
 
   <!-- অথ মডাল -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
@@ -124,11 +133,9 @@
     </div>
   </div>
 
-  <div id="footer-placeholder"></div>
   <div id="toast-container"></div>
 
   <script type="module">
-    // ✅ ফিক্স: createUserWithEmailAndPassword (টাইপো ঠিক)
     import { auth, db, collection, addDoc, serverTimestamp, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, doc, setDoc, getDoc } from './firebase-config.js';
     import { renderNavbar, renderFooter, updateNavbarAuth } from './components.js';
 
@@ -150,7 +157,7 @@
       }, 4500);
     };
 
-    // ===== ফর্ম সাবমিট (fixRequests) =====
+    // ===== ফর্ম সাবমিট =====
     document.getElementById('fixForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = document.getElementById('fixName').value.trim();

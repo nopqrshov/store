@@ -27,6 +27,11 @@
     .profile-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#007AFF,#5856D6); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; cursor:pointer; }
     .social-icon { display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:60px; background:rgba(255,255,255,0.8); backdrop-filter:blur(4px); color:#3a3a3c; text-decoration:none; border:1px solid rgba(60,60,67,0.08); transition:0.3s; }
     .social-icon:hover { background:#007AFF; color:#fff; transform:translateY(-4px); box-shadow:0 8px 20px rgba(0,122,255,0.2); border-color:#007AFF; }
+    .cart-badge { background:#007AFF; color:white; border-radius:50%; padding:2px 8px; font-size:0.7rem; font-weight:700; }
+
+    /* ফ্লেক্স লেআউট – ফুটার নিচে আটকে রাখে */
+    .page-wrapper { display: flex; flex-direction: column; min-height: 100vh; }
+    .main-content { flex: 1 0 auto; }
 
     #toast-container {
       position: fixed;
@@ -69,44 +74,51 @@
 </head>
 <body>
 
-  <!-- নেভবার প্লেসহোল্ডার -->
-  <div id="navbar-placeholder"></div>
+  <div class="page-wrapper">
+    <!-- নেভবার প্লেসহোল্ডার -->
+    <div id="navbar-placeholder"></div>
 
-  <!-- হিরো সেকশন -->
-  <section class="pt-32 pb-16 px-6 min-h-screen flex items-center">
-    <div class="max-w-7xl mx-auto text-center">
-      <h1 class="text-5xl md:text-7xl font-bold text-gray-900 leading-tight">
-        Build Your <span class="gradient-text">Dream Website</span> Today
-      </h1>
-      <p class="text-xl text-gray-500 mt-4 max-w-2xl mx-auto">
-        Choose from ready-made packages or get a fully custom solution. Fast, reliable, and modern.
-      </p>
-      <div class="mt-10 flex flex-wrap justify-center gap-4">
-        <a href="get-new-website.html" class="btn-primary"><i class="fas fa-shopping-cart"></i> Explore Store</a>
-        <a href="fix-website.html" class="btn-outline"><i class="fas fa-wrench"></i> Fix My Site</a>
-      </div>
-      <div class="mt-16 grid md:grid-cols-3 gap-6 text-left">
-        <div class="glass-card">
-          <i class="fas fa-file-code text-3xl text-blue-500"></i>
-          <h3 class="font-bold mt-2">Static Website</h3>
-          <p class="text-sm text-gray-500">Perfect for portfolios & small business.</p>
-          <span class="block mt-2 font-bold text-gray-800">From $60</span>
+    <!-- মূল কন্টেন্ট -->
+    <main class="main-content">
+      <section class="pt-32 pb-16 px-6 min-h-screen flex items-center">
+        <div class="max-w-7xl mx-auto text-center">
+          <h1 class="text-5xl md:text-7xl font-bold text-gray-900 leading-tight">
+            Build Your <span class="gradient-text">Dream Website</span> Today
+          </h1>
+          <p class="text-xl text-gray-500 mt-4 max-w-2xl mx-auto">
+            Choose from ready-made packages or get a fully custom solution. Fast, reliable, and modern.
+          </p>
+          <div class="mt-10 flex flex-wrap justify-center gap-4">
+            <a href="get-new-website.html" class="btn-primary"><i class="fas fa-shopping-cart"></i> Explore Store</a>
+            <a href="fix-website.html" class="btn-outline"><i class="fas fa-wrench"></i> Fix My Site</a>
+          </div>
+          <div class="mt-16 grid md:grid-cols-3 gap-6 text-left">
+            <div class="glass-card">
+              <i class="fas fa-file-code text-3xl text-blue-500"></i>
+              <h3 class="font-bold mt-2">Static Website</h3>
+              <p class="text-sm text-gray-500">Perfect for portfolios & small business.</p>
+              <span class="block mt-2 font-bold text-gray-800">From $60</span>
+            </div>
+            <div class="glass-card">
+              <i class="fas fa-layer-group text-3xl text-blue-500"></i>
+              <h3 class="font-bold mt-2">Single Page App</h3>
+              <p class="text-sm text-gray-500">Interactive SPA with React/Vue.</p>
+              <span class="block mt-2 font-bold text-gray-800">From $120</span>
+            </div>
+            <div class="glass-card">
+              <i class="fas fa-database text-3xl text-blue-500"></i>
+              <h3 class="font-bold mt-2">Dynamic Website</h3>
+              <p class="text-sm text-gray-500">Full CMS, blog, e‑commerce ready.</p>
+              <span class="block mt-2 font-bold text-gray-800">From $250</span>
+            </div>
+          </div>
         </div>
-        <div class="glass-card">
-          <i class="fas fa-layer-group text-3xl text-blue-500"></i>
-          <h3 class="font-bold mt-2">Single Page App</h3>
-          <p class="text-sm text-gray-500">Interactive SPA with React/Vue.</p>
-          <span class="block mt-2 font-bold text-gray-800">From $120</span>
-        </div>
-        <div class="glass-card">
-          <i class="fas fa-database text-3xl text-blue-500"></i>
-          <h3 class="font-bold mt-2">Dynamic Website</h3>
-          <p class="text-sm text-gray-500">Full CMS, blog, e‑commerce ready.</p>
-          <span class="block mt-2 font-bold text-gray-800">From $250</span>
-        </div>
-      </div>
-    </div>
-  </section>
+      </section>
+    </main>
+
+    <!-- ফুটার প্লেসহোল্ডার -->
+    <div id="footer-placeholder"></div>
+  </div>
 
   <!-- অথ মডাল -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
@@ -128,8 +140,6 @@
     </div>
   </div>
 
-  <!-- ফুটার প্লেসহোল্ডার -->
-  <div id="footer-placeholder"></div>
   <!-- টোস্ট -->
   <div id="toast-container"></div>
 
@@ -137,7 +147,6 @@
     import { auth, db, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, doc, setDoc, getDoc } from './firebase-config.js';
     import { renderNavbar, renderFooter, updateNavbarAuth } from './components.js';
 
-    // ===== রেন্ডার নেভবার ও ফুটার =====
     renderNavbar();
     renderFooter();
 
@@ -219,7 +228,6 @@
       updateNavbarAuth(user, name);
     });
 
-    // ===== LOGOUT =====
     window.handleLogout = async () => {
       await signOut(auth);
       showToast('✅ লগআউট সফল', 'success');
