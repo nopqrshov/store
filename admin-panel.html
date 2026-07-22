@@ -62,6 +62,8 @@
           <input type="text" id="prodDesc" placeholder="Description" class="form-input" />
           <input type="number" id="prodPrice" placeholder="Price" required class="form-input" />
           <input type="text" id="prodCategory" placeholder="Category (static/spa/dynamic)" class="form-input" />
+          <!-- ✅ নতুন ইমেজ ফিল্ড -->
+          <input type="text" id="prodImage" placeholder="Image URL (Google Drive link)" class="form-input" />
           <input type="hidden" id="prodId" />
           <button type="submit" class="btn-primary w-full">Save</button>
         </form>
@@ -156,6 +158,9 @@ onSnapshot(collection(db, 'products'), (snapshot) => {
   snapshot.forEach(doc => {
     const p = doc.data();
     html += `<div class="glass-card">
+      <img src="${p.imageUrl || 'https://via.placeholder.com/300x150?text=No+Image'}" 
+           alt="${p.name}" 
+           class="w-full h-32 object-cover rounded-t-lg mb-2" />
       <h3 class="font-bold">${p.name}</h3>
       <p class="text-sm text-gray-500">$${p.price}</p>
       <button onclick="editProduct('${doc.id}')" class="text-blue-600 text-sm"><i class="fas fa-edit"></i></button>
@@ -174,6 +179,7 @@ window.editProduct = async (id) => {
     document.getElementById('prodDesc').value = data.desc || '';
     document.getElementById('prodPrice').value = data.price;
     document.getElementById('prodCategory').value = data.category || '';
+    document.getElementById('prodImage').value = data.imageUrl || '';
     document.getElementById('productModalTitle').innerText = 'Edit Product';
     document.getElementById('productModal').classList.remove('hidden');
   }
@@ -181,14 +187,14 @@ window.editProduct = async (id) => {
 window.openProductModal = (id) => {
   document.getElementById('productModal').classList.remove('hidden');
   if (id) editProduct(id);
-  else { document.getElementById('productModalTitle').innerText = 'Add Product'; document.getElementById('prodId').value = ''; }
+  else { document.getElementById('productModalTitle').innerText = 'Add Product'; document.getElementById('prodId').value = ''; document.getElementById('prodImage').value = ''; }
 };
 window.closeProductModal = () => {
   document.getElementById('productModal').classList.add('hidden');
   document.getElementById('productForm').reset();
 };
 
-// প্রোডাক্ট ফর্মে লোডিং
+// প্রোডাক্ট ফর্মে লোডিং + ইমেজ ফিল্ড
 const productForm = document.getElementById('productForm');
 const productSubmitBtn = productForm.querySelector('button[type="submit"]');
 productForm.addEventListener('submit', async (e) => {
@@ -197,13 +203,15 @@ productForm.addEventListener('submit', async (e) => {
   const desc = document.getElementById('prodDesc').value.trim();
   const price = parseFloat(document.getElementById('prodPrice').value);
   const category = document.getElementById('prodCategory').value.trim();
+  const imageUrl = document.getElementById('prodImage').value.trim();
   const id = document.getElementById('prodId').value;
   if (!name || !price) return alert('Name and price required.');
   
   setLoading(productSubmitBtn, true, 'Save');
   try {
-    if (id) await updateDoc(doc(db, 'products', id), { name, desc, price, category });
-    else await addDoc(collection(db, 'products'), { name, desc, price, category });
+    const productData = { name, desc, price, category, imageUrl };
+    if (id) await updateDoc(doc(db, 'products', id), productData);
+    else await addDoc(collection(db, 'products'), productData);
     closeProductModal();
   } catch (err) { alert(err.message); }
   finally { setLoading(productSubmitBtn, false); }

@@ -73,7 +73,6 @@
   <div id="toast-container"></div>
 
   <script type="module">
-    // ✅ setLoading ইম্পোর্ট যোগ করুন
     import { auth, db, collection, doc, getDoc, onSnapshot, addDoc, updateDoc, serverTimestamp, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setDoc } from './firebase-config.js';
     import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar, setLoading } from './components.js';
 
@@ -82,7 +81,6 @@
     renderCartSidebar();
     updateCartBadge();
 
-    // ===== টোস্ট =====
     window.showToast = (message, type = 'success') => {
       const container = document.getElementById('toast-container');
       if (!container) return;
@@ -94,7 +92,6 @@
       setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
     };
 
-    // ===== অথ মডাল =====
     let currentAuthMode = 'signin';
     window.openAuthModal = (mode) => {
       currentAuthMode = mode;
@@ -112,7 +109,6 @@
       window.openAuthModal(currentAuthMode);
     });
 
-    // ✅ অথ ফর্মে লোডিং
     const authForm = document.getElementById('authForm');
     const authSubmitBtn = authForm.querySelector('button[type="submit"]');
     authForm.addEventListener('submit', async (e) => {
@@ -146,7 +142,6 @@
       }
     });
 
-    // ===== অথ স্টেট =====
     onAuthStateChanged(auth, async (user) => {
       let name = null;
       if (user) {
@@ -161,7 +156,6 @@
       showToast('✅ লগআউট সফল', 'success');
     };
 
-    // ===== প্রোডাক্ট লোড =====
     const productGrid = document.getElementById('productGrid');
     let products = [];
     onSnapshot(collection(db, 'products'), (snapshot) => {
@@ -172,6 +166,9 @@
     const renderProducts = () => {
       productGrid.innerHTML = products.map(p => `
         <div class="glass-card">
+          <img src="${p.imageUrl || 'https://via.placeholder.com/300x200?text=No+Image'}" 
+               alt="${p.name}" 
+               class="w-full h-48 object-cover rounded-t-lg mb-3" />
           <h3 class="font-bold text-xl">${p.name}</h3>
           <p class="text-sm text-gray-500 mt-1">${p.desc || p.description || ''}</p>
           <p class="text-2xl font-bold text-blue-600 mt-2">$${p.price}</p>
@@ -180,18 +177,21 @@
       `).join('');
     };
 
-    // ===== কার্ট ফাংশন =====
     window.addToCart = (productId) => {
       const product = products.find(p => p.id === productId);
       if (!product) return;
       const cart = JSON.parse(localStorage.getItem('cart')) || [];
-      cart.push({ id: product.id, name: product.name, price: product.price });
+      cart.push({ 
+        id: product.id, 
+        name: product.name, 
+        price: product.price,
+        imageUrl: product.imageUrl || ''
+      });
       localStorage.setItem('cart', JSON.stringify(cart));
       if (typeof window.updateCartUI === 'function') window.updateCartUI();
       showToast(`✅ "${product.name}" কার্টে যোগ হয়েছে`, 'success');
     };
 
-    // ✅ চেকআউট ফাংশন (লোডিং সহ)
     window.checkout = async () => {
       const cart = JSON.parse(localStorage.getItem('cart')) || [];
       if (cart.length === 0) {
@@ -205,7 +205,6 @@
         return;
       }
 
-      // ⭐ বাটনটি এখনই খুঁজুন (কারণ সাইডবার ওপেন থাকবে)
       const checkoutBtn = document.querySelector('#cartSidebar .btn-primary');
       if (checkoutBtn) setLoading(checkoutBtn, true, 'Proceed to Checkout');
 
@@ -232,14 +231,13 @@
         const docRef = await addDoc(collection(db, 'orders'), orderData);
         window.openPaymentModal(docRef.id, paymentSettings);
 
-        if (checkoutBtn) setLoading(checkoutBtn, false); // মডাল খোলার পর লোডিং বন্ধ
+        if (checkoutBtn) setLoading(checkoutBtn, false);
       } catch (err) {
         showToast('⚠️ ' + err.message, 'error');
         if (checkoutBtn) setLoading(checkoutBtn, false);
       }
     };
 
-    // ===== পেমেন্ট মডাল =====
     window.openPaymentModal = (orderId, settings) => {
       const numbersDiv = document.getElementById('paymentNumbers');
       let html = '';
@@ -257,7 +255,6 @@
       document.getElementById('paymentModal').classList.add('hidden');
     };
 
-    // ✅ পেমেন্ট ফর্মে লোডিং
     const paymentForm = document.getElementById('paymentForm');
     const paySubmitBtn = paymentForm.querySelector('button[type="submit"]');
     paymentForm.addEventListener('submit', async (e) => {

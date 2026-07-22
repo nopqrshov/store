@@ -30,7 +30,6 @@ export function renderNavbar() {
           <a href="messages.html" class="text-gray-700 hover:text-blue-500 text-xl" title="Messages">
             <i class="fas fa-envelope"></i>
           </a>
-          <!-- ✅ কার্ট আইকন – সরাসরি window.toggleCart কল করবে -->
           <a href="#" class="cart-toggle text-gray-700 hover:text-blue-500 text-xl relative" title="Cart">
             <i class="fas fa-shopping-cart"></i>
             <span id="cartCount" class="cart-badge">0</span>
@@ -54,7 +53,6 @@ export function renderNavbar() {
   `;
   document.getElementById('navbar-placeholder').innerHTML = navbarHTML;
 
-  // প্রোফাইল ড্রপডাউন
   const avatar = document.getElementById('profileAvatar');
   const dropdown = document.getElementById('dropdownMenu');
   if (avatar) {
@@ -66,7 +64,6 @@ export function renderNavbar() {
     }
   });
 
-  // ✅ কার্ট টগল – রিডাইরেক্ট সরানো হয়েছে
   const cartToggle = document.querySelector('#navbar-placeholder .cart-toggle');
   if (cartToggle) {
     cartToggle.addEventListener('click', (e) => {
@@ -118,12 +115,8 @@ export function updateNavbarAuth(user, displayName) {
   }
 }
 
-// ======================================================
-// ✅ নতুন: কার্ট সাইডবার রেন্ডার ও টগল ফাংশন
-// ======================================================
-
+// ===== কার্ট সাইডবার রেন্ডার ও টগল =====
 export function renderCartSidebar() {
-  // ডুপ্লিকেট রোধ
   if (document.getElementById('cartSidebar')) return;
 
   const html = `
@@ -144,8 +137,6 @@ export function renderCartSidebar() {
     </div>
   `;
   document.body.insertAdjacentHTML('beforeend', html);
-  
-  // প্রাথমিক UI আপডেট
   updateCartUI();
 }
 
@@ -170,10 +161,13 @@ export function updateCartUI() {
     container.innerHTML = cart.map((item, idx) => {
       total += item.price;
       return `
-        <div class="flex justify-between items-center border-b pb-2">
-          <div>
+        <div class="flex items-center gap-3 border-b pb-2">
+          <img src="${item.imageUrl || 'https://via.placeholder.com/50?text=No+Img'}" 
+               alt="${item.name}" 
+               class="w-12 h-12 object-cover rounded" />
+          <div class="flex-1">
             <span class="font-medium">${item.name}</span>
-            <span class="text-sm text-gray-500">$${item.price}</span>
+            <span class="text-sm text-gray-500 block">$${item.price}</span>
           </div>
           <button onclick="window.removeFromCart(${idx})" class="text-red-500"><i class="fas fa-trash"></i></button>
         </div>
@@ -184,7 +178,7 @@ export function updateCartUI() {
   updateCartBadge();
 }
 
-// গ্লোবাল ফাংশন (যাতে নেভবারের ইভেন্ট লিসেনার ও HTML-এর onclick কাজ করে)
+// গ্লোবাল ফাংশন
 window.toggleCart = toggleCart;
 window.updateCartUI = updateCartUI;
 
@@ -195,11 +189,10 @@ window.removeFromCart = function(index) {
   updateCartUI();
 };
 
-// checkout ফাংশনটি get-new-website.html-এ ডিফাইন করা হবে, 
-// কিন্তু এখানে ডামি ফাংশন রাখছি যাতে অন্য পেজে error না হয়
 window.checkout = window.checkout || function() {
   alert('Please go to the Store page to checkout.');
 };
+
 // ===== লোডিং কন্ট্রোল =====
 export function setLoading(button, isLoading, originalText = null) {
   if (!button) return;
