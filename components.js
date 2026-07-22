@@ -1,13 +1,14 @@
 // components.js
-import { auth, onAuthStateChanged, signOut } from './firebase-config.js';
+import { auth, onAuthStateChanged, signOut, sendPasswordResetEmail } from './firebase-config.js';
 
-// ===== কার্ট ব্যাজ আপডেট =====
+// ===== কার্ট ব্যাজ আপডেট (কোয়ান্টিটি সহ) =====
 export function updateCartBadge() {
   const cartBadge = document.getElementById('cartCount');
   if (!cartBadge) return;
   try {
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    cartBadge.textContent = cart.length;
+    const totalQty = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    cartBadge.textContent = totalQty;
   } catch (e) {
     cartBadge.textContent = '0';
   }
@@ -43,6 +44,8 @@ export function renderNavbar() {
             <div class="dropdown-menu" id="dropdownMenu">
               <a href="my-profile.html"><i class="fas fa-user mr-2"></i> My Profile</a>
               <a href="my-orders.html"><i class="fas fa-box mr-2"></i> My Orders</a>
+              <!-- ✅ নতুন লিংক -->
+              <a href="my-fix-requests.html"><i class="fas fa-tools mr-2"></i> My Fix Requests</a>
               <a href="settings.html"><i class="fas fa-cog mr-2"></i> Settings</a>
               <a href="#" onclick="window.handleLogout()"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
             </div>
@@ -77,22 +80,16 @@ export function renderNavbar() {
   updateCartBadge();
 }
 
-// ===== ফুটার রেন্ডার =====
+// ===== ফুটার =====
 export function renderFooter() {
   const footerHTML = `
     <footer class="glass border-t border-gray-200/30 py-8 px-6 sm:px-8 lg:px-12 mt-auto">
       <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-        <div class="font-medium text-gray-700">
-          &copy; 2026 SWD Store. All rights reserved.
-        </div>
+        <div class="font-medium text-gray-700">&copy; 2026 SWD Store. All rights reserved.</div>
         <div class="flex items-center gap-4">
           <a href="https://shovon337.github.io/web-developer" target="_blank" class="text-blue-600 hover:underline font-medium">Portfolio</a>
-          <a href="https://github.com/shovon337" target="_blank" class="social-icon" aria-label="GitHub">
-            <i class="fab fa-github"></i>
-          </a>
-          <a href="https://www.linkedin.com/in/shovon-s-mind-67aa4b260/" target="_blank" class="social-icon" aria-label="LinkedIn">
-            <i class="fab fa-linkedin-in"></i>
-          </a>
+          <a href="https://github.com/shovon337" target="_blank" class="social-icon" aria-label="GitHub"><i class="fab fa-github"></i></a>
+          <a href="https://www.linkedin.com/in/shovon-s-mind-67aa4b260/" target="_blank" class="social-icon" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
         </div>
       </div>
     </footer>
@@ -100,7 +97,7 @@ export function renderFooter() {
   document.getElementById('footer-placeholder').innerHTML = footerHTML;
 }
 
-// ===== অথ স্টেট আপডেট =====
+// ===== অথ স্টেট =====
 export function updateNavbarAuth(user, displayName) {
   const authBtns = document.getElementById('auth-buttons');
   const profileSection = document.getElementById('profile-section');
@@ -115,10 +112,9 @@ export function updateNavbarAuth(user, displayName) {
   }
 }
 
-// ===== কার্ট সাইডবার রেন্ডার ও টগল =====
+// ===== কার্ট সাইডবার =====
 export function renderCartSidebar() {
   if (document.getElementById('cartSidebar')) return;
-
   const html = `
     <div class="cart-overlay" id="cartOverlay" onclick="window.toggleCart()"></div>
     <div class="cart-sidebar" id="cartSidebar">
@@ -147,11 +143,11 @@ export function toggleCart() {
   if (overlay) overlay.classList.toggle('open');
 }
 
+// ===== কার্ট UI (কোয়ান্টিটি সহ) =====
 export function updateCartUI() {
   const container = document.getElementById('cartItems');
   const totalEl = document.getElementById('cartTotal');
   if (!container || !totalEl) return;
-
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
   if (cart.length === 0) {
     container.innerHTML = '<p class="text-gray-500">Your cart is empty.</p>';
@@ -159,28 +155,45 @@ export function updateCartUI() {
   } else {
     let total = 0;
     container.innerHTML = cart.map((item, idx) => {
-      total += item.price;
+      const qty = item.quantity || 1;
+      const price = item.price || 0;
+      const subtotal = qty * price;
+      total += subtotal;
       return `
-        <div class="flex items-center gap-3 border-b pb-2">
-          <img src="${item.imageUrl || 'https://via.placeholder.com/50?text=No+Img'}" 
-               alt="${item.name}" 
-               class="w-12 h-12 object-cover rounded" />
+        <div class="flex items-center gap-3 border-b pb-3">
+          <img src="${item.imageUrl || 'https://via.placeholder.com/50?text=No+Img'}" alt="${item.name}" class="w-12 h-12 object-cover rounded" />
           <div class="flex-1">
-            <span class="font-medium">${item.name}</span>
-            <span class="text-sm text-gray-500 block">$${item.price}</span>
+            <span class="font-medium block">${item.name}</span>
+            <span class="text-sm text-gray-500 block">$${price} × ${qty} = $${subtotal.toFixed(2)}</span>
           </div>
-          <button onclick="window.removeFromCart(${idx})" class="text-red-500"><i class="fas fa-trash"></i></button>
+          <div class="flex items-center gap-1">
+            <button onclick="window.updateQuantity(${idx}, -1)" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">−</button>
+            <span class="w-6 text-center font-medium">${qty}</span>
+            <button onclick="window.updateQuantity(${idx}, 1)" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">+</button>
+          </div>
+          <button onclick="window.removeFromCart(${idx})" class="text-red-500 ml-1"><i class="fas fa-trash"></i></button>
         </div>
       `;
     }).join('');
-    totalEl.textContent = `$${total}`;
+    totalEl.textContent = `$${total.toFixed(2)}`;
   }
   updateCartBadge();
 }
 
-// গ্লোবাল ফাংশন
+// ===== গ্লোবাল কার্ট ফাংশন =====
 window.toggleCart = toggleCart;
 window.updateCartUI = updateCartUI;
+
+window.updateQuantity = function(index, delta) {
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  if (!cart[index]) return;
+  cart[index].quantity = (cart[index].quantity || 1) + delta;
+  if (cart[index].quantity <= 0) {
+    cart.splice(index, 1);
+  }
+  localStorage.setItem('cart', JSON.stringify(cart));
+  updateCartUI();
+};
 
 window.removeFromCart = function(index) {
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -193,7 +206,7 @@ window.checkout = window.checkout || function() {
   alert('Please go to the Store page to checkout.');
 };
 
-// ===== লোডিং কন্ট্রোল =====
+// ===== লোডিং =====
 export function setLoading(button, isLoading, originalText = null) {
   if (!button) return;
   if (isLoading) {
@@ -208,3 +221,15 @@ export function setLoading(button, isLoading, originalText = null) {
     }
   }
 }
+
+// ===== পাসওয়ার্ড রিসেট =====
+export function showResetPasswordModal() {
+  const email = prompt('Enter your email address to reset password:');
+  if (!email) return;
+  setLoading(document.activeElement, true);
+  sendPasswordResetEmail(auth, email)
+    .then(() => alert('✅ Password reset link sent to your email.'))
+    .catch((error) => alert('⚠️ ' + error.message))
+    .finally(() => setLoading(document.activeElement, false));
+}
+window.showResetPasswordModal = showResetPasswordModal;

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Fix My Website – SWD Store</title>
+  <title>My Fix Requests – SWD Store</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
@@ -15,40 +15,9 @@
     <div id="navbar-placeholder"></div>
 
     <main class="main-content">
-      <section class="pt-28 pb-16 px-6 max-w-3xl mx-auto">
-        <h1 class="text-3xl font-bold text-gray-900">Fix My Website</h1>
-        <p class="text-gray-500 mt-2">Describe your issue in detail. We'll get back to you within 24 hours.</p>
-        <form id="fixForm" class="mt-8 space-y-5">
-          <div>
-            <label class="block text-sm font-semibold text-gray-700">Your Name *</label>
-            <input type="text" id="fixName" required class="form-input" />
-          </div>
-          <div>
-            <label class="block text-sm font-semibold text-gray-700">Email *</label>
-            <input type="email" id="fixEmail" required class="form-input" />
-          </div>
-          <div>
-            <label class="block text-sm font-semibold text-gray-700">Phone</label>
-            <input type="tel" id="fixPhone" class="form-input" />
-          </div>
-          <div>
-            <label class="block text-sm font-semibold text-gray-700">Website URL (if any)</label>
-            <input type="url" id="fixUrl" class="form-input" placeholder="https://example.com" />
-          </div>
-          <div>
-            <label class="block text-sm font-semibold text-gray-700">Describe the problem *</label>
-            <textarea id="fixProblem" rows="5" required class="form-input resize-y" placeholder="What's broken? Slow speed? Error messages?"></textarea>
-          </div>
-          <div>
-            <label class="block text-sm font-semibold text-gray-700">Screenshot / Image (Google Drive link)</label>
-            <input type="text" id="fixImageLink" class="form-input" placeholder="Paste your Google Drive share link here" />
-            <p class="text-xs text-gray-400 mt-1">Upload image to Google Drive, get shareable link, and paste here.</p>
-          </div>
-          <button type="submit" class="btn-primary w-full justify-center">
-            <i class="fas fa-paper-plane"></i> Submit Fix Request
-          </button>
-          <div id="fixFeedback" class="hidden text-sm font-medium p-4 rounded-xl"></div>
-        </form>
+      <section class="pt-28 pb-16 px-6 max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900">My Fix Requests</h1>
+        <div id="requestList" class="mt-6 space-y-4"></div>
       </section>
     </main>
 
@@ -78,7 +47,7 @@
   <div id="toast-container"></div>
 
   <script type="module">
-    import { auth, db, collection, addDoc, serverTimestamp, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, doc, setDoc, getDoc } from './firebase-config.js';
+    import { auth, db, collection, query, where, onSnapshot, signOut, onAuthStateChanged, doc, getDoc, signInWithEmailAndPassword, createUserWithEmailAndPassword, setDoc } from './firebase-config.js';
     import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar, setLoading } from './components.js';
 
     renderNavbar();
@@ -96,52 +65,6 @@
       container.appendChild(toast);
       setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
     };
-
-    const fixForm = document.getElementById('fixForm');
-    const fixBtn = fixForm.querySelector('button[type="submit"]');
-    fixForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('fixName').value.trim();
-      const email = document.getElementById('fixEmail').value.trim();
-      const phone = document.getElementById('fixPhone').value.trim();
-      const url = document.getElementById('fixUrl').value.trim();
-      const problem = document.getElementById('fixProblem').value.trim();
-      const imageLink = document.getElementById('fixImageLink').value.trim();
-      const feedback = document.getElementById('fixFeedback');
-
-      if (!name || !email || !problem) {
-        feedback.className = 'block text-sm font-medium p-4 rounded-xl bg-red-50 text-red-600 border border-red-200';
-        feedback.textContent = 'দয়া করে নাম, ইমেইল ও সমস্যা বিবরণ দিন।';
-        showToast('⚠️ দয়া করে নাম, ইমেইল ও সমস্যা বিবরণ দিন।', 'error');
-        return;
-      }
-
-      setLoading(fixBtn, true, 'Submit Fix Request');
-      try {
-        const userId = auth.currentUser ? auth.currentUser.uid : null; // ✅ userId সংরক্ষণ
-        await addDoc(collection(db, 'fixRequests'), {
-          name, email, phone, url, problem, imageLink,
-          userId, // ✅ নতুন
-          status: 'pending',
-          timestamp: serverTimestamp(),
-          read: false,
-          reply: '', // খালি থাকবে
-          replyTimestamp: null
-        });
-        feedback.className = 'block text-sm font-medium p-4 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200';
-        feedback.textContent = '✅ আপনার রিকোয়েস্ট সফলভাবে জমা হয়েছে। শীঘ্রই যোগাযোগ করা হবে।';
-        showToast('✅ আপনার রিকোয়েস্ট সফলভাবে জমা হয়েছে!', 'success');
-        fixForm.reset();
-        setTimeout(() => feedback.className = 'hidden', 8000);
-      } catch (error) {
-        feedback.className = 'block text-sm font-medium p-4 rounded-xl bg-red-50 text-red-600 border border-red-200';
-        feedback.textContent = '⚠️ কিছু সমস্যা হয়েছে, আবার চেষ্টা করুন।';
-        showToast('⚠️ কিছু সমস্যা হয়েছে, আবার চেষ্টা করুন।', 'error');
-        console.error(error);
-      } finally {
-        setLoading(fixBtn, false);
-      }
-    });
 
     // ===== অথ মডাল (setLoading সহ) =====
     let currentAuthMode = 'signin';
@@ -192,18 +115,47 @@
       }
     });
 
+    // ===== চেক করুন ইউজার লগইন আছে কিনা =====
+    const requestList = document.getElementById('requestList');
+
     onAuthStateChanged(auth, async (user) => {
-      let name = null;
-      if (user) {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        name = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
+      if (!user) {
+        window.location.href = 'index.html';
+        return;
       }
-      updateNavbarAuth(user, name);
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      updateNavbarAuth(user, userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0]);
+
+      // ইউজারের রিকোয়েস্ট লোড করুন
+      const q = query(collection(db, 'fixRequests'), where('userId', '==', user.uid));
+      onSnapshot(q, (snapshot) => {
+        if (snapshot.empty) {
+          requestList.innerHTML = '<p class="text-gray-500">আপনার কোনো ফিক্স রিকোয়েস্ট নেই।</p>';
+          return;
+        }
+        let html = '';
+        snapshot.forEach(doc => {
+          const f = doc.data();
+          const reply = f.reply || '';
+          html += `
+            <div class="glass-card">
+              <p><strong>Problem:</strong> ${f.problem}</p>
+              <p class="text-sm text-gray-500">Submitted: ${f.timestamp?.toDate?.()?.toLocaleString() || ''}</p>
+              ${f.imageLink ? `<p class="text-xs text-gray-400">Image: ${f.imageLink}</p>` : ''}
+              <div class="mt-3 p-3 bg-gray-50 rounded-lg">
+                <p class="font-semibold text-sm text-gray-700">Admin Reply:</p>
+                ${reply ? `<p class="text-sm text-green-700">${reply}</p><p class="text-xs text-gray-400">${f.replyTimestamp?.toDate?.()?.toLocaleString() || ''}</p>` : '<p class="text-sm text-gray-400">No reply yet.</p>'}
+              </div>
+            </div>
+          `;
+        });
+        requestList.innerHTML = html;
+      });
     });
 
     window.handleLogout = async () => {
       await signOut(auth);
-      showToast('✅ লগআউট সফল', 'success');
+      window.location.href = 'index.html';
     };
   </script>
 </body>
