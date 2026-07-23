@@ -110,8 +110,8 @@ export function renderNavbar() {
               <a href="my-orders.html"><i class="fas fa-box mr-2"></i> My Orders</a>
               <a href="my-fix-requests.html"><i class="fas fa-tools mr-2"></i> My Fix Requests</a>
               <a href="settings.html"><i class="fas fa-cog mr-2"></i> Settings</a>
-              <!-- ✅ Admin Panel লিংক hidden ক্লাস সহ – শুধুমাত্র অ্যাডমিন দেখবে -->
-              <a href="admin-panel.html" class="admin-link hidden"><i class="fas fa-shield-alt mr-2"></i> Admin Panel</a>
+              <!-- ✅ Admin Panel লিংক – hidden by default -->
+              <a href="admin-panel.html" id="adminPanelLink" class="hidden" style="display:none !important;"><i class="fas fa-shield-alt mr-2"></i> Admin Panel</a>
               <a href="#" onclick="window.handleLogout()"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
             </div>
           </div>
@@ -154,16 +154,13 @@ export function renderNavbar() {
   updateCartBadge();
 }
 
-// ===== নেভবার অথ আপডেট (role প্যারামিটার যোগ) =====
+// ===== ✅ নেভবার অথ আপডেট – Admin Link দেখানোর লজিক শক্তিশালী =====
 export function updateNavbarAuth(user, displayName, role = null) {
   const authBtns = document.getElementById('auth-buttons');
   const profileSection = document.getElementById('profile-section');
   const loadingEl = document.getElementById('auth-loading');
   const avatar = document.getElementById('profileAvatar');
-  const dropdown = document.getElementById('dropdownMenu');
-  
-  // Admin লিংক নির্বাচন
-  const adminLink = document.querySelector('#profile-section .dropdown-menu a.admin-link');
+  const adminLink = document.getElementById('adminPanelLink');
 
   if (loadingEl) loadingEl.style.display = 'none';
 
@@ -172,12 +169,14 @@ export function updateNavbarAuth(user, displayName, role = null) {
     if (profileSection) profileSection.classList.remove('hidden');
     if (avatar) avatar.textContent = (displayName || user.email).charAt(0).toUpperCase();
     
-    // ✅ অ্যাডমিন চেক – শুধুমাত্র role === 'admin' হলে লিংক দেখাবে
+    // ✅ Admin Link – শুধুমাত্র role === 'admin' হলে দেখাবে
     if (adminLink) {
       if (role === 'admin') {
         adminLink.classList.remove('hidden');
+        adminLink.style.display = ''; // override inline style
       } else {
         adminLink.classList.add('hidden');
+        adminLink.style.display = 'none !important';
       }
     }
   } else {
@@ -307,7 +306,7 @@ export function setLoading(button, isLoading, originalText = null) {
   }
 }
 
-// ===== পেমেন্ট মডাল (FIXED) =====
+// ===== পেমেন্ট মডাল =====
 export function renderPaymentModal() {
   if (document.getElementById('paymentModal')) return;
 
