@@ -294,7 +294,10 @@ export function setLoading(button, isLoading, originalText = null) {
   }
 }
 
-// ===== পেমেন্ট মডাল =====
+// ================================================================
+// ===== ✅ পেমেন্ট মডাল (FIXED – orderId hidden input ব্যবহার) =====
+// ================================================================
+
 export function renderPaymentModal() {
   if (document.getElementById('paymentModal')) return;
 
@@ -310,6 +313,9 @@ export function renderPaymentModal() {
           <div id="paymentNumbers" class="space-y-2"></div>
         </div>
         <form id="paymentForm" class="mt-4 space-y-4">
+          <!-- ✅ Hidden input for orderId (সবচেয়ে নিরাপদ পদ্ধতি) -->
+          <input type="hidden" id="paymentOrderId" />
+          
           <div>
             <label class="block text-sm font-semibold text-gray-700">Transaction ID *</label>
             <input type="text" id="transactionId" placeholder="Enter your payment transaction ID" required class="form-input" />
@@ -324,22 +330,28 @@ export function renderPaymentModal() {
   `;
   document.body.insertAdjacentHTML('beforeend', modalHTML);
 
+  // ===== Payment Form Submit Handler (FIXED) =====
   const paymentForm = document.getElementById('paymentForm');
   if (paymentForm) {
     paymentForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      
+      // ✅ orderId hidden input থেকে নেওয়া হচ্ছে (dataset না)
+      const orderId = document.getElementById('paymentOrderId').value;
       const txnId = document.getElementById('transactionId').value.trim();
       const errorDiv = document.getElementById('paymentError');
-      const orderId = e.target.dataset.orderId;
+      
       errorDiv.classList.add('hidden');
+
+      if (!orderId) {
+        errorDiv.textContent = '❌ Order not found. Please try again.';
+        errorDiv.classList.remove('hidden');
+        window.showToast('Order not found. Please refresh and try again.', 'error');
+        return;
+      }
 
       if (!txnId) {
         errorDiv.textContent = 'Please enter transaction ID.';
-        errorDiv.classList.remove('hidden');
-        return;
-      }
-      if (!orderId) {
-        errorDiv.textContent = 'Order not found.';
         errorDiv.classList.remove('hidden');
         return;
       }
@@ -353,6 +365,7 @@ export function renderPaymentModal() {
 
       const btn = paymentForm.querySelector('button[type="submit"]');
       setLoading(btn, true, 'Confirm Payment');
+      
       try {
         await updateDoc(doc(db, 'orders', orderId), {
           transactionId: txnId,
@@ -364,6 +377,7 @@ export function renderPaymentModal() {
         window.updateCartUI();
         if (typeof window.toggleCart === 'function') window.toggleCart();
       } catch (err) {
+        console.error('Payment update error:', err);
         errorDiv.textContent = '⚠️ ' + err.message;
         errorDiv.classList.remove('hidden');
         window.showToast('⚠️ ' + err.message, 'error');
@@ -374,7 +388,38 @@ export function renderPaymentModal() {
   }
 }
 
-// ===== চেকআউট =====
+// ===== পেমেন্ট মডাল খোলা (FIXED) =====
+window.openPaymentModal = function(orderId, settings) {
+  const numbersDiv = document.getElementById('paymentNumbers');
+  const orderInput = document.getElementById('paymentOrderId');
+  
+  if (!numbersDiv || !orderInput) {
+    console.error('Payment modal not found. Did you call renderPaymentModal()?');
+    window.showToast('Payment system not ready. Please refresh.', 'error');
+    return;
+  }
+
+  // ✅ hidden input এ orderId সেট করা হচ্ছে
+  orderInput.value = orderId;
+
+  let html = '';
+  if (settings.bkash) html += `<p><i class="fas fa-mobile-alt text-blue-500"></i> BKash: <strong>${settings.bkash}</strong></p>`;
+  if (settings.nagad) html += `<p><i class="fas fa-mobile-alt text-orange-500"></i> Nagad: <strong>${settings.nagad}</strong></p>`;
+  if (settings.usdt) html += `<p><i class="fab fa-bitcoin text-yellow-500"></i> USDT (BEP20): <strong>${settings.usdt}</strong></p>`;
+  if (settings.rocket) html += `<p><i class="fas fa-mobile-alt text-red-500"></i> Rocket: <strong>${settings.rocket}</strong></p>`;
+  if (!html) html = '<p class="text-gray-500">Payment methods not set. Contact admin.</p>';
+  
+  numbersDiv.innerHTML = html;
+  document.getElementById('paymentModal').classList.remove('hidden');
+  document.getElementById('paymentError').classList.add('hidden');
+  document.getElementById('transactionId').value = '';
+};
+
+window.closePaymentModal = function() {
+  document.getElementById('paymentModal').classList.add('hidden');
+};
+
+// ===== চেকআউট (অপরিবর্তিত) =====
 window.checkout = async function() {
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
   if (cart.length === 0) {
@@ -425,27 +470,4 @@ window.checkout = async function() {
     window.showToast('⚠️ ' + err.message, 'error');
     if (checkoutBtn) setLoading(checkoutBtn, false);
   }
-};
-
-window.openPaymentModal = function(orderId, settings) {
-  const numbersDiv = document.getElementById('paymentNumbers');
-  if (!numbersDiv) {
-    console.error('Payment modal not found.');
-    return;
-  }
-  let html = '';
-  if (settings.bkash) html += `<p><i class="fas fa-mobile-alt text-blue-500"></i> BKash: <strong>${settings.bkash}</strong></p>`;
-  if (settings.nagad) html += `<p><i class="fas fa-mobile-alt text-orange-500"></i> Nagad: <strong>${settings.nagad}</strong></p>`;
-  if (settings.usdt) html += `<p><i class="fab fa-bitcoin text-yellow-500"></i> USDT (BEP20): <strong>${settings.usdt}</strong></p>`;
-  if (settings.rocket) html += `<p><i class="fas fa-mobile-alt text-red-500"></i> Rocket: <strong>${settings.rocket}</strong></p>`;
-  if (!html) html = '<p class="text-gray-500">Payment methods not set. Contact admin.</p>';
-  numbersDiv.innerHTML = html;
-  document.getElementById('paymentModal').classList.remove('hidden');
-  document.getElementById('paymentError').classList.add('hidden');
-  document.getElementById('transactionId').value = '';
-  document.getElementById('paymentForm').dataset.orderId = orderId;
-};
-
-window.closePaymentModal = function() {
-  document.getElementById('paymentModal').classList.add('hidden');
 };
