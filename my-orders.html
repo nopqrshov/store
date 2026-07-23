@@ -20,10 +20,6 @@
     .order-status.processing { background: #dbeafe; color: #2563eb; }
     .order-status.completed { background: #d1fae5; color: #059669; }
     .order-status.cancelled { background: #fee2e2; color: #dc2626; }
-    .dark .order-status.pending { background: #78350f; color: #fbbf24; }
-    .dark .order-status.processing { background: #1e3a5f; color: #60a5fa; }
-    .dark .order-status.completed { background: #064e3b; color: #6ee7b7; }
-    .dark .order-status.cancelled { background: #7f1d1d; color: #fca5a5; }
 
     .order-card {
       transition: all 0.3s ease;
@@ -33,17 +29,14 @@
       box-shadow: 0 12px 40px rgba(0,0,0,0.08);
     }
 
-    /* ডিটেইল মডাল */
     .detail-item {
       display: flex;
       justify-content: space-between;
       padding: 8px 0;
       border-bottom: 1px solid rgba(0,0,0,0.05);
     }
-    .dark .detail-item { border-color: rgba(255,255,255,0.05); }
     .detail-item:last-child { border-bottom: none; }
 
-    /* খালি স্টেট */
     .empty-state-icon {
       font-size: 4rem;
       opacity: 0.3;
@@ -59,9 +52,9 @@
         <!-- হেডার -->
         <div class="flex items-center gap-3 mb-2">
           <i class="fas fa-shopping-bag text-3xl text-blue-500"></i>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">My Orders</h1>
+          <h1 class="text-3xl font-bold text-gray-900">My Orders</h1>
         </div>
-        <p class="text-gray-500 dark:text-gray-400 mb-4">View all your orders and their status</p>
+        <p class="text-gray-500 mb-4">View all your orders and their status</p>
 
         <!-- ===== ফিল্টার ===== -->
         <div class="flex flex-wrap gap-3 items-center mb-6">
@@ -106,9 +99,9 @@
 
   <!-- ===== অর্ডার ডিটেইল মডাল ===== -->
   <div id="orderDetailModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[300] hidden">
-    <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-2xl font-bold dark:text-white" id="detailOrderTitle">Order Details</h3>
+        <h3 class="text-2xl font-bold text-gray-900" id="detailOrderTitle">Order Details</h3>
         <button onclick="closeOrderDetail()" class="text-gray-400 hover:text-gray-600 text-xl">
           <i class="fas fa-times"></i>
         </button>
@@ -134,9 +127,9 @@
 
   <!-- ===== অথ মডাল ===== -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-    <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 max-w-md w-full shadow-2xl">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
       <div class="flex justify-between items-center mb-4">
-        <h3 id="authModalTitle" class="text-2xl font-bold dark:text-white">Sign In</h3>
+        <h3 id="authModalTitle" class="text-2xl font-bold">Sign In</h3>
         <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
       </div>
       <form id="authForm" class="space-y-4">
@@ -154,7 +147,7 @@
       <p class="mt-2 text-sm text-center">
         <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline"><i class="fas fa-key"></i> Forgot Password?</a>
       </p>
-      <p class="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+      <p class="mt-4 text-sm text-gray-500 text-center">
         <span id="authToggleText">Don't have an account?</span>
         <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
       </p>
@@ -173,11 +166,11 @@
       onAuthStateChanged, doc, getDoc, 
       signInWithEmailAndPassword, createUserWithEmailAndPassword, setDoc,
       signInWithPopup, googleProvider, githubProvider, sendPasswordResetEmail,
-      orderBy, limit, startAfter
+      orderBy
     } from './firebase-config.js';
     import { 
       renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
-      renderCartSidebar, setLoading, toggleDarkMode 
+      renderCartSidebar, setLoading
     } from './components.js';
 
     // ================================================================
@@ -201,11 +194,6 @@
       container.appendChild(toast);
       setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
     };
-
-    // ================================================================
-    // ===== ডার্ক মোড =====
-    // ================================================================
-    window.toggleDarkModeGlobal = toggleDarkMode;
 
     // ================================================================
     // ===== অথ মডাল =====
@@ -313,19 +301,15 @@
     let filteredOrders = [];
     let currentUser = null;
     let unsubOrders = null;
-    let lastDoc = null;
-    let isLoading = false;
-    let hasMore = true;
-    const PAGE_SIZE = 10;
 
     // ===== রেন্ডার অর্ডার =====
     function renderOrders(orders) {
       if (!orders || orders.length === 0) {
         orderList.innerHTML = `
           <div class="text-center py-16">
-            <i class="fas fa-inbox empty-state-icon text-gray-300 dark:text-gray-600"></i>
-            <p class="text-gray-500 dark:text-gray-400 mt-4 text-lg">No orders found</p>
-            <p class="text-gray-400 dark:text-gray-500 text-sm">Start shopping to see your orders here.</p>
+            <i class="fas fa-inbox empty-state-icon text-gray-300"></i>
+            <p class="text-gray-500 mt-4 text-lg">No orders found</p>
+            <p class="text-gray-400 text-sm">Start shopping to see your orders here.</p>
             <a href="get-new-website.html" class="btn-primary mt-4 inline-block">
               <i class="fas fa-shopping-cart"></i> Browse Store
             </a>
@@ -350,24 +334,24 @@
             <div class="flex flex-wrap justify-between items-start gap-3">
               <div class="flex-1 min-w-[150px]">
                 <div class="flex items-center gap-3 flex-wrap">
-                  <p class="font-bold dark:text-white text-lg">
+                  <p class="font-bold text-gray-900 text-lg">
                     #${o.id?.slice(0, 8)?.toUpperCase() || 'N/A'}
                   </p>
                   <span class="order-status ${statusClass}">${statusClass}</span>
                 </div>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <p class="text-sm text-gray-500 mt-1">
                   <i class="far fa-calendar-alt mr-1"></i> ${dateStr} at ${timeStr}
                 </p>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
+                <p class="text-sm text-gray-500">
                   <i class="fas fa-box mr-1"></i> ${o.items?.length || 0} items
                 </p>
               </div>
               <div class="text-right">
-                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                <p class="text-2xl font-bold text-blue-600">
                   $${o.total?.toFixed(2) || '0.00'}
                 </p>
                 ${o.transactionId ? `<p class="text-xs text-gray-400">Txn: ${o.transactionId}</p>` : ''}
-                <button onclick="viewOrderDetail('${o.id}')" class="text-blue-600 dark:text-blue-400 text-sm mt-1 hover:underline">
+                <button onclick="viewOrderDetail('${o.id}')" class="text-blue-600 text-sm mt-1 hover:underline">
                   <i class="fas fa-eye"></i> View Details
                 </button>
               </div>
@@ -385,13 +369,11 @@
       const status = statusFilter.value;
 
       filteredOrders = allOrders.filter(o => {
-        // সার্চ
         if (search) {
           const id = o.id?.toLowerCase() || '';
           const userEmail = o.userEmail?.toLowerCase() || '';
           if (!id.includes(search) && !userEmail.includes(search)) return false;
         }
-        // স্ট্যাটাস
         if (status !== 'all' && o.status !== status) return false;
         return true;
       });
@@ -423,7 +405,6 @@
           allOrders.push({ id: doc.id, ...doc.data() });
         });
         applyFilters();
-        hasMore = false;
       }, (error) => {
         console.error('Orders load error:', error);
         orderList.innerHTML = `
@@ -473,7 +454,6 @@
         hour: '2-digit', minute: '2-digit' 
       });
 
-      // আইটেম লিস্ট
       let itemsHtml = '';
       if (o.items && o.items.length > 0) {
         o.items.forEach(item => {
@@ -481,10 +461,10 @@
           const price = item.price || 0;
           itemsHtml += `
             <div class="detail-item">
-              <span class="dark:text-gray-300">
+              <span class="text-gray-800">
                 ${item.name} × ${qty}
               </span>
-              <span class="font-medium dark:text-white">$${(price * qty).toFixed(2)}</span>
+              <span class="font-medium text-gray-900">$${(price * qty).toFixed(2)}</span>
             </div>
           `;
         });
@@ -498,44 +478,44 @@
       content.innerHTML = `
         <div class="flex justify-between items-start mb-4">
           <div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Order ID</p>
-            <p class="font-mono font-bold dark:text-white">#${o.id}</p>
+            <p class="text-sm text-gray-500">Order ID</p>
+            <p class="font-mono font-bold text-gray-900">#${o.id}</p>
           </div>
           <span class="order-status ${statusClass} text-sm px-4 py-1.5">${statusDisplay}</span>
         </div>
 
         <div class="grid grid-cols-2 gap-4 mb-4">
           <div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Date</p>
-            <p class="dark:text-white">${dateStr}</p>
+            <p class="text-sm text-gray-500">Date</p>
+            <p class="text-gray-900">${dateStr}</p>
             <p class="text-sm text-gray-400">${timeStr}</p>
           </div>
           <div>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Total</p>
-            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">$${o.total?.toFixed(2) || '0.00'}</p>
+            <p class="text-sm text-gray-500">Total</p>
+            <p class="text-2xl font-bold text-blue-600">$${o.total?.toFixed(2) || '0.00'}</p>
           </div>
         </div>
 
         <div class="mb-4">
-          <p class="text-sm text-gray-500 dark:text-gray-400">Payment</p>
-          <p class="dark:text-white">${o.paymentMethod || 'N/A'}</p>
+          <p class="text-sm text-gray-500">Payment</p>
+          <p class="text-gray-900">${o.paymentMethod || 'N/A'}</p>
           ${o.transactionId ? `<p class="text-sm text-gray-400">Transaction: ${o.transactionId}</p>` : '<p class="text-sm text-yellow-500">⚠️ Payment pending</p>'}
         </div>
 
         <div>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Items (${o.items?.length || 0})</p>
-          <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+          <p class="text-sm text-gray-500 mb-2">Items (${o.items?.length || 0})</p>
+          <div class="bg-gray-50 rounded-lg p-3">
             ${itemsHtml}
           </div>
         </div>
 
         ${o.status !== 'completed' ? `
-          <div class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-sm text-yellow-700 dark:text-yellow-400">
+          <div class="mt-4 p-3 bg-yellow-50 rounded-lg text-sm text-yellow-700">
             <i class="fas fa-clock"></i> 
             Your order is ${statusDisplay.toLowerCase()}. You'll be notified when it's completed.
           </div>
         ` : `
-          <div class="mt-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-sm text-green-700 dark:text-green-400">
+          <div class="mt-4 p-3 bg-green-50 rounded-lg text-sm text-green-700">
             <i class="fas fa-check-circle"></i> 
             Order completed! Thank you for shopping with us.
           </div>
@@ -645,7 +625,6 @@ Visit: https://your-store.com
 
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        // নট লগইন -> হোমে রিডাইরেক্ট
         window.location.href = 'index.html';
         return;
       }
@@ -655,7 +634,6 @@ Visit: https://your-store.com
       const displayName = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
       updateNavbarAuth(user, displayName);
 
-      // অর্ডার লোড
       loadOrders(user.uid);
     });
 

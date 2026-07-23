@@ -20,10 +20,6 @@
       border: 2px solid #fee2e2;
       background: #fef2f2;
     }
-    .dark .danger-zone {
-      border-color: #7f1d1d;
-      background: #1f1a1a;
-    }
     .status-badge {
       display: inline-block;
       padding: 2px 12px;
@@ -33,8 +29,6 @@
     }
     .status-badge.verified { background: #d1fae5; color: #059669; }
     .status-badge.unverified { background: #fef3c7; color: #d97706; }
-    .dark .status-badge.verified { background: #064e3b; color: #6ee7b7; }
-    .dark .status-badge.unverified { background: #78350f; color: #fbbf24; }
   </style>
 </head>
 <body>
@@ -46,32 +40,17 @@
         <!-- হেডার -->
         <div class="flex items-center gap-3 mb-2">
           <i class="fas fa-cog text-3xl text-blue-500"></i>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
+          <h1 class="text-3xl font-bold text-gray-900">Settings</h1>
         </div>
-        <p class="text-gray-500 dark:text-gray-400 mb-6">Manage your account preferences and security</p>
+        <p class="text-gray-500 mb-6">Manage your account preferences and security</p>
 
-        <!-- ===== ১. ডার্ক মোড ===== -->
+        <!-- ===== ১. ইমেইল ভেরিফিকেশন ===== -->
         <div class="glass-card settings-card">
-          <div class="flex items-center justify-between">
-            <div>
-              <h2 class="text-lg font-bold dark:text-white">
-                <i class="fas fa-moon text-blue-500 mr-2"></i> Dark Mode
-              </h2>
-              <p class="text-sm text-gray-500 dark:text-gray-400">Toggle dark/light theme</p>
-            </div>
-            <button onclick="window.toggleDarkModeGlobal()" class="btn-primary text-sm py-2 px-4">
-              <i class="fas fa-sync-alt"></i> Toggle
-            </button>
-          </div>
-        </div>
-
-        <!-- ===== ২. ইমেইল ভেরিফিকেশন ===== -->
-        <div class="glass-card settings-card mt-4">
-          <h2 class="text-lg font-bold dark:text-white">
+          <h2 class="text-lg font-bold text-gray-900">
             <i class="fas fa-envelope text-blue-500 mr-2"></i> Email Verification
           </h2>
           <div id="emailVerificationStatus" class="mt-2">
-            <span id="verifyStatusText" class="text-sm">Checking...</span>
+            <span id="verifyStatusText" class="text-sm text-gray-600">Checking...</span>
           </div>
           <button id="verifyEmailBtn" class="btn-primary mt-3 text-sm py-2 px-4">
             <i class="fas fa-paper-plane"></i> Send Verification Email
@@ -82,21 +61,21 @@
           <div id="verifyFeedback" class="mt-2 text-sm hidden"></div>
         </div>
 
-        <!-- ===== ৩. পাসওয়ার্ড পরিবর্তন ===== -->
+        <!-- ===== ২. পাসওয়ার্ড পরিবর্তন ===== -->
         <div class="glass-card settings-card mt-4">
-          <h2 class="text-lg font-bold dark:text-white">
+          <h2 class="text-lg font-bold text-gray-900">
             <i class="fas fa-key text-blue-500 mr-2"></i> Change Password
           </h2>
           <form id="changePasswordForm" class="mt-4 space-y-3">
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Password</label>
+              <label class="block text-sm font-medium text-gray-700">Current Password</label>
               <div class="relative">
                 <input type="password" id="currentPassword" placeholder="Enter current password" required class="form-input pr-10" />
                 <button type="button" onclick="togglePasswordVisibility('currentPassword')" class="absolute right-3 top-3 text-gray-400"><i class="fas fa-eye"></i></button>
               </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label>
+              <label class="block text-sm font-medium text-gray-700">New Password</label>
               <div class="relative">
                 <input type="password" id="newPassword" placeholder="Enter new password" required class="form-input pr-10" />
                 <button type="button" onclick="togglePasswordVisibility('newPassword')" class="absolute right-3 top-3 text-gray-400"><i class="fas fa-eye"></i></button>
@@ -110,12 +89,12 @@
           </form>
         </div>
 
-        <!-- ===== ৪. ডেটা এক্সপোর্ট ===== -->
+        <!-- ===== ৩. ডেটা এক্সপোর্ট ===== -->
         <div class="glass-card settings-card mt-4">
-          <h2 class="text-lg font-bold dark:text-white">
+          <h2 class="text-lg font-bold text-gray-900">
             <i class="fas fa-download text-blue-500 mr-2"></i> Export Data
           </h2>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <p class="text-sm text-gray-500 mt-1">
             Download all your personal data (profile, orders, fix requests) as JSON.
           </p>
           <button onclick="exportUserData()" class="btn-primary mt-3 text-sm py-2 px-4">
@@ -124,12 +103,12 @@
           <div id="exportFeedback" class="mt-2 text-sm hidden"></div>
         </div>
 
-        <!-- ===== ৫. ডেঞ্জার জোন (অ্যাকাউন্ট ডিলিট) ===== -->
+        <!-- ===== ৪. ডেঞ্জার জোন (অ্যাকাউন্ট ডিলিট) ===== -->
         <div class="glass-card settings-card mt-4 danger-zone">
-          <h2 class="text-lg font-bold text-red-600 dark:text-red-400">
+          <h2 class="text-lg font-bold text-red-600">
             <i class="fas fa-exclamation-triangle mr-2"></i> Danger Zone
           </h2>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <p class="text-sm text-gray-500 mt-1">
             Once you delete your account, all your data will be permanently removed. This action cannot be undone.
           </p>
           <button onclick="deleteAccount()" class="btn-danger mt-3 text-sm py-2 px-4">
@@ -138,9 +117,9 @@
           <div id="deleteFeedback" class="mt-2 text-sm hidden"></div>
         </div>
 
-        <!-- ===== ৬. সেশন ===== -->
+        <!-- ===== ৫. সেশন ===== -->
         <div class="glass-card settings-card mt-4">
-          <h2 class="text-lg font-bold dark:text-white">
+          <h2 class="text-lg font-bold text-gray-900">
             <i class="fas fa-sign-out-alt text-blue-500 mr-2"></i> Session
           </h2>
           <button onclick="window.handleLogout()" class="btn-outline mt-2 text-sm py-2 px-4">
@@ -155,9 +134,9 @@
 
   <!-- ===== অথ মডাল ===== -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-    <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 max-w-md w-full shadow-2xl">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
       <div class="flex justify-between items-center mb-4">
-        <h3 id="authModalTitle" class="text-2xl font-bold dark:text-white">Sign In</h3>
+        <h3 id="authModalTitle" class="text-2xl font-bold">Sign In</h3>
         <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
       </div>
       <form id="authForm" class="space-y-4">
@@ -175,7 +154,7 @@
       <p class="mt-2 text-sm text-center">
         <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline"><i class="fas fa-key"></i> Forgot Password?</a>
       </p>
-      <p class="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+      <p class="mt-4 text-sm text-gray-500 text-center">
         <span id="authToggleText">Don't have an account?</span>
         <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
       </p>
@@ -199,7 +178,7 @@
     } from './firebase-config.js';
     import { 
       renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
-      renderCartSidebar, setLoading, toggleDarkMode, initDarkMode 
+      renderCartSidebar, setLoading
     } from './components.js';
 
     // ================================================================
@@ -223,11 +202,6 @@
       container.appendChild(toast);
       setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
     };
-
-    // ================================================================
-    // ===== ডার্ক মোড =====
-    // ================================================================
-    window.toggleDarkModeGlobal = toggleDarkMode;
 
     // ================================================================
     // ===== অথ মডাল =====
@@ -345,7 +319,7 @@
           <span class="status-badge verified">
             <i class="fas fa-check-circle"></i> Verified
           </span>
-          <span class="text-sm text-green-600 dark:text-green-400 ml-2">Your email is verified.</span>
+          <span class="text-sm text-green-600 ml-2">Your email is verified.</span>
         `;
         verifyBtn.style.display = 'none';
       } else {
@@ -353,7 +327,7 @@
           <span class="status-badge unverified">
             <i class="fas fa-exclamation-triangle"></i> Unverified
           </span>
-          <span class="text-sm text-orange-500 dark:text-orange-400 ml-2">Please verify your email.</span>
+          <span class="text-sm text-orange-500 ml-2">Please verify your email.</span>
         `;
         verifyBtn.style.display = 'inline-flex';
       }
@@ -370,7 +344,7 @@
       setLoading(btn, true);
       try {
         await sendEmailVerification(user);
-        feedback.className = 'block text-sm text-green-600 dark:text-green-400 mt-2';
+        feedback.className = 'block text-sm text-green-600 mt-2';
         feedback.innerHTML = '✅ Verification email sent! Please check your inbox (and spam folder).';
         showToast('✅ Verification email sent!', 'success');
       } catch (err) {
@@ -414,7 +388,7 @@
         const credential = EmailAuthProvider.credential(user.email, current);
         await reauthenticateWithCredential(user, credential);
         await updatePassword(user, newPass);
-        passwordFeedback.className = 'block text-sm text-green-600 dark:text-green-400 mt-2';
+        passwordFeedback.className = 'block text-sm text-green-600 mt-2';
         passwordFeedback.innerHTML = '✅ Password updated successfully!';
         showToast('✅ Password updated!', 'success');
         changePasswordForm.reset();
@@ -470,7 +444,7 @@
         document.body.removeChild(link);
         URL.revokeObjectURL(link.href);
 
-        feedback.className = 'block text-sm text-green-600 dark:text-green-400 mt-2';
+        feedback.className = 'block text-sm text-green-600 mt-2';
         feedback.innerHTML = '✅ Data exported successfully!';
         showToast('✅ Data exported!', 'success');
       } catch (err) {
@@ -487,13 +461,10 @@
       if (!confirm('⚠️ Are you sure you want to delete your account? This action is IRREVERSIBLE and all your data will be permanently lost.')) {
         return;
       }
-      if (!confirm('Type "DELETE" to confirm:')) {
-        // সিম্পল কনফর্মেশন, কিন্তু prompt ব্যবহার করি
-        const confirmText = prompt('Type "DELETE" to permanently delete your account:');
-        if (confirmText !== 'DELETE') {
-          showToast('Account deletion cancelled', 'warning');
-          return;
-        }
+      const confirmText = prompt('Type "DELETE" to permanently delete your account:');
+      if (confirmText !== 'DELETE') {
+        showToast('Account deletion cancelled', 'warning');
+        return;
       }
 
       const user = auth.currentUser;

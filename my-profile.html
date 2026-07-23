@@ -35,8 +35,6 @@
       min-width: 100px;
       display: inline-block;
     }
-    .dark .info-label { color: #9ca3af; }
-    .dark .profile-avatar-big { background: linear-gradient(135deg, #4f46e5, #7c3aed); }
   </style>
 </head>
 <body>
@@ -48,9 +46,9 @@
         <!-- হেডার -->
         <div class="flex items-center gap-3 mb-2">
           <i class="fas fa-user-circle text-3xl text-blue-500"></i>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">My Profile</h1>
+          <h1 class="text-3xl font-bold text-gray-900">My Profile</h1>
         </div>
-        <p class="text-gray-500 dark:text-gray-400 mb-6">Manage your personal information</p>
+        <p class="text-gray-500 mb-6">Manage your personal information</p>
 
         <!-- ===== প্রোফাইল কার্ড ===== -->
         <div class="glass-card">
@@ -60,51 +58,51 @@
               <span id="avatarLetter">U</span>
             </div>
             <div class="flex-1 text-center sm:text-left">
-              <h2 id="profileDisplayName" class="text-2xl font-bold dark:text-white">Loading...</h2>
-              <p id="profileEmail" class="text-gray-500 dark:text-gray-400">Loading...</p>
-              <span id="profileRole" class="inline-block mt-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full">User</span>
+              <h2 id="profileDisplayName" class="text-2xl font-bold text-gray-900">Loading...</h2>
+              <p id="profileEmail" class="text-gray-500">Loading...</p>
+              <span id="profileRole" class="inline-block mt-1 text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">User</span>
             </div>
             <button onclick="toggleEditForm()" class="btn-outline text-sm py-2 px-4">
               <i class="fas fa-edit"></i> Edit
             </button>
           </div>
 
-          <hr class="my-6 dark:border-gray-700" />
+          <hr class="my-6 border-gray-200" />
 
           <!-- ===== ইনফো গ্রিড ===== -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <p class="info-label"><i class="fas fa-envelope mr-2"></i>Email</p>
-              <p id="profileEmailDisplay" class="dark:text-gray-300">-</p>
+              <p id="profileEmailDisplay" class="text-gray-800">-</p>
             </div>
             <div>
               <p class="info-label"><i class="fas fa-phone mr-2"></i>Phone</p>
-              <p id="profilePhoneDisplay" class="dark:text-gray-300">Not set</p>
+              <p id="profilePhoneDisplay" class="text-gray-800">Not set</p>
             </div>
             <div>
               <p class="info-label"><i class="fas fa-user-tag mr-2"></i>Role</p>
-              <p id="profileRoleDisplay" class="dark:text-gray-300">User</p>
+              <p id="profileRoleDisplay" class="text-gray-800">User</p>
             </div>
             <div>
               <p class="info-label"><i class="fas fa-calendar-alt mr-2"></i>Joined</p>
-              <p id="profileJoinedDisplay" class="dark:text-gray-300">-</p>
+              <p id="profileJoinedDisplay" class="text-gray-800">-</p>
             </div>
           </div>
 
           <!-- ===== এডিট ফর্ম ===== -->
-          <div id="editForm" class="hidden mt-6 pt-6 border-t dark:border-gray-700">
-            <h3 class="text-lg font-semibold dark:text-white mb-4">Edit Profile</h3>
+          <div id="editForm" class="hidden mt-6 pt-6 border-t border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Edit Profile</h3>
             <form id="profileEditForm" class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Display Name</label>
+                <label class="block text-sm font-medium text-gray-700">Display Name</label>
                 <input type="text" id="editDisplayName" class="form-input" placeholder="Your name" required />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone Number</label>
+                <label class="block text-sm font-medium text-gray-700">Phone Number</label>
                 <input type="tel" id="editPhone" class="form-input" placeholder="+880 1XXX-XXXXXX" />
               </div>
               <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Profile Photo URL</label>
+                <label class="block text-sm font-medium text-gray-700">Profile Photo URL</label>
                 <input type="text" id="editPhotoURL" class="form-input" placeholder="https://example.com/photo.jpg" />
                 <p class="text-xs text-gray-400 mt-1">Paste a direct image URL (e.g., from Imgur, Google Drive)</p>
               </div>
@@ -123,19 +121,19 @@
         <div class="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
           <a href="my-orders.html" class="glass-card text-center hover:shadow-lg transition-all">
             <i class="fas fa-box text-2xl text-blue-500"></i>
-            <p class="text-sm font-medium dark:text-white mt-1">My Orders</p>
+            <p class="text-sm font-medium text-gray-800 mt-1">My Orders</p>
           </a>
           <a href="my-fix-requests.html" class="glass-card text-center hover:shadow-lg transition-all">
             <i class="fas fa-tools text-2xl text-orange-500"></i>
-            <p class="text-sm font-medium dark:text-white mt-1">Fix Requests</p>
+            <p class="text-sm font-medium text-gray-800 mt-1">Fix Requests</p>
           </a>
           <a href="messages.html" class="glass-card text-center hover:shadow-lg transition-all">
             <i class="fas fa-comments text-2xl text-green-500"></i>
-            <p class="text-sm font-medium dark:text-white mt-1">Support Chat</p>
+            <p class="text-sm font-medium text-gray-800 mt-1">Support Chat</p>
           </a>
           <a href="settings.html" class="glass-card text-center hover:shadow-lg transition-all">
             <i class="fas fa-cog text-2xl text-gray-500"></i>
-            <p class="text-sm font-medium dark:text-white mt-1">Settings</p>
+            <p class="text-sm font-medium text-gray-800 mt-1">Settings</p>
           </a>
         </div>
       </section>
@@ -146,9 +144,9 @@
 
   <!-- ===== অথ মডাল ===== -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-    <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 max-w-md w-full shadow-2xl">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
       <div class="flex justify-between items-center mb-4">
-        <h3 id="authModalTitle" class="text-2xl font-bold dark:text-white">Sign In</h3>
+        <h3 id="authModalTitle" class="text-2xl font-bold">Sign In</h3>
         <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
       </div>
       <form id="authForm" class="space-y-4">
@@ -166,7 +164,7 @@
       <p class="mt-2 text-sm text-center">
         <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline"><i class="fas fa-key"></i> Forgot Password?</a>
       </p>
-      <p class="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+      <p class="mt-4 text-sm text-gray-500 text-center">
         <span id="authToggleText">Don't have an account?</span>
         <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
       </p>
@@ -187,7 +185,7 @@
     } from './firebase-config.js';
     import { 
       renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
-      renderCartSidebar, setLoading, toggleDarkMode 
+      renderCartSidebar, setLoading
     } from './components.js';
 
     // ================================================================
@@ -211,11 +209,6 @@
       container.appendChild(toast);
       setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
     };
-
-    // ================================================================
-    // ===== ডার্ক মোড =====
-    // ================================================================
-    window.toggleDarkModeGlobal = toggleDarkMode;
 
     // ================================================================
     // ===== অথ মডাল =====
@@ -259,7 +252,6 @@
         }
         showToast('✅ Signed in with ' + provider, 'success');
         closeAuthModal();
-        // প্রোফাইল রিলোড
         loadProfile(user);
       } catch (err) {
         showToast('⚠️ ' + err.message, 'error');
@@ -327,7 +319,6 @@
     const avatarLetter = document.getElementById('avatarLetter');
     const profileRole = document.getElementById('profileRole');
 
-    // এডিট ফর্ম এলিমেন্ট
     const editForm = document.getElementById('editForm');
     const editDisplayName = document.getElementById('editDisplayName');
     const editPhone = document.getElementById('editPhone');
@@ -338,7 +329,6 @@
 
     async function loadProfile(user) {
       if (!user) {
-        // নট লগইন -> হোমে রিডাইরেক্ট
         window.location.href = 'index.html';
         return;
       }
@@ -349,26 +339,21 @@
           currentUserData = { id: user.uid, ...userDoc.data() };
           const data = currentUserData;
 
-          // ডিসপ্লে নাম
           const name = data.displayName || user.email?.split('@')[0] || 'User';
           profileDisplayName.textContent = name;
           document.title = `${name} – Profile`;
 
-          // ইমেইল
           const email = data.email || user.email || 'No email';
           profileEmail.textContent = email;
           profileEmailDisplay.textContent = email;
 
-          // ফোন
           profilePhoneDisplay.textContent = data.phone || 'Not set';
 
-          // রোল
           const role = data.role || 'user';
           const roleDisplay = role.charAt(0).toUpperCase() + role.slice(1);
           profileRoleDisplay.textContent = roleDisplay;
           profileRole.textContent = roleDisplay;
 
-          // জয়েন ডেট
           if (data.createdAt) {
             const date = new Date(data.createdAt);
             profileJoinedDisplay.textContent = date.toLocaleDateString('en-US', { 
@@ -376,7 +361,6 @@
             });
           }
 
-          // অ্যাভাটার
           avatarLetter.textContent = name.charAt(0).toUpperCase();
           if (data.photoURL) {
             profileAvatarBig.innerHTML = `<img src="${data.photoURL}" alt="${name}" />`;
@@ -384,15 +368,12 @@
             profileAvatarBig.innerHTML = `<span id="avatarLetter">${name.charAt(0).toUpperCase()}</span>`;
           }
 
-          // এডিট ফর্মে ভ্যালু সেট
           editDisplayName.value = name;
           editPhone.value = data.phone || '';
           editPhotoURL.value = data.photoURL || '';
 
-          // নেভবার আপডেট
           updateNavbarAuth(user, name);
         } else {
-          // ইউজার ডক না থাকলে তৈরি
           await setDoc(doc(db, 'users', user.uid), {
             email: user.email,
             displayName: user.email?.split('@')[0] || 'User',
@@ -407,7 +388,6 @@
       }
     }
 
-    // ===== অথ স্টেট =====
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = 'index.html';
@@ -466,7 +446,6 @@
 
         await updateDoc(doc(db, 'users', user.uid), updateData);
 
-        // UI আপডেট
         profileDisplayName.textContent = newName;
         avatarLetter.textContent = newName.charAt(0).toUpperCase();
         if (photoURL) {

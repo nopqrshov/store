@@ -9,7 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* ===== চ্যাট UI স্টাইল ===== */
     .messenger-wrap {
       display: flex;
       flex-direction: column;
@@ -63,7 +62,6 @@
       border-radius:18px;
       font-size:0.95rem;
       word-wrap:break-word;
-      position:relative;
       animation:fadeUp 0.2s ease;
     }
     .chat-msg.sent {
@@ -179,24 +177,10 @@
       to { opacity:1; transform:translateY(0); }
     }
 
-    /* ===== স্ক্রলবার ===== */
     .chat-messages::-webkit-scrollbar { width:4px; }
     .chat-messages::-webkit-scrollbar-thumb { background:#d0d0d5; border-radius:10px; }
     .chat-messages::-webkit-scrollbar-track { background:transparent; }
 
-    /* ===== ডার্ক মোড ===== */
-    .dark .messenger-wrap { background:#1c1c1e; border-color:#2c2c2e; }
-    .dark .chat-header { background:#2c2c2e; border-color:#3a3a3c; }
-    .dark .chat-header .chat-info .name { color:#e5e5ea; }
-    .dark .chat-messages { background:#121214; }
-    .dark .chat-msg.received { background:#2c2c2e; color:#e5e5ea; box-shadow:0 1px 4px rgba(0,0,0,0.2); }
-    .dark .chat-input-wrap { background:#1c1c1e; border-color:#3a3a3c; }
-    .dark .chat-input-wrap input { background:#2c2c2e; color:#e5e5ea; border-color:#3a3a3c; }
-    .dark .chat-input-wrap input:focus { border-color:#007AFF; background:#2c2c2e; }
-    .dark .typing-indicator { background:#121214; color:#a0a0a5; }
-    .dark .emoji-picker span:hover { background:rgba(255,255,255,0.1); }
-
-    /* ===== মোবাইল ===== */
     @media (max-width:640px) {
       .chat-msg { max-width:92%; }
       .messenger-wrap { height:75vh; min-height:400px; }
@@ -211,13 +195,11 @@
       <section class="pt-28 pb-16 px-6 max-w-3xl mx-auto">
         <div class="flex items-center gap-3 mb-2">
           <i class="fas fa-comments text-3xl text-blue-500"></i>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Support Chat</h1>
+          <h1 class="text-3xl font-bold text-gray-900">Support Chat</h1>
         </div>
-        <p class="text-gray-500 dark:text-gray-400 mb-6">Chat directly with our support team. We're here to help!</p>
+        <p class="text-gray-500 mb-6">Chat directly with our support team. We're here to help!</p>
 
-        <!-- ===== চ্যাট উইন্ডো ===== -->
         <div class="messenger-wrap">
-          <!-- হেডার -->
           <div class="chat-header">
             <div class="chat-avatar"><i class="fas fa-headset"></i></div>
             <div class="chat-info">
@@ -228,7 +210,6 @@
             </div>
           </div>
 
-          <!-- মেসেজ এরিয়া -->
           <div class="chat-messages" id="chatMessages">
             <div class="empty-state">
               <i class="fas fa-inbox"></i>
@@ -236,10 +217,8 @@
             </div>
           </div>
 
-          <!-- টাইপিং ইন্ডিকেটর -->
           <div id="typingIndicator" class="typing-indicator"></div>
 
-          <!-- ইনপুট -->
           <div class="chat-input-wrap">
             <div class="emoji-picker" id="emojiPicker">
               <span onclick="insertEmoji('😊')">😊</span>
@@ -260,8 +239,7 @@
           </div>
         </div>
 
-        <!-- ===== ইনফো ===== -->
-        <div class="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl text-sm text-gray-500 dark:text-gray-400">
+        <div class="mt-4 p-3 bg-gray-50 rounded-xl text-sm text-gray-500">
           <i class="fas fa-info-circle text-blue-500"></i>
           Messages are end-to-end encrypted. Your conversation is private.
         </div>
@@ -273,9 +251,9 @@
 
   <!-- ===== অথ মডাল ===== -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-    <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 max-w-md w-full shadow-2xl">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
       <div class="flex justify-between items-center mb-4">
-        <h3 id="authModalTitle" class="text-2xl font-bold dark:text-white">Sign In</h3>
+        <h3 id="authModalTitle" class="text-2xl font-bold">Sign In</h3>
         <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
       </div>
       <form id="authForm" class="space-y-4">
@@ -293,7 +271,7 @@
       <p class="mt-2 text-sm text-center">
         <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline"><i class="fas fa-key"></i> Forgot Password?</a>
       </p>
-      <p class="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+      <p class="mt-4 text-sm text-gray-500 text-center">
         <span id="authToggleText">Don't have an account?</span>
         <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
       </p>
@@ -304,9 +282,6 @@
   <div id="toast-container"></div>
 
   <script type="module">
-    // ================================================================
-    // ===== ইমপোর্ট =====
-    // ================================================================
     import { 
       auth, db, collection, doc, getDoc, setDoc, addDoc, onSnapshot, 
       query, where, serverTimestamp, signOut, onAuthStateChanged,
@@ -315,20 +290,14 @@
     } from './firebase-config.js';
     import { 
       renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
-      renderCartSidebar, setLoading, toggleDarkMode 
+      renderCartSidebar, setLoading
     } from './components.js';
 
-    // ================================================================
-    // ===== রেন্ডার =====
-    // ================================================================
     renderNavbar();
     renderFooter();
     renderCartSidebar();
     updateCartBadge();
 
-    // ================================================================
-    // ===== টোস্ট =====
-    // ================================================================
     window.showToast = (message, type = 'success') => {
       const container = document.getElementById('toast-container');
       if (!container) return;
@@ -340,14 +309,7 @@
       setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
     };
 
-    // ================================================================
-    // ===== ডার্ক মোড =====
-    // ================================================================
-    window.toggleDarkModeGlobal = toggleDarkMode;
-
-    // ================================================================
     // ===== অথ মডাল =====
-    // ================================================================
     let currentAuthMode = 'signin';
     window.openAuthModal = (mode) => {
       currentAuthMode = mode;
@@ -438,10 +400,7 @@
       window.location.href = 'index.html';
     };
 
-    // ================================================================
     // ===== চ্যাট লজিক =====
-    // ================================================================
-
     const chatMessages = document.getElementById('chatMessages');
     const chatInput = document.getElementById('chatInput');
     const chatSendBtn = document.getElementById('chatSendBtn');
@@ -452,13 +411,11 @@
     let unsubMessages = null;
     let typingTimeout = null;
 
-    // ===== ইমোজি ইনসার্ট =====
     window.insertEmoji = (emoji) => {
       chatInput.value += emoji;
       chatInput.focus();
     };
 
-    // ===== মেসেজ রেন্ডার =====
     function renderMessages(msgs) {
       if (!msgs || msgs.length === 0) {
         chatMessages.innerHTML = `
@@ -500,7 +457,6 @@
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    // ===== লিসেন মেসেজ =====
     function listenMessages(user) {
       if (unsubMessages) unsubMessages();
 
@@ -515,7 +471,6 @@
           msgs.push({ id: doc.id, ...doc.data() });
         });
         
-        // টাইমস্ট্যাম্প অনুযায়ী সর্ট
         msgs.sort((a, b) => {
           const ta = a.timestamp?.toDate?.()?.getTime() || 0;
           const tb = b.timestamp?.toDate?.()?.getTime() || 0;
@@ -524,7 +479,6 @@
 
         renderMessages(msgs);
 
-        // ===== অ্যাডমিনের আসা মেসেজ রিড মার্ক করা =====
         const unreadAdminMsgs = msgs.filter(m => 
           m.fromUserId === 'admin' && !m.read
         );
@@ -545,7 +499,6 @@
         showToast('Error loading messages: ' + error.message, 'error');
       });
 
-      // ===== টাইপিং ইন্ডিকেটর (অ্যাডমিনের টাইপিং শুনি) =====
       const typingRef = doc(db, 'typing', conversationId);
       onSnapshot(typingRef, (docSnap) => {
         if (docSnap.exists() && docSnap.data().adminTyping) {
@@ -556,10 +509,8 @@
       });
     }
 
-    // ===== অথ স্টেট =====
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        // নট লগইন -> হোমে রিডাইরেক্ট
         window.location.href = 'index.html';
         return;
       }
@@ -569,14 +520,10 @@
       const displayName = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
       updateNavbarAuth(user, displayName);
 
-      // কনভার্সেশন আইডি সেট
       conversationId = `conv_${user.uid}_admin`;
-
-      // মেসেজ লিসেন শুরু
       listenMessages(user);
     });
 
-    // ===== টাইপিং ইন্ডিকেটর পাঠানো (ইউজার টাইপ করলে) =====
     chatInput.addEventListener('input', async () => {
       if (!conversationId || !currentUser) return;
       
@@ -586,9 +533,7 @@
           userTyping: true, 
           timestamp: serverTimestamp() 
         }, { merge: true });
-      } catch (err) {
-        // সাইলেন্ট ফেইল
-      }
+      } catch (err) {}
 
       clearTimeout(typingTimeout);
       typingTimeout = setTimeout(async () => {
@@ -598,7 +543,6 @@
       }, 3000);
     });
 
-    // ===== মেসেজ সেন্ড =====
     const chatForm = document.querySelector('.input-row');
     chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -629,7 +573,6 @@
 
         chatInput.value = '';
         
-        // টাইপিং বন্ধ
         const typingRef = doc(db, 'typing', conversationId);
         await setDoc(typingRef, { userTyping: false }, { merge: true });
 
@@ -643,9 +586,6 @@
       }
     });
 
-    // ================================================================
-    // ===== ক্লিনআপ =====
-    // ================================================================
     window.addEventListener('beforeunload', () => {
       if (unsubMessages) unsubMessages();
     });

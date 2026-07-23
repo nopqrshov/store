@@ -9,7 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* স্টোর পেজের অতিরিক্ত স্টাইল */
     .rating-stars { color: #f59e0b; font-size: 1.25rem; }
     .rating-stars .star { cursor: pointer; transition: 0.2s; }
     .rating-stars .star:hover { transform: scale(1.2); }
@@ -24,7 +23,7 @@
     <main class="main-content">
       <section class="pt-24 pb-12 px-6">
         <div class="max-w-7xl mx-auto">
-          <h1 class="text-3xl font-bold dark:text-white">Choose Your Website Package</h1>
+          <h1 class="text-3xl font-bold text-gray-900">Choose Your Website Package</h1>
           
           <!-- ===== ফিল্টার, সার্চ, সর্ট ===== -->
           <div class="flex flex-wrap gap-4 mt-4 items-center">
@@ -60,16 +59,16 @@
 
   <!-- ===== প্রোডাক্ট ডিটেইল মডাল ===== -->
   <div id="productDetailModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[300] hidden">
-    <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-4">
-        <h3 id="detailName" class="text-2xl font-bold dark:text-white"></h3>
+        <h3 id="detailName" class="text-2xl font-bold text-gray-900"></h3>
         <button onclick="closeDetailModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
       </div>
       <img id="detailImage" src="" alt="" class="w-full h-64 object-cover rounded-lg mb-4" />
-      <p id="detailDesc" class="text-gray-600 dark:text-gray-300"></p>
-      <p id="detailPrice" class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-2"></p>
+      <p id="detailDesc" class="text-gray-600"></p>
+      <p id="detailPrice" class="text-2xl font-bold text-blue-600 mt-2"></p>
       <div id="detailRating" class="mt-2 text-yellow-500"></div>
-      <div id="detailStock" class="text-sm text-green-600 dark:text-green-400 mt-1"></div>
+      <div id="detailStock" class="text-sm text-green-600 mt-1"></div>
       <div class="mt-4 flex flex-wrap gap-3">
         <button onclick="window.addToCartFromDetail()" class="btn-primary">
           <i class="fas fa-cart-plus"></i> Add to Cart
@@ -82,8 +81,8 @@
         </button>
       </div>
       <!-- ===== রেটিং ফর্ম ===== -->
-      <div class="mt-6 border-t dark:border-gray-700 pt-4">
-        <h4 class="font-semibold dark:text-white">Rate this product</h4>
+      <div class="mt-6 border-t border-gray-200 pt-4">
+        <h4 class="font-semibold text-gray-900">Rate this product</h4>
         <div class="rating-stars flex gap-2 mt-2" id="ratingStars">
           <span class="star" data-val="1">☆</span>
           <span class="star" data-val="2">☆</span>
@@ -102,18 +101,18 @@
 
   <!-- ===== পেমেন্ট মডাল ===== -->
   <div id="paymentModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[400] hidden">
-    <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 max-w-lg w-full">
+    <div class="bg-white rounded-2xl p-8 max-w-lg w-full">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-2xl font-bold dark:text-white">Complete Payment</h3>
+        <h3 class="text-2xl font-bold text-gray-900">Complete Payment</h3>
         <button onclick="closePaymentModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
       </div>
-      <div id="paymentDetails" class="space-y-3 text-sm bg-gray-50 dark:bg-gray-800 p-4 rounded-xl">
-        <p class="font-semibold dark:text-white">Send payment to any of these:</p>
+      <div id="paymentDetails" class="space-y-3 text-sm bg-gray-50 p-4 rounded-xl">
+        <p class="font-semibold text-gray-700">Send payment to any of these:</p>
         <div id="paymentNumbers" class="space-y-2"></div>
       </div>
       <form id="paymentForm" class="mt-4 space-y-4">
         <div>
-          <label class="block text-sm font-semibold dark:text-gray-300">Transaction ID *</label>
+          <label class="block text-sm font-semibold text-gray-700">Transaction ID *</label>
           <input type="text" id="transactionId" placeholder="Enter your payment transaction ID" required class="form-input" />
         </div>
         <button type="submit" class="btn-primary w-full justify-center">
@@ -126,9 +125,9 @@
 
   <!-- ===== অথ মডাল ===== -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-    <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 max-w-md w-full shadow-2xl">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
       <div class="flex justify-between items-center mb-4">
-        <h3 id="authModalTitle" class="text-2xl font-bold dark:text-white">Sign In</h3>
+        <h3 id="authModalTitle" class="text-2xl font-bold">Sign In</h3>
         <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
       </div>
       <form id="authForm" class="space-y-4">
@@ -146,7 +145,7 @@
       <p class="mt-2 text-sm text-center">
         <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline"><i class="fas fa-key"></i> Forgot Password?</a>
       </p>
-      <p class="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+      <p class="mt-4 text-sm text-gray-500 text-center">
         <span id="authToggleText">Don't have an account?</span>
         <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
       </p>
@@ -168,7 +167,7 @@
     } from './firebase-config.js';
     import { 
       renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
-      renderCartSidebar, setLoading, toggleDarkMode 
+      renderCartSidebar, setLoading
     } from './components.js';
 
     // ===== রেন্ডার =====
@@ -310,7 +309,6 @@
     function renderProducts() {
       let filtered = [...allProducts];
       
-      // সার্চ
       const search = searchInput.value.toLowerCase();
       if (search) {
         filtered = filtered.filter(p => 
@@ -319,18 +317,16 @@
         );
       }
       
-      // ক্যাটাগরি
       const cat = categoryFilter.value;
       if (cat !== 'all') filtered = filtered.filter(p => p.category === cat);
       
-      // সর্ট
       const sort = sortFilter.value;
       if (sort === 'price-asc') filtered.sort((a, b) => a.price - b.price);
       else if (sort === 'price-desc') filtered.sort((a, b) => b.price - a.price);
       else if (sort === 'name') filtered.sort((a, b) => a.name.localeCompare(b.name));
 
       if (filtered.length === 0) {
-        grid.innerHTML = `<p class="text-gray-500 dark:text-gray-400 col-span-3 text-center py-10">No products found.</p>`;
+        grid.innerHTML = `<p class="text-gray-500 col-span-3 text-center py-10">No products found.</p>`;
         return;
       }
 
@@ -344,17 +340,17 @@
                  alt="${p.name}" 
                  class="w-full h-48 object-cover rounded-t-lg mb-3" />
             <div class="flex justify-between items-start">
-              <h3 class="font-bold text-xl dark:text-white">${p.name}</h3>
+              <h3 class="font-bold text-xl text-gray-900">${p.name}</h3>
               <button onclick="window.toggleWishlist('${p.id}')" 
                       class="wishlist-btn text-xl ${inWishlist ? 'active' : 'text-gray-300'}"
                       id="wishlist-${p.id}">
                 <i class="fas fa-heart"></i>
               </button>
             </div>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">${p.desc || p.description || ''}</p>
-            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-2">$${p.price}</p>
+            <p class="text-sm text-gray-500 mt-1">${p.desc || p.description || ''}</p>
+            <p class="text-2xl font-bold text-blue-600 mt-2">$${p.price}</p>
             <div class="mt-1 text-yellow-500 text-sm">${renderStars(rating)} (${p.ratingCount || 0})</div>
-            <div class="text-sm ${stock > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}">
+            <div class="text-sm ${stock > 0 ? 'text-green-600' : 'text-red-500'}">
               ${stock > 0 ? `✅ In Stock (${stock})` : '❌ Out of Stock'}
             </div>
             <div class="mt-3 flex flex-wrap gap-2">
@@ -409,7 +405,6 @@
       const product = allProducts.find(p => p.id === productId);
       if (!product) { showToast('Product not found', 'error'); return; }
       
-      // স্টক চেক
       if (product.stock !== undefined && product.stock <= 0) {
         showToast('❌ Out of stock!', 'error');
         return;
@@ -433,9 +428,7 @@
       showToast(`✅ "${product.name}" added to cart`, 'success');
     };
 
-    // কার্ট UI আপডেট (components.js থেকে কল)
     window.updateCartUI = () => {
-      // components.js এর updateCartUI কল
       import('./components.js').then(({ updateCartUI }) => updateCartUI());
       updateCartBadge();
     };
@@ -482,7 +475,6 @@
           showToast('✅ Added to wishlist', 'success');
         }
         renderProducts();
-        // ডিটেইল মডালে বাটন আপডেট
         if (currentProductId === productId) {
           updateDetailWishlistBtn(wishlistItems.includes(productId));
         }
@@ -527,11 +519,9 @@
       document.getElementById('detailStock').textContent = p.stock !== undefined ? 
         (p.stock > 0 ? `✅ In Stock (${p.stock})` : '❌ Out of Stock') : '✅ In Stock';
 
-      // উইশলিস্ট স্ট্যাটাস
       const inWishlist = wishlistItems.includes(id);
       updateDetailWishlistBtn(inWishlist);
 
-      // রিভিউ লোড
       loadReviews(id);
 
       document.getElementById('productDetailModal').classList.remove('hidden');
@@ -579,7 +569,6 @@
       const review = document.getElementById('ratingReview').value.trim();
       
       try {
-        // রেটিং সেভ
         await addDoc(collection(db, 'ratings'), {
           productId: currentProductId,
           userId: user.uid,
@@ -589,7 +578,6 @@
           timestamp: serverTimestamp()
         });
 
-        // প্রোডাক্ট আপডেট (এভারেজ রেটিং)
         const productRef = doc(db, 'products', currentProductId);
         const snap = await getDoc(productRef);
         const data = snap.data();
@@ -605,7 +593,6 @@
         document.querySelectorAll('#ratingStars .star').forEach(s => s.textContent = '☆');
         document.getElementById('ratingReview').value = '';
         
-        // রিভিউ রিলোড
         loadReviews(currentProductId);
         renderProducts();
       } catch (err) {
@@ -627,12 +614,12 @@
           const r = doc.data();
           const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
           html += `
-            <div class="border-b dark:border-gray-700 pb-2">
+            <div class="border-b border-gray-200 pb-2">
               <div class="flex justify-between">
-                <span class="font-semibold dark:text-white">${r.userEmail || 'Anonymous'}</span>
+                <span class="font-semibold text-gray-900">${r.userEmail || 'Anonymous'}</span>
                 <span class="text-yellow-500">${stars}</span>
               </div>
-              ${r.review ? `<p class="text-sm text-gray-600 dark:text-gray-400">${r.review}</p>` : ''}
+              ${r.review ? `<p class="text-sm text-gray-600">${r.review}</p>` : ''}
               <p class="text-xs text-gray-400">${r.timestamp?.toDate?.()?.toLocaleString() || ''}</p>
             </div>
           `;
@@ -664,7 +651,6 @@
       if (checkoutBtn) setLoading(checkoutBtn, true, 'Proceed to Checkout');
 
       try {
-        // পেমেন্ট সেটিংস লোড
         const settingsSnap = await getDoc(doc(db, 'settings', 'payment'));
         const settings = settingsSnap.exists() ? settingsSnap.data() : {};
         if (!settings.bkash && !settings.nagad && !settings.usdt) {
@@ -673,7 +659,6 @@
           return;
         }
 
-        // অর্ডার ক্রিয়েট
         const orderData = {
           userId: user.uid,
           userEmail: user.email,
@@ -692,7 +677,6 @@
         };
         const docRef = await addDoc(collection(db, 'orders'), orderData);
         
-        // পেমেন্ট মডাল খোলা
         window.openPaymentModal(docRef.id, settings);
 
         if (checkoutBtn) setLoading(checkoutBtn, false);
@@ -762,16 +746,7 @@
       }
     });
 
-    // ================================================================
-    // ===== আরও কিছু =====
-    // ================================================================
-
-    // ডার্ক মোড টগল
-    window.toggleDarkModeGlobal = toggleDarkMode;
-
     console.log('🚀 SWD Store Loaded Successfully!');
-    console.log('📦 Features: Filter, Search, Sort, Wishlist, Ratings, Reviews, Cart, Checkout');
-
   </script>
 </body>
 </html>

@@ -20,9 +20,6 @@
     .request-status.pending { background: #fef3c7; color: #d97706; }
     .request-status.resolved { background: #d1fae5; color: #059669; }
     .request-status.closed { background: #e5e7eb; color: #6b7280; }
-    .dark .request-status.pending { background: #78350f; color: #fbbf24; }
-    .dark .request-status.resolved { background: #064e3b; color: #6ee7b7; }
-    .dark .request-status.closed { background: #374151; color: #9ca3af; }
 
     .priority-badge {
       padding: 2px 10px;
@@ -34,9 +31,6 @@
     .priority-badge.high { background: #fee2e2; color: #dc2626; }
     .priority-badge.medium { background: #fef3c7; color: #d97706; }
     .priority-badge.low { background: #d1fae5; color: #059669; }
-    .dark .priority-badge.high { background: #7f1d1d; color: #fca5a5; }
-    .dark .priority-badge.medium { background: #78350f; color: #fbbf24; }
-    .dark .priority-badge.low { background: #064e3b; color: #6ee7b7; }
 
     .ticket-code {
       font-family: 'Courier New', monospace;
@@ -45,8 +39,8 @@
       background: rgba(0,0,0,0.04);
       padding: 2px 10px;
       border-radius: 6px;
+      font-size: 0.85rem;
     }
-    .dark .ticket-code { background: rgba(255,255,255,0.06); }
 
     .request-card {
       transition: all 0.3s ease;
@@ -59,18 +53,19 @@
     .reply-box {
       background: #f0fdf4;
       border-left: 4px solid #22c55e;
-    }
-    .dark .reply-box {
-      background: #052e16;
-      border-left-color: #4ade80;
+      padding: 12px;
+      border-radius: 8px;
     }
     .no-reply-box {
       background: #f9fafb;
       border-left: 4px solid #d1d5db;
+      padding: 12px;
+      border-radius: 8px;
     }
-    .dark .no-reply-box {
-      background: #1f2937;
-      border-left-color: #4b5563;
+
+    .empty-state-icon {
+      font-size: 4rem;
+      opacity: 0.3;
     }
   </style>
 </head>
@@ -83,9 +78,9 @@
         <!-- হেডার -->
         <div class="flex items-center gap-3 mb-2">
           <i class="fas fa-tools text-3xl text-blue-500"></i>
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">My Fix Requests</h1>
+          <h1 class="text-3xl font-bold text-gray-900">My Fix Requests</h1>
         </div>
-        <p class="text-gray-500 dark:text-gray-400 mb-4">Track all your website fix requests and replies from admin.</p>
+        <p class="text-gray-500 mb-4">Track all your website fix requests and replies from admin.</p>
 
         <!-- ===== ফিল্টার ===== -->
         <div class="flex flex-wrap gap-3 items-center mb-6">
@@ -122,22 +117,22 @@
         </div>
 
         <!-- ===== স্ট্যাটিস্টিক্স ===== -->
-        <div id="statsContainer" class="mt-8 grid grid-cols-3 md:grid-cols-4 gap-3 hidden">
+        <div id="statsContainer" class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 hidden">
           <div class="glass-card text-center">
-            <p class="text-2xl font-bold dark:text-white" id="totalCount">0</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Total</p>
+            <p class="text-2xl font-bold text-gray-900" id="totalCount">0</p>
+            <p class="text-xs text-gray-500">Total</p>
           </div>
           <div class="glass-card text-center">
-            <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400" id="pendingCount">0</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Pending</p>
+            <p class="text-2xl font-bold text-yellow-600" id="pendingCount">0</p>
+            <p class="text-xs text-gray-500">Pending</p>
           </div>
           <div class="glass-card text-center">
-            <p class="text-2xl font-bold text-green-600 dark:text-green-400" id="resolvedCount">0</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Resolved</p>
+            <p class="text-2xl font-bold text-green-600" id="resolvedCount">0</p>
+            <p class="text-xs text-gray-500">Resolved</p>
           </div>
           <div class="glass-card text-center">
-            <p class="text-2xl font-bold text-gray-500 dark:text-gray-400" id="closedCount">0</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Closed</p>
+            <p class="text-2xl font-bold text-gray-500" id="closedCount">0</p>
+            <p class="text-xs text-gray-500">Closed</p>
           </div>
         </div>
       </section>
@@ -148,9 +143,9 @@
 
   <!-- ===== অথ মডাল ===== -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-    <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 max-w-md w-full shadow-2xl">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
       <div class="flex justify-between items-center mb-4">
-        <h3 id="authModalTitle" class="text-2xl font-bold dark:text-white">Sign In</h3>
+        <h3 id="authModalTitle" class="text-2xl font-bold">Sign In</h3>
         <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
       </div>
       <form id="authForm" class="space-y-4">
@@ -168,7 +163,7 @@
       <p class="mt-2 text-sm text-center">
         <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline"><i class="fas fa-key"></i> Forgot Password?</a>
       </p>
-      <p class="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+      <p class="mt-4 text-sm text-gray-500 text-center">
         <span id="authToggleText">Don't have an account?</span>
         <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
       </p>
@@ -191,7 +186,7 @@
     } from './firebase-config.js';
     import { 
       renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
-      renderCartSidebar, setLoading, toggleDarkMode 
+      renderCartSidebar, setLoading
     } from './components.js';
 
     // ================================================================
@@ -215,11 +210,6 @@
       container.appendChild(toast);
       setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
     };
-
-    // ================================================================
-    // ===== ডার্ক মোড =====
-    // ================================================================
-    window.toggleDarkModeGlobal = toggleDarkMode;
 
     // ================================================================
     // ===== অথ মডাল =====
@@ -349,9 +339,9 @@
       if (!requests || requests.length === 0) {
         requestList.innerHTML = `
           <div class="text-center py-16">
-            <i class="fas fa-inbox empty-state-icon text-gray-300 dark:text-gray-600 text-5xl"></i>
-            <p class="text-gray-500 dark:text-gray-400 mt-4 text-lg">No fix requests found</p>
-            <p class="text-gray-400 dark:text-gray-500 text-sm">Submit a fix request to get help from our team.</p>
+            <i class="fas fa-inbox empty-state-icon text-gray-300"></i>
+            <p class="text-gray-500 mt-4 text-lg">No fix requests found</p>
+            <p class="text-gray-400 text-sm">Submit a fix request to get help from our team.</p>
             <a href="fix-website.html" class="btn-primary mt-4 inline-block">
               <i class="fas fa-plus"></i> Submit Request
             </a>
@@ -384,18 +374,18 @@
             hour: '2-digit', minute: '2-digit' 
           });
           replyHtml = `
-            <div class="reply-box mt-3 p-3 rounded-lg">
-              <p class="text-sm font-medium text-green-700 dark:text-green-300">
+            <div class="reply-box mt-3">
+              <p class="text-sm font-medium text-green-700">
                 <i class="fas fa-reply"></i> Admin Reply
               </p>
-              <p class="text-sm text-gray-700 dark:text-gray-200 mt-1">${r.reply}</p>
+              <p class="text-sm text-gray-800 mt-1">${r.reply}</p>
               <p class="text-xs text-gray-400 mt-1">${replyDateStr} at ${replyTimeStr}</p>
             </div>
           `;
         } else if (status === 'pending') {
           replyHtml = `
-            <div class="no-reply-box mt-3 p-3 rounded-lg">
-              <p class="text-sm text-gray-500 dark:text-gray-400">
+            <div class="no-reply-box mt-3">
+              <p class="text-sm text-gray-500">
                 <i class="fas fa-clock"></i> No reply yet. Our team is reviewing your request.
               </p>
             </div>
@@ -422,17 +412,17 @@
                   <span class="request-status ${status}">${status}</span>
                   <span class="priority-badge ${priority}">${priority}</span>
                 </div>
-                <p class="text-sm font-medium dark:text-white mt-2">
-                  <span class="text-gray-500 dark:text-gray-400">${categoryIcon}</span>
+                <p class="text-sm font-medium text-gray-900 mt-2">
+                  <span class="text-gray-500">${categoryIcon}</span>
                   ${r.problem?.substring(0, 80) || 'No description'}${r.problem?.length > 80 ? '...' : ''}
                 </p>
-                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                <p class="text-xs text-gray-400 mt-1">
                   <i class="far fa-calendar-alt mr-1"></i> ${dateStr} at ${timeStr}
                 </p>
-                ${r.category ? `<p class="text-xs text-gray-400 dark:text-gray-500">Category: ${r.category}</p>` : ''}
+                ${r.category ? `<p class="text-xs text-gray-400">Category: ${r.category}</p>` : ''}
               </div>
               <div class="text-right flex flex-col items-end gap-1">
-                <span class="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
+                <span class="text-xs bg-gray-100 px-2 py-0.5 rounded-full">
                   ${r.imageLink ? `<a href="${r.imageLink}" target="_blank" class="text-blue-500 hover:underline"><i class="fas fa-image"></i> Image</a>` : 'No image'}
                 </span>
               </div>
@@ -441,8 +431,8 @@
             <!-- রিপ্লাই -->
             ${replyHtml}
 
-            <!-- রিকোয়েস্ট আইডি (hidden) -->
-            <div class="text-xs text-gray-400 dark:text-gray-500 mt-2">
+            <!-- রিকোয়েস্ট আইডি -->
+            <div class="text-xs text-gray-400 mt-2">
               ID: ${r.id?.slice(0, 12) || 'N/A'}
             </div>
           </div>
@@ -460,15 +450,12 @@
       const priority = priorityFilter.value;
 
       filteredRequests = allRequests.filter(r => {
-        // সার্চ (টিকেট নম্বর বা সমস্যার অংশ)
         if (search) {
           const ticket = r.ticketNumber?.toLowerCase() || '';
           const problem = r.problem?.toLowerCase() || '';
           if (!ticket.includes(search) && !problem.includes(search)) return false;
         }
-        // স্ট্যাটাস
         if (status !== 'all' && r.status !== status) return false;
-        // প্রায়োরিটি
         if (priority !== 'all' && r.priority !== priority) return false;
         return true;
       });
@@ -530,7 +517,6 @@
       const displayName = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
       updateNavbarAuth(user, displayName);
 
-      // রিকোয়েস্ট লোড
       loadRequests(user.uid);
     });
 

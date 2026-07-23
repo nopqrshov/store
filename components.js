@@ -6,22 +6,6 @@ import {
   deleteDoc, getDocs
 } from './firebase-config.js';
 
-// ===== ডার্ক মোড =====
-export function initDarkMode() {
-  const stored = localStorage.getItem('darkMode');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const isDark = stored === 'true' || (stored === null && prefersDark);
-  if (isDark) document.documentElement.classList.add('dark');
-  return isDark;
-}
-
-export function toggleDarkMode() {
-  const isDark = document.documentElement.classList.toggle('dark');
-  localStorage.setItem('darkMode', isDark);
-  const icon = document.getElementById('darkModeToggle');
-  if (icon) icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
-}
-
 // ===== কার্ট ব্যাজ =====
 export function updateCartBadge() {
   const cartBadge = document.getElementById('cartCount');
@@ -42,7 +26,7 @@ export function renderNavbar() {
   const navbarHTML = `
     <nav class="fixed top-0 left-0 w-full glass z-50 h-16 md:h-20 flex items-center px-4 sm:px-6 lg:px-8">
       <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
-        <a href="index.html" class="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">
+        <a href="index.html" class="text-xl md:text-2xl font-bold text-gray-900">
           SWD <span class="gradient-text">Store</span>
         </a>
         
@@ -51,33 +35,32 @@ export function renderNavbar() {
           <a href="index.html" class="nav-link">Home</a>
           <a href="get-new-website.html" class="nav-link">Store</a>
           <a href="fix-website.html" class="nav-link">Fix</a>
-          <a href="#" onclick="window.toggleDarkModeGlobal()" id="darkModeToggle" class="nav-link"><i class="fas fa-moon"></i></a>
         </div>
 
         <div class="flex items-center gap-3 md:gap-4">
           <!-- নোটিফিকেশন বেল -->
           <div class="relative">
-            <a href="#" onclick="window.toggleNotifications()" class="text-gray-700 dark:text-gray-300 hover:text-blue-500 text-xl relative">
+            <a href="#" onclick="window.toggleNotifications()" class="text-gray-700 hover:text-blue-500 text-xl relative">
               <i class="fas fa-bell"></i>
               <span id="notificationDot" class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full hidden"></span>
             </a>
-            <div id="notificationDropdown" class="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 hidden max-h-80 overflow-y-auto z-50">
-              <div class="p-3 font-semibold border-b dark:border-gray-700 dark:text-white">Notifications</div>
-              <div id="notificationList" class="p-2 text-sm text-gray-600 dark:text-gray-300">No notifications</div>
+            <div id="notificationDropdown" class="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-100 hidden max-h-80 overflow-y-auto z-50">
+              <div class="p-3 font-semibold border-b">Notifications</div>
+              <div id="notificationList" class="p-2 text-sm text-gray-600">No notifications</div>
             </div>
           </div>
 
-          <a href="messages.html" class="text-gray-700 dark:text-gray-300 hover:text-blue-500 text-xl" title="Messages">
+          <a href="messages.html" class="text-gray-700 hover:text-blue-500 text-xl" title="Messages">
             <i class="fas fa-envelope"></i>
           </a>
-          <a href="#" class="cart-toggle text-gray-700 dark:text-gray-300 hover:text-blue-500 text-xl relative" title="Cart">
+          <a href="#" class="cart-toggle text-gray-700 hover:text-blue-500 text-xl relative" title="Cart">
             <i class="fas fa-shopping-cart"></i>
             <span id="cartCount" class="cart-badge" style="display:none;">0</span>
           </a>
           
           <div id="auth-loading" class="flex items-center gap-3">
-            <div class="w-16 h-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
-            <div class="w-24 h-10 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse hidden md:block"></div>
+            <div class="w-16 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+            <div class="w-24 h-10 bg-gray-200 rounded-full animate-pulse hidden md:block"></div>
           </div>
 
           <div id="auth-buttons" class="hidden flex items-center gap-3">
@@ -92,24 +75,24 @@ export function renderNavbar() {
               <a href="my-orders.html"><i class="fas fa-box mr-2"></i> My Orders</a>
               <a href="my-fix-requests.html"><i class="fas fa-tools mr-2"></i> My Fix Requests</a>
               <a href="settings.html"><i class="fas fa-cog mr-2"></i> Settings</a>
+              ${auth.currentUser ? (auth.currentUser.email === 'shovon@admin.com' || true ? `<a href="admin-panel.html"><i class="fas fa-shield-alt mr-2"></i> Admin Panel</a>` : '') : ''}
               <a href="#" onclick="window.handleLogout()"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
             </div>
           </div>
 
           <!-- মোবাইল হ্যাম্বার্গার -->
-          <button onclick="window.toggleMobileMenu()" class="md:hidden text-gray-700 dark:text-gray-300 text-2xl">
+          <button onclick="window.toggleMobileMenu()" class="md:hidden text-gray-700 text-2xl">
             <i class="fas fa-bars" id="hamburgerIcon"></i>
           </button>
         </div>
       </div>
     </nav>
     <!-- মোবাইল মেনু -->
-    <div id="mobileMenu" class="fixed top-16 left-0 w-full bg-white dark:bg-gray-900 shadow-lg z-40 hidden md:hidden">
+    <div id="mobileMenu" class="fixed top-16 left-0 w-full bg-white shadow-lg z-40 hidden md:hidden">
       <div class="flex flex-col p-4 gap-3">
         <a href="index.html" class="nav-link py-2">Home</a>
         <a href="get-new-website.html" class="nav-link py-2">Store</a>
         <a href="fix-website.html" class="nav-link py-2">Fix</a>
-        <a href="#" onclick="window.toggleDarkModeGlobal()" class="nav-link py-2"><i class="fas fa-moon"></i> Dark Mode</a>
       </div>
     </div>
   `;
@@ -137,7 +120,6 @@ export function renderNavbar() {
   }
 
   updateCartBadge();
-  initDarkMode();
 }
 
 // ===== নেভবার অথ আপডেট =====
@@ -157,13 +139,13 @@ export function updateNavbarAuth(user, displayName) {
     // অ্যাডমিন চেক
     const isAdmin = user.email === 'shovon@admin.com';
     if (dropdown) {
-      let adminLink = dropdown.querySelector('a[href="admin-panel.html"]');
+      const adminLink = dropdown.querySelector('a[href="admin-panel.html"]');
       if (isAdmin) {
         if (!adminLink) {
-          adminLink = document.createElement('a');
-          adminLink.href = 'admin-panel.html';
-          adminLink.innerHTML = '<i class="fas fa-shield-alt mr-2"></i> Admin Panel';
-          dropdown.insertBefore(adminLink, dropdown.querySelector('a[href="#"]'));
+          const link = document.createElement('a');
+          link.href = 'admin-panel.html';
+          link.innerHTML = '<i class="fas fa-shield-alt mr-2"></i> Admin Panel';
+          dropdown.insertBefore(link, dropdown.querySelector('a[href="#"]'));
         }
       } else if (adminLink) {
         adminLink.remove();
@@ -178,9 +160,9 @@ export function updateNavbarAuth(user, displayName) {
 // ===== ফুটার =====
 export function renderFooter() {
   const footerHTML = `
-    <footer class="glass border-t border-gray-200/30 dark:border-gray-800/30 py-8 px-6 sm:px-8 lg:px-12 mt-auto">
-      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500 dark:text-gray-400">
-        <div class="font-medium text-gray-700 dark:text-gray-300">&copy; 2026 SWD Store. All rights reserved.</div>
+    <footer class="glass border-t border-gray-200/30 py-8 px-6 sm:px-8 lg:px-12 mt-auto">
+      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
+        <div class="font-medium text-gray-700">&copy; 2026 SWD Store. All rights reserved.</div>
         <div class="flex items-center gap-4">
           <a href="https://shovon337.github.io/web-developer" target="_blank" class="text-blue-600 hover:underline font-medium">Portfolio</a>
           <a href="https://github.com/shovon337" target="_blank" class="social-icon" aria-label="GitHub"><i class="fab fa-github"></i></a>
@@ -199,12 +181,12 @@ export function renderCartSidebar() {
     <div class="cart-overlay" id="cartOverlay" onclick="window.toggleCart()"></div>
     <div class="cart-sidebar" id="cartSidebar">
       <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-bold dark:text-white">Your Cart</h2>
+        <h2 class="text-xl font-bold">Your Cart</h2>
         <button onclick="window.toggleCart()" class="text-gray-500"><i class="fas fa-times"></i></button>
       </div>
       <div id="cartItems" class="space-y-4"></div>
-      <div class="mt-6 border-t dark:border-gray-700 pt-4">
-        <div class="flex justify-between font-bold dark:text-white">
+      <div class="mt-6 border-t pt-4">
+        <div class="flex justify-between font-bold">
           <span>Total:</span>
           <span id="cartTotal">$0</span>
         </div>
@@ -229,7 +211,7 @@ export function updateCartUI() {
   if (!container || !totalEl) return;
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
   if (cart.length === 0) {
-    container.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Your cart is empty.</p>';
+    container.innerHTML = '<p class="text-gray-500">Your cart is empty.</p>';
     totalEl.textContent = '$0';
   } else {
     let total = 0;
@@ -239,16 +221,16 @@ export function updateCartUI() {
       const subtotal = qty * price;
       total += subtotal;
       return `
-        <div class="flex items-center gap-3 border-b dark:border-gray-700 pb-3">
+        <div class="flex items-center gap-3 border-b pb-3">
           <img src="${item.imageUrl || 'https://via.placeholder.com/50?text=No+Img'}" alt="${item.name}" class="w-12 h-12 object-cover rounded" />
           <div class="flex-1">
-            <span class="font-medium dark:text-white block">${item.name}</span>
-            <span class="text-sm text-gray-500 dark:text-gray-400 block">$${price} × ${qty} = $${subtotal.toFixed(2)}</span>
+            <span class="font-medium block">${item.name}</span>
+            <span class="text-sm text-gray-500 block">$${price} × ${qty} = $${subtotal.toFixed(2)}</span>
           </div>
           <div class="flex items-center gap-1">
-            <button onclick="window.updateQuantity(${idx}, -1)" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300">−</button>
-            <span class="w-6 text-center font-medium dark:text-white">${qty}</span>
-            <button onclick="window.updateQuantity(${idx}, 1)" class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300">+</button>
+            <button onclick="window.updateQuantity(${idx}, -1)" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">−</button>
+            <span class="w-6 text-center font-medium">${qty}</span>
+            <button onclick="window.updateQuantity(${idx}, 1)" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600">+</button>
           </div>
           <button onclick="window.removeFromCart(${idx})" class="text-red-500 ml-1"><i class="fas fa-trash"></i></button>
         </div>
@@ -280,6 +262,10 @@ window.removeFromCart = function(index) {
   updateCartUI();
 };
 
+window.checkout = window.checkout || function() {
+  alert('Please go to the Store page to checkout.');
+};
+
 // ===== লোডিং =====
 export function setLoading(button, isLoading, originalText = null) {
   if (!button) return;
@@ -296,7 +282,7 @@ export function setLoading(button, isLoading, originalText = null) {
   }
 }
 
-// ===== ফরগট পাসওয়ার্ড (গ্লোবাল) =====
+// ===== ফরগট পাসওয়ার্ড =====
 export function showResetPasswordModal() {
   const email = prompt('Enter your email address to reset password:');
   if (!email) return;
@@ -307,40 +293,3 @@ export function showResetPasswordModal() {
     .finally(() => setLoading(document.activeElement, false));
 }
 window.showResetPasswordModal = showResetPasswordModal;
-
-// ===== নোটিফিকেশন =====
-let notificationUnsub = null;
-export function initNotifications(userId) {
-  if (notificationUnsub) notificationUnsub();
-  const q = query(collection(db, 'orders'), where('userId', '==', userId), where('status', '==', 'processing'));
-  notificationUnsub = onSnapshot(q, (snapshot) => {
-    const dot = document.getElementById('notificationDot');
-    const list = document.getElementById('notificationList');
-    if (dot) dot.classList.toggle('hidden', snapshot.empty);
-    if (list) {
-      if (snapshot.empty) {
-        list.innerHTML = 'No new notifications';
-      } else {
-        let html = '';
-        snapshot.forEach(doc => {
-          html += `<div class="p-2 border-b dark:border-gray-700">Order #${doc.id.slice(0,8)} is processing</div>`;
-        });
-        list.innerHTML = html;
-      }
-    }
-  });
-}
-
-window.toggleNotifications = () => {
-  const dropdown = document.getElementById('notificationDropdown');
-  if (dropdown) dropdown.classList.toggle('hidden');
-};
-
-window.toggleMobileMenu = () => {
-  const menu = document.getElementById('mobileMenu');
-  const icon = document.getElementById('hamburgerIcon');
-  if (menu) {
-    menu.classList.toggle('hidden');
-    icon.className = menu.classList.contains('hidden') ? 'fas fa-bars' : 'fas fa-times';
-  }
-};

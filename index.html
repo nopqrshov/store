@@ -14,13 +14,13 @@
     <div id="navbar-placeholder"></div>
 
     <main class="main-content">
-      <!-- ===== হিরো সেকশন ===== -->
+      <!-- ===== হিরো ===== -->
       <section class="pt-32 pb-16 px-6 min-h-screen flex items-center">
         <div class="max-w-7xl mx-auto text-center">
-          <h1 class="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white leading-tight">
+          <h1 class="text-5xl md:text-7xl font-bold text-gray-900 leading-tight">
             Build Your <span class="gradient-text">Dream Website</span> Today
           </h1>
-          <p class="text-xl text-gray-500 dark:text-gray-400 mt-4 max-w-2xl mx-auto">
+          <p class="text-xl text-gray-500 mt-4 max-w-2xl mx-auto">
             Choose from ready-made packages or get a fully custom solution. Fast, reliable, and modern.
           </p>
           <div class="mt-10 flex flex-wrap justify-center gap-4">
@@ -34,9 +34,9 @@
       </section>
 
       <!-- ===== টেস্টিমোনিয়াল ===== -->
-      <section id="testimonials" class="py-16 px-6 bg-gray-50 dark:bg-gray-800/50">
+      <section id="testimonials" class="py-16 px-6 bg-gray-50">
         <div class="max-w-6xl mx-auto">
-          <h2 class="text-3xl font-bold text-center dark:text-white">What Our Clients Say</h2>
+          <h2 class="text-3xl font-bold text-center">What Our Clients Say</h2>
           <div id="testimonialList" class="mt-8 grid md:grid-cols-3 gap-6"></div>
         </div>
       </section>
@@ -44,7 +44,7 @@
       <!-- ===== FAQ ===== -->
       <section id="faq" class="py-16 px-6">
         <div class="max-w-3xl mx-auto">
-          <h2 class="text-3xl font-bold text-center dark:text-white">Frequently Asked Questions</h2>
+          <h2 class="text-3xl font-bold text-center">Frequently Asked Questions</h2>
           <div id="faqList" class="mt-8 space-y-4"></div>
         </div>
       </section>
@@ -55,10 +55,10 @@
 
   <!-- ===== অথ মডাল ===== -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-    <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 max-w-md w-full shadow-2xl">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
       <div class="flex justify-between items-center mb-4">
-        <h3 id="authModalTitle" class="text-2xl font-bold dark:text-white">Sign In</h3>
-        <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"><i class="fas fa-times"></i></button>
+        <h3 id="authModalTitle" class="text-2xl font-bold">Sign In</h3>
+        <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
       </div>
       <form id="authForm" class="space-y-4">
         <input type="email" id="authEmail" placeholder="Email" required class="form-input" />
@@ -75,7 +75,7 @@
       <p class="mt-2 text-sm text-center">
         <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline"><i class="fas fa-key"></i> Forgot Password?</a>
       </p>
-      <p class="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
+      <p class="mt-4 text-sm text-gray-500 text-center">
         <span id="authToggleText">Don't have an account?</span>
         <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
       </p>
@@ -94,16 +94,14 @@
     } from './firebase-config.js';
     import { 
       renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
-      renderCartSidebar, setLoading, toggleDarkMode, initDarkMode 
+      renderCartSidebar, setLoading 
     } from './components.js';
 
-    // ===== রেন্ডার =====
     renderNavbar();
     renderFooter();
     renderCartSidebar();
     updateCartBadge();
 
-    // ===== টোস্ট =====
     window.showToast = (message, type = 'success') => {
       const container = document.getElementById('toast-container');
       if (!container) return;
@@ -115,16 +113,11 @@
       setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
     };
 
-    // ===== ডার্ক মোড টগল (গ্লোবাল) =====
-    window.toggleDarkModeGlobal = toggleDarkMode;
-
-    // ===== পাসওয়ার্ড শো/হাইড =====
     window.togglePasswordVisibility = (id) => {
       const input = document.getElementById(id);
       input.type = input.type === 'password' ? 'text' : 'password';
     };
 
-    // ===== অথ মডাল =====
     let currentAuthMode = 'signin';
     window.openAuthModal = (mode) => {
       currentAuthMode = mode;
@@ -142,7 +135,6 @@
       window.openAuthModal(currentAuthMode);
     });
 
-    // ===== অথ ফর্ম =====
     const authForm = document.getElementById('authForm');
     const authSubmitBtn = authForm.querySelector('button[type="submit"]');
     authForm.addEventListener('submit', async (e) => {
@@ -175,7 +167,6 @@
       }
     });
 
-    // ===== সোশ্যাল লগইন =====
     window.socialLogin = async (provider) => {
       try {
         let result;
@@ -198,11 +189,9 @@
       }
     };
 
-    // ===== ফরগট পাসওয়ার্ড =====
     window.showResetPasswordModal = () => {
       const email = prompt('Enter your email address to reset password:');
       if (!email) return;
-      // sendPasswordResetEmail ইমপোর্ট করতে হবে, কিন্তু এখানে components.js থেকে কল করব
       import('./firebase-config.js').then(({ sendPasswordResetEmail }) => {
         sendPasswordResetEmail(auth, email)
           .then(() => alert('✅ Password reset link sent to your email.'))
@@ -210,7 +199,6 @@
       });
     };
 
-    // ===== অথ স্টেট =====
     onAuthStateChanged(auth, async (user) => {
       let name = null;
       if (user) {
@@ -225,7 +213,7 @@
       showToast('✅ Logged out', 'success');
     };
 
-    // ===== ডাইনামিক প্যাকেজ (প্রোডাক্ট থেকে) =====
+    // ===== ডাইনামিক প্যাকেজ =====
     const packagesContainer = document.getElementById('featuredPackages');
     onSnapshot(collection(db, 'products'), (snapshot) => {
       let html = '';
@@ -234,14 +222,14 @@
         html += `
           <div class="glass-card">
             <i class="fas fa-file-code text-3xl text-blue-500"></i>
-            <h3 class="font-bold mt-2 dark:text-white">${p.name}</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400">${p.desc || p.description || ''}</p>
-            <span class="block mt-2 font-bold text-gray-800 dark:text-white">$${p.price}</span>
+            <h3 class="font-bold mt-2">${p.name}</h3>
+            <p class="text-sm text-gray-500">${p.desc || p.description || ''}</p>
+            <span class="block mt-2 font-bold text-gray-800">$${p.price}</span>
             <a href="get-new-website.html" class="btn-primary text-sm py-2 px-4 mt-3 inline-block">View</a>
           </div>
         `;
       });
-      packagesContainer.innerHTML = html || '<p class="text-gray-500 dark:text-gray-400 col-span-3 text-center">No packages available.</p>';
+      packagesContainer.innerHTML = html || '<p class="text-gray-500 col-span-3 text-center">No packages available.</p>';
     });
 
     // ===== টেস্টিমোনিয়াল =====
@@ -252,16 +240,16 @@
         const t = doc.data();
         html += `
           <div class="glass-card text-center">
-            <p class="text-gray-600 dark:text-gray-300 italic">“${t.text}”</p>
-            <p class="font-bold mt-2 dark:text-white">- ${t.name}</p>
+            <p class="text-gray-600 italic">“${t.text}”</p>
+            <p class="font-bold mt-2">- ${t.name}</p>
             <p class="text-sm text-gray-400">${t.role || ''}</p>
           </div>
         `;
       });
-      testimonialContainer.innerHTML = html || '<p class="text-gray-500 dark:text-gray-400 col-span-3 text-center">No testimonials yet.</p>';
+      testimonialContainer.innerHTML = html || '<p class="text-gray-500 col-span-3 text-center">No testimonials yet.</p>';
     });
 
-    // ===== FAQ (অ্যাকর্ডিয়ন) =====
+    // ===== FAQ =====
     const faqContainer = document.getElementById('faqList');
     onSnapshot(collection(db, 'faqs'), (snapshot) => {
       let html = '';
@@ -272,17 +260,16 @@
         html += `
           <div class="glass-card cursor-pointer" onclick="toggleFaq(${idx})">
             <div class="flex justify-between items-center">
-              <h3 class="font-semibold dark:text-white">${f.question}</h3>
+              <h3 class="font-semibold">${f.question}</h3>
               <i class="fas fa-chevron-down text-gray-400 transition-transform" id="faqIcon${idx}"></i>
             </div>
-            <div id="faqAnswer${idx}" class="mt-2 text-gray-600 dark:text-gray-300 hidden">${f.answer}</div>
+            <div id="faqAnswer${idx}" class="mt-2 text-gray-600 hidden">${f.answer}</div>
           </div>
         `;
       });
-      faqContainer.innerHTML = html || '<p class="text-gray-500 dark:text-gray-400 text-center">No FAQs yet.</p>';
+      faqContainer.innerHTML = html || '<p class="text-gray-500 text-center">No FAQs yet.</p>';
     });
 
-    // FAQ টগল ফাংশন
     window.toggleFaq = (index) => {
       const ans = document.getElementById(`faqAnswer${index}`);
       const icon = document.getElementById(`faqIcon${index}`);
@@ -291,7 +278,6 @@
         if (icon) icon.classList.toggle('rotate-180');
       }
     };
-
   </script>
 </body>
 </html>
