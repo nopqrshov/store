@@ -4,243 +4,66 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Messages – SWD Store</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <style>
-    .messenger-wrap {
-      display: flex;
-      flex-direction: column;
-      height: 70vh;
-      min-height: 460px;
-      background: #fff;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.04);
-      border: 1px solid rgba(0,0,0,0.04);
-    }
-    .chat-header {
-      padding: 14px 20px;
-      border-bottom: 1px solid rgba(0,0,0,0.04);
-      font-weight: 600;
-      background: #fafafc;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-shrink: 0;
-    }
-    .chat-header .chat-avatar {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: linear-gradient(135deg,#007AFF,#5856D6);
-      color:#fff;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:600;
-      font-size:1.1rem;
-      flex-shrink:0;
-    }
-    .chat-header .chat-info { flex:1; min-width:0; }
+    /* (আপনার আগের স্টাইল একই থাকবে) */
+    .messenger-wrap { display: flex; flex-direction: column; height: 70vh; min-height: 460px; background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.04); border:1px solid rgba(0,0,0,0.04); }
+    .chat-header { padding: 14px 20px; border-bottom: 1px solid rgba(0,0,0,0.04); font-weight: 600; background: #fafafc; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .chat-header .chat-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg,#007AFF,#5856D6); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:1rem; }
+    .chat-header .chat-info { flex:1; }
     .chat-header .chat-info .name { font-weight:600; color:#1c1c1e; }
-    .chat-header .chat-info .status { font-size:0.75rem; color:#34C759; display:flex; align-items:center; gap:4px; }
-    .chat-header .chat-info .status .dot { display:inline-block; width:8px; height:8px; border-radius:50%; background:#34C759; }
-    .chat-messages {
-      flex:1;
-      overflow-y:auto;
-      padding:16px 20px;
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      background:#f8f9fc;
-    }
-    .chat-msg {
-      max-width:78%;
-      padding:10px 16px;
-      border-radius:18px;
-      font-size:0.95rem;
-      word-wrap:break-word;
-      animation:fadeUp 0.2s ease;
-    }
-    .chat-msg.sent {
-      align-self:flex-end;
-      background:#007AFF;
-      color:#fff;
-      border-bottom-right-radius:4px;
-    }
-    .chat-msg.received {
-      align-self:flex-start;
-      background:#fff;
-      color:#1c1c1e;
-      border-bottom-left-radius:4px;
-      box-shadow:0 1px 4px rgba(0,0,0,0.04);
-    }
-    .chat-msg .msg-time {
-      font-size:0.6rem;
-      opacity:0.6;
-      margin-top:4px;
-      text-align:right;
-    }
+    .chat-header .chat-info .status { font-size:0.75rem; color:#34C759; }
+    .chat-messages { flex:1; overflow-y:auto; padding:16px 20px; display:flex; flex-direction:column; gap:6px; background:#f8f9fc; }
+    .chat-msg { max-width:78%; padding:10px 16px; border-radius:18px; font-size:0.95rem; word-wrap:break-word; position:relative; animation:fadeUp 0.2s ease; }
+    .chat-msg.sent { align-self:flex-end; background:#007AFF; color:#fff; border-bottom-right-radius:4px; }
+    .chat-msg.received { align-self:flex-start; background:#fff; color:#1c1c1e; border-bottom-left-radius:4px; box-shadow:0 1px 4px rgba(0,0,0,0.04); }
+    .chat-msg .msg-time { font-size:0.6rem; opacity:0.6; margin-top:4px; text-align:right; }
     .chat-msg.sent .msg-time { color:rgba(255,255,255,0.7); }
     .chat-msg .msg-status { font-size:0.6rem; margin-left:6px; opacity:0.6; }
-
-    .chat-input-wrap {
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      padding:12px 20px;
-      border-top:1px solid rgba(0,0,0,0.04);
-      background:#fff;
-      flex-shrink:0;
-    }
-    .chat-input-wrap .input-row {
-      display:flex;
-      gap:10px;
-    }
-    .chat-input-wrap input {
-      flex:1;
-      padding:12px 18px;
-      border-radius:30px;
-      border:1.5px solid rgba(60,60,67,0.08);
-      font-size:0.95rem;
-      transition:0.2s;
-      background:#f5f5f8;
-      outline:none;
-    }
-    .chat-input-wrap input:focus {
-      border-color:#007AFF;
-      background:#fff;
-      box-shadow:0 0 0 4px rgba(0,122,255,0.06);
-    }
-    .chat-input-wrap button {
-      border-radius:50%;
-      width:48px;
-      height:48px;
-      padding:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:linear-gradient(135deg,#007AFF,#5856D6);
-      color:#fff;
-      border:none;
-      cursor:pointer;
-      transition:0.2s;
-      font-size:1.1rem;
-      flex-shrink:0;
-    }
+    .chat-input-wrap { display:flex; gap:10px; padding:12px 20px; border-top:1px solid rgba(0,0,0,0.04); background:#fff; flex-shrink:0; }
+    .chat-input-wrap input { flex:1; padding:12px 18px; border-radius:30px; border:1.5px solid rgba(60,60,67,0.08); font-size:0.95rem; transition:0.2s; background:#f5f5f8; }
+    .chat-input-wrap input:focus { outline:none; border-color:#007AFF; background:#fff; box-shadow:0 0 0 4px rgba(0,122,255,0.06); }
+    .chat-input-wrap button { border-radius:50%; width:48px; height:48px; padding:0; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#007AFF,#5856D6); color:#fff; border:none; cursor:pointer; transition:0.2s; font-size:1.1rem; flex-shrink:0; }
     .chat-input-wrap button:hover { transform:scale(1.03); box-shadow:0 4px 16px rgba(0,122,255,0.3); }
     .chat-input-wrap button:disabled { opacity:0.5; transform:none !important; }
-
-    .emoji-picker {
-      display:flex;
-      gap:6px;
-      flex-wrap:wrap;
-      padding:4px 0;
-    }
-    .emoji-picker span {
-      cursor:pointer;
-      font-size:1.4rem;
-      transition:0.2s;
-      padding:2px 4px;
-      border-radius:8px;
-    }
-    .emoji-picker span:hover {
-      transform:scale(1.3);
-      background:rgba(0,0,0,0.05);
-    }
-
-    .typing-indicator {
-      font-size:0.8rem;
-      color:#8e8e93;
-      padding:4px 20px;
-      font-style:italic;
-      min-height:24px;
-      background:#f8f9fc;
-      flex-shrink:0;
-    }
-    .empty-state {
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      height:100%;
-      color:#8e8e93;
-      flex-direction:column;
-      gap:8px;
-    }
+    .empty-state { display:flex; align-items:center; justify-content:center; height:100%; color:#8e8e93; font-size:0.95rem; flex-direction:column; gap:8px; }
     .empty-state i { font-size:2.4rem; opacity:0.3; }
-
-    @keyframes fadeUp {
-      from { opacity:0; transform:translateY(8px); }
-      to { opacity:1; transform:translateY(0); }
-    }
-
+    @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
     .chat-messages::-webkit-scrollbar { width:4px; }
     .chat-messages::-webkit-scrollbar-thumb { background:#d0d0d5; border-radius:10px; }
     .chat-messages::-webkit-scrollbar-track { background:transparent; }
-
-    @media (max-width:640px) {
-      .chat-msg { max-width:92%; }
-      .messenger-wrap { height:75vh; min-height:400px; }
-    }
+    @media (max-width:640px) { .chat-msg { max-width:92%; } .messenger-wrap { height:75vh; min-height:400px; } }
   </style>
 </head>
 <body>
+
   <div class="page-wrapper">
     <div id="navbar-placeholder"></div>
 
     <main class="main-content">
       <section class="pt-28 pb-16 px-6 max-w-3xl mx-auto">
-        <div class="flex items-center gap-3 mb-2">
-          <i class="fas fa-comments text-3xl text-blue-500"></i>
-          <h1 class="text-3xl font-bold text-gray-900">Support Chat</h1>
-        </div>
-        <p class="text-gray-500 mb-6">Chat directly with our support team. We're here to help!</p>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Support Chat</h1>
+        <p class="text-gray-500 mb-6">Chat directly with our support team.</p>
 
         <div class="messenger-wrap">
           <div class="chat-header">
             <div class="chat-avatar"><i class="fas fa-headset"></i></div>
             <div class="chat-info">
               <div class="name">Admin Support</div>
-              <div class="status">
-                <span class="dot"></span> Online
-              </div>
+              <div class="status"><i class="fas fa-circle text-green-500 text-xs"></i> Online</div>
             </div>
           </div>
-
           <div class="chat-messages" id="chatMessages">
-            <div class="empty-state">
-              <i class="fas fa-inbox"></i>
-              <span>No messages yet. Start the conversation!</span>
-            </div>
+            <div class="empty-state"><i class="fas fa-inbox"></i><span>No messages yet. Start the conversation!</span></div>
           </div>
-
-          <div id="typingIndicator" class="typing-indicator"></div>
-
-          <div class="chat-input-wrap">
-            <div class="emoji-picker" id="emojiPicker">
-              <span onclick="insertEmoji('😊')">😊</span>
-              <span onclick="insertEmoji('❤️')">❤️</span>
-              <span onclick="insertEmoji('🔥')">🔥</span>
-              <span onclick="insertEmoji('👍')">👍</span>
-              <span onclick="insertEmoji('😂')">😂</span>
-              <span onclick="insertEmoji('🎉')">🎉</span>
-              <span onclick="insertEmoji('🙏')">🙏</span>
-              <span onclick="insertEmoji('💯')">💯</span>
-              <span onclick="insertEmoji('🤔')">🤔</span>
-              <span onclick="insertEmoji('👋')">👋</span>
-            </div>
-            <div class="input-row">
-              <input type="text" id="chatInput" placeholder="Type a message..." required autocomplete="off" />
-              <button type="submit" id="chatSendBtn"><i class="fas fa-paper-plane"></i></button>
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-4 p-3 bg-gray-50 rounded-xl text-sm text-gray-500">
-          <i class="fas fa-info-circle text-blue-500"></i>
-          Messages are end-to-end encrypted. Your conversation is private.
+          <form class="chat-input-wrap" id="chatForm">
+            <input type="text" id="chatInput" placeholder="Type a message..." required autocomplete="off" />
+            <button type="submit" id="chatSendBtn"><i class="fas fa-paper-plane"></i></button>
+          </form>
         </div>
       </section>
     </main>
@@ -248,7 +71,7 @@
     <div id="footer-placeholder"></div>
   </div>
 
-  <!-- ===== অথ মডাল ===== -->
+  <!-- অথ মডাল -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
       <div class="flex justify-between items-center mb-4">
@@ -256,19 +79,14 @@
         <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
       </div>
       <form id="authForm" class="space-y-4">
-        <input type="email" id="authEmail" placeholder="Email" required class="form-input" />
-        <div class="relative">
-          <input type="password" id="authPassword" placeholder="Password" required class="form-input pr-10" />
-          <button type="button" onclick="togglePasswordVisibility('authPassword')" class="absolute right-3 top-3 text-gray-400"><i class="fas fa-eye"></i></button>
-        </div>
+        <input type="email" id="authEmail" placeholder="Email" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
+        <input type="password" id="authPassword" placeholder="Password" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
         <button type="submit" class="btn-primary w-full justify-center">Continue</button>
       </form>
-      <div class="mt-4 flex flex-col gap-2">
-        <button onclick="window.socialLogin('google')" class="btn-outline w-full justify-center"><i class="fab fa-google"></i> Sign in with Google</button>
-        <button onclick="window.socialLogin('github')" class="btn-outline w-full justify-center"><i class="fab fa-github"></i> Sign in with GitHub</button>
-      </div>
       <p class="mt-2 text-sm text-center">
-        <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline"><i class="fas fa-key"></i> Forgot Password?</a>
+        <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline">
+          <i class="fas fa-key"></i> Forgot Password?
+        </a>
       </p>
       <p class="mt-4 text-sm text-gray-500 text-center">
         <span id="authToggleText">Don't have an account?</span>
@@ -281,39 +99,14 @@
   <div id="toast-container"></div>
 
   <script type="module">
-    // ================================================================
-    // ===== ইমপোর্ট =====
-    // ================================================================
-     import { 
-  renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
-  renderCartSidebar, setLoading, renderPaymentModal   // ← renderPaymentModal যোগ
-} from './components.js';
+    import { auth, db, collection, doc, getDoc, setDoc, addDoc, onSnapshot, query, where, serverTimestamp, signOut, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateDoc } from './firebase-config.js';
+    import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar, setLoading } from './components.js';
 
-  // ← এই লাইন যোগ করুন
-
-    import { 
-      auth, db, collection, doc, getDoc, setDoc, addDoc, onSnapshot, 
-      query, where, serverTimestamp, signOut, onAuthStateChanged,
-      signInWithEmailAndPassword, createUserWithEmailAndPassword, updateDoc,
-      signInWithPopup, googleProvider, githubProvider, sendPasswordResetEmail
-    } from './firebase-config.js';
-    import { 
-      renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
-      renderCartSidebar, setLoading
-    } from './components.js';
-
-    // ================================================================
-    // ===== রেন্ডার =====
-    // ================================================================
     renderNavbar();
-    renderPaymentModal(); 
     renderFooter();
     renderCartSidebar();
     updateCartBadge();
 
-    // ================================================================
-    // ===== টোস্ট =====
-    // ================================================================
     window.showToast = (message, type = 'success') => {
       const container = document.getElementById('toast-container');
       if (!container) return;
@@ -325,9 +118,7 @@
       setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
     };
 
-    // ================================================================
     // ===== অথ মডাল =====
-    // ================================================================
     let currentAuthMode = 'signin';
     window.openAuthModal = (mode) => {
       currentAuthMode = mode;
@@ -344,46 +135,6 @@
       currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
       window.openAuthModal(currentAuthMode);
     });
-
-    window.togglePasswordVisibility = (id) => {
-      const input = document.getElementById(id);
-      input.type = input.type === 'password' ? 'text' : 'password';
-    };
-
-    window.socialLogin = async (provider) => {
-      try {
-        let result;
-        if (provider === 'google') result = await signInWithPopup(auth, googleProvider);
-        else if (provider === 'github') result = await signInWithPopup(auth, githubProvider);
-        const user = result.user;
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (!userDoc.exists()) {
-          await setDoc(doc(db, 'users', user.uid), {
-            email: user.email,
-            displayName: user.displayName || user.email.split('@')[0],
-            role: 'user',
-            createdAt: new Date().toISOString()
-          });
-        }
-        showToast('✅ Signed in with ' + provider, 'success');
-        closeAuthModal();
-        // চ্যাট শুরু
-        const currentUser = auth.currentUser;
-        if (currentUser) {
-          initializeChat(currentUser);
-        }
-      } catch (err) {
-        showToast('⚠️ ' + err.message, 'error');
-      }
-    };
-
-    window.showResetPasswordModal = () => {
-      const email = prompt('Enter your email address to reset password:');
-      if (!email) return;
-      sendPasswordResetEmail(auth, email)
-        .then(() => alert('✅ Password reset link sent to your email.'))
-        .catch((error) => alert('⚠️ ' + error.message));
-    };
 
     const authForm = document.getElementById('authForm');
     const authSubmitBtn = authForm.querySelector('button[type="submit"]');
@@ -408,7 +159,6 @@
         }
         closeAuthModal();
         authForm.reset();
-        initializeChat(userCred.user);
       } catch (error) {
         errorDiv.textContent = error.message;
         errorDiv.classList.remove('hidden');
@@ -418,158 +168,82 @@
       }
     });
 
-    window.handleLogout = async () => {
-      await signOut(auth);
-      showToast('✅ Logged out', 'success');
-      window.location.href = 'index.html';
-    };
-
-    // ================================================================
-    // ===== চ্যাট লজিক (ইনডেক্স-ফ্রি, শুধু conversationId) =====
-    // ================================================================
-
+    // ===== চ্যাট লজিক =====
     const chatMessages = document.getElementById('chatMessages');
+    const chatForm = document.getElementById('chatForm');
     const chatInput = document.getElementById('chatInput');
     const chatSendBtn = document.getElementById('chatSendBtn');
-    const typingIndicator = document.getElementById('typingIndicator');
-    
     let currentUser = null;
     let conversationId = null;
     let unsubMessages = null;
-    let unsubTyping = null;
-    let typingTimeout = null;
 
-    // ইমোজি
-    window.insertEmoji = (emoji) => {
-      chatInput.value += emoji;
-      chatInput.focus();
-    };
-
-    // মেসেজ রেন্ডার
     function renderMessages(msgs) {
       if (!msgs || msgs.length === 0) {
-        chatMessages.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-comment-dots"></i>
-            <span>No messages yet. Start the conversation!</span>
-          </div>
-        `;
+        chatMessages.innerHTML = `<div class="empty-state"><i class="fas fa-comment-dots"></i><span>No messages yet. Start the conversation!</span></div>`;
         return;
       }
-
       let html = '';
       msgs.forEach(m => {
         const isSent = m.fromUserId === currentUser?.uid;
-        const time = m.timestamp?.toDate?.()?.toLocaleString('en-US', { 
-          hour: '2-digit', 
-          minute: '2-digit',
-          month: 'short',
-          day: 'numeric'
-        }) || '';
-        
+        const time = m.timestamp?.toDate?.()?.toLocaleString('en-US', { hour: '2-digit', minute: '2-digit' }) || '';
         let statusHtml = '';
         if (isSent) {
           const readStatus = m.read ? '✓✓' : '✓';
           statusHtml = `<span class="msg-status">${readStatus}</span>`;
         }
-
-        const contentHtml = m.content.replace(/\n/g, '<br>');
-
         html += `
           <div class="chat-msg ${isSent ? 'sent' : 'received'}">
-            ${contentHtml}
+            ${m.content}
             <div class="msg-time">${time} ${statusHtml}</div>
           </div>
         `;
       });
-
       chatMessages.innerHTML = html;
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    // মেসেজ লিসেনার (শুধু conversationId)
-    function listenMessages(user) {
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = 'index.html';
+        return;
+      }
+      currentUser = user;
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const displayName = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
+      updateNavbarAuth(user, displayName);
+
+      conversationId = `conv_${user.uid}_admin`;
+
       if (unsubMessages) unsubMessages();
-      if (unsubTyping) unsubTyping();
-
-      const q = query(
-        collection(db, 'messages'),
-        where('conversationId', '==', conversationId)
-      );
-
+      const q = query(collection(db, 'messages'), where('conversationId', '==', conversationId));
       unsubMessages = onSnapshot(q, (snapshot) => {
         const msgs = [];
         snapshot.forEach(doc => {
           msgs.push({ id: doc.id, ...doc.data() });
         });
-        
         msgs.sort((a, b) => {
           const ta = a.timestamp?.toDate?.()?.getTime() || 0;
           const tb = b.timestamp?.toDate?.()?.getTime() || 0;
           return ta - tb;
         });
-
         renderMessages(msgs);
 
-        // অ্যাডমিনের পাঠানো মেসেজ রিড মার্ক করুন
-        const unreadAdminMsgs = msgs.filter(m => 
-          m.fromUserId === 'admin' && !m.read
-        );
+        const unreadAdminMsgs = msgs.filter(m => m.fromUserId === 'admin' && !m.read);
         if (unreadAdminMsgs.length > 0) {
           unreadAdminMsgs.forEach(async (m) => {
-            try {
-              await updateDoc(doc(db, 'messages', m.id), { 
-                read: true, 
-                readAt: serverTimestamp() 
-              });
-            } catch (err) {
-              console.error('Error marking message as read:', err);
-            }
+            await updateDoc(doc(db, 'messages', m.id), { read: true, readAt: serverTimestamp() });
           });
         }
       }, (error) => {
         console.error('Snapshot error:', error);
-        showToast('⚠️ Error loading messages: ' + error.message, 'error');
+        showToast('Error loading messages: ' + error.message, 'error');
       });
-
-      // অ্যাডমিন টাইপিং ইন্ডিকেটর
-      const typingRef = doc(db, 'typing', conversationId);
-      unsubTyping = onSnapshot(typingRef, (docSnap) => {
-        if (docSnap.exists() && docSnap.data().adminTyping) {
-          typingIndicator.textContent = '👤 Admin is typing...';
-        } else {
-          typingIndicator.textContent = '';
-        }
-      });
-    }
-
-    // ইউজার টাইপিং ইন্ডিকেটর
-    chatInput.addEventListener('input', async () => {
-      if (!conversationId || !currentUser) return;
-      
-      const typingRef = doc(db, 'typing', conversationId);
-      try {
-        await setDoc(typingRef, { 
-          userTyping: true, 
-          timestamp: serverTimestamp() 
-        }, { merge: true });
-      } catch (err) {}
-
-      clearTimeout(typingTimeout);
-      typingTimeout = setTimeout(async () => {
-        try {
-          await setDoc(typingRef, { userTyping: false }, { merge: true });
-        } catch (err) {}
-      }, 3000);
     });
 
-    // মেসেজ পাঠান
-    const chatForm = document.querySelector('.input-row');
     chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const content = chatInput.value.trim();
       if (!content) return;
-
       if (!currentUser) {
         showToast('Please sign in first.', 'warning');
         return;
@@ -580,76 +254,36 @@
       }
 
       setLoading(chatSendBtn, true);
-
       try {
         await addDoc(collection(db, 'messages'), {
           conversationId: conversationId,
           fromUserId: currentUser.uid,
           toUserId: 'admin',
-          content: content,
+          content,
           timestamp: serverTimestamp(),
-          read: false
-          // ⚠️ participants ফিল্ড নেই – যাতে কোনো ইনডেক্সের প্রয়োজন না হয়
+          read: false,
+          participants: [currentUser.uid, 'admin']
         });
-
         chatInput.value = '';
-        
-        const typingRef = doc(db, 'typing', conversationId);
-        await setDoc(typingRef, { userTyping: false }, { merge: true });
-
-        showToast('✅ Message sent', 'success');
+        showToast('Message sent', 'success');
       } catch (err) {
         console.error('Send error:', err);
-        showToast('⚠️ Error sending message: ' + err.message, 'error');
+        showToast('Error sending message: ' + err.message, 'error');
       } finally {
         setLoading(chatSendBtn, false);
         chatInput.focus();
       }
     });
 
-    // ===== চ্যাট ইনিশিয়ালাইজ =====
-    function initializeChat(user) {
-      if (!user) return;
-      currentUser = user;
-      conversationId = `conv_${user.uid}_admin`;
-      
-      // ইউজারের নাম আপডেট
-      getDoc(doc(db, 'users', user.uid)).then(doc => {
-        if (doc.exists()) {
-          const data = doc.data();
-          updateNavbarAuth(user, data.displayName || user.email.split('@')[0]);
-        }
-      });
+    window.handleLogout = async () => {
+      if (unsubMessages) unsubMessages();
+      await signOut(auth);
+      window.location.href = 'index.html';
+    };
 
-      // মেসেজ লিসেনার শুরু
-      listenMessages(user);
-    }
-
-    // ===== অথ স্টেট =====
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        // ইউজার না থাকলে মডাল দেখান
-        setTimeout(() => {
-          openAuthModal('signin');
-        }, 500);
-        return;
-      }
-
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      const displayName = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
-      updateNavbarAuth(user, displayName);
-
-      // চ্যাট শুরু
-      initializeChat(user);
-    });
-
-    // উইন্ডো ক্লোজে আনসাবস্ক্রাইব
     window.addEventListener('beforeunload', () => {
       if (unsubMessages) unsubMessages();
-      if (unsubTyping) unsubTyping();
     });
-
-    console.log('💬 Support Chat (User Side) – Fully compatible with Admin Panel');
   </script>
 </body>
 </html>
