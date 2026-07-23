@@ -1,23 +1,63 @@
-/* ===== style.css ===== */
-* {
+/* ================================================================
+   📦 SWD STORE – MASTER STYLESHEET
+   ================================================================
+   Version: 2.0
+   Author: SWD Store Team
+   Description: Complete global styles for all pages
+   ================================================================ */
+
+/* ================================================================
+   1.  RESET & BASE
+   ================================================================ */
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background: #f2f4f7;
   color: #1c1c1e;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  min-height: 100vh;
 }
 
-/* ===== গ্লাসমরফিজম ===== */
+/* ================================================================
+   2.  TYPOGRAPHY
+   ================================================================ */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* ================================================================
+   3.  GLASSMORPHISM
+   ================================================================ */
 .glass {
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
 }
 
 .glass-card {
@@ -28,72 +68,83 @@ body {
   border-radius: 16px;
   padding: 1.5rem;
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
 }
+
 .glass-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
 }
 
-/* ===== বাটন ===== */
+/* ================================================================
+   4.  BUTTONS
+   ================================================================ */
 .btn-primary {
   background: linear-gradient(135deg, #007AFF, #5856D6);
   color: #fff;
   padding: 12px 28px;
   border-radius: 60px;
   font-weight: 600;
+  font-size: 0.95rem;
   border: none;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   text-decoration: none;
+  line-height: 1.4;
+  min-height: 48px;
 }
+
 .btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 30px rgba(0, 122, 255, 0.35);
 }
-/* ===== লোডিং স্পিনার ===== */
-.spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  display: inline-block;
-}
-@keyframes spin {
-  to { transform: rotate(360deg); }
+
+.btn-primary:active {
+  transform: scale(0.97);
 }
 
-/* বাটন ডিজেবল স্টাইল */
-.btn-primary:disabled,
-.btn-outline:disabled,
-.btn-danger:disabled {
+.btn-primary:disabled {
   opacity: 0.7;
   cursor: not-allowed;
   transform: none !important;
   box-shadow: none !important;
 }
+
 .btn-outline {
   background: transparent;
   color: #1c1c1e;
   padding: 12px 28px;
   border-radius: 60px;
   font-weight: 600;
+  font-size: 0.95rem;
   border: 1.5px solid rgba(60, 60, 67, 0.08);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   text-decoration: none;
+  line-height: 1.4;
+  min-height: 48px;
+  background: rgba(255, 255, 255, 0.5);
 }
+
 .btn-outline:hover {
   background: rgba(0, 122, 255, 0.04);
   border-color: #007AFF;
   color: #007AFF;
+  transform: translateY(-2px);
+}
+
+.btn-outline:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
 }
 
 .btn-danger {
@@ -102,16 +153,33 @@ body {
   padding: 12px 28px;
   border-radius: 60px;
   font-weight: 600;
+  font-size: 0.95rem;
   border: none;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-decoration: none;
+  line-height: 1.4;
+  min-height: 48px;
 }
+
 .btn-danger:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 30px rgba(255, 59, 48, 0.35);
 }
 
-/* ===== টেক্সট ===== */
+.btn-danger:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ================================================================
+   5.  GRADIENT TEXT
+   ================================================================ */
 .gradient-text {
   background: linear-gradient(135deg, #007AFF, #AF52DE);
   -webkit-background-clip: text;
@@ -119,7 +187,9 @@ body {
   background-clip: text;
 }
 
-/* ===== নেভবার ===== */
+/* ================================================================
+   6.  NAVBAR
+   ================================================================ */
 .nav-link {
   position: relative;
   font-weight: 500;
@@ -127,44 +197,89 @@ body {
   transition: color 0.2s ease;
   cursor: pointer;
   text-decoration: none;
+  padding: 4px 0;
 }
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(135deg, #007AFF, #5856D6);
+  transition: width 0.3s ease;
+}
+
 .nav-link:hover {
   color: #007AFF;
 }
 
-/* ===== ড্রপডাউন ===== */
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* ================================================================
+   7.  DROPDOWN MENU
+   ================================================================ */
 .dropdown-menu {
   display: none;
   position: absolute;
   right: 0;
-  top: 100%;
+  top: calc(100% + 8px);
   background: white;
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-  min-width: 200px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+  min-width: 220px;
   padding: 8px 0;
   border: 1px solid rgba(0, 0, 0, 0.04);
   z-index: 100;
+  overflow: hidden;
 }
+
 .dropdown-menu a {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   padding: 10px 20px;
   color: #1c1c1e;
   text-decoration: none;
   font-size: 0.9rem;
   transition: background 0.2s ease;
 }
+
 .dropdown-menu a:hover {
   background: #f0f0f5;
 }
-.dropdown-menu.show {
-  display: block;
+
+.dropdown-menu a i {
+  width: 20px;
+  text-align: center;
+  color: #8e8e93;
 }
 
-/* ===== প্রোফাইল অ্যাভাটার ===== */
+.dropdown-menu.show {
+  display: block;
+  animation: dropdownFade 0.2s ease;
+}
+
+@keyframes dropdownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================================================================
+   8.  PROFILE AVATAR
+   ================================================================ */
 .profile-avatar {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: linear-gradient(135deg, #007AFF, #5856D6);
   color: white;
@@ -172,10 +287,20 @@ body {
   align-items: center;
   justify-content: center;
   font-weight: 700;
+  font-size: 1rem;
   cursor: pointer;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  user-select: none;
 }
 
-/* ===== কার্ট ব্যাজ (লাল, ছোট) ===== */
+.profile-avatar:hover {
+  transform: scale(1.05);
+}
+
+/* ================================================================
+   9.  CART BADGE
+   ================================================================ */
 .cart-badge {
   background: #FF3B30;
   color: white;
@@ -189,15 +314,23 @@ body {
   right: -8px;
   min-width: 18px;
   text-align: center;
-  box-shadow: 0 2px 6px rgba(255, 59, 48, 0.3);
+  box-shadow: 0 2px 8px rgba(255, 59, 48, 0.35);
+  transition: transform 0.2s ease;
 }
 
-/* ===== কার্ট সাইডবার ===== */
+.cart-badge.show {
+  transform: scale(1);
+}
+
+/* ================================================================
+   10. CART SIDEBAR
+   ================================================================ */
 .cart-sidebar {
   position: fixed;
-  right: -400px;
+  right: -420px;
   top: 0;
-  width: 380px;
+  width: 400px;
+  max-width: 90vw;
   height: 100%;
   background: white;
   box-shadow: -10px 0 40px rgba(0, 0, 0, 0.1);
@@ -205,24 +338,43 @@ body {
   z-index: 200;
   padding: 1.5rem;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
+
 .cart-sidebar.open {
   right: 0;
 }
+
+.cart-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.cart-sidebar::-webkit-scrollbar-thumb {
+  background: #d0d0d5;
+  border-radius: 10px;
+}
+
 .cart-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   z-index: 199;
   display: none;
-}
-.cart-overlay.open {
-  display: block;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-/* ===== ফর্ম ইনপুট ===== */
+.cart-overlay.open {
+  display: block;
+  opacity: 1;
+}
+
+/* ================================================================
+   11. FORM INPUTS
+   ================================================================ */
 .form-input {
   width: 100%;
   padding: 14px 18px;
@@ -232,15 +384,42 @@ body {
   background: rgba(255, 255, 255, 0.8);
   transition: all 0.3s ease;
   font-family: 'Inter', sans-serif;
-}
-.form-input:focus {
+  color: #1c1c1e;
   outline: none;
+}
+
+.form-input:focus {
   border-color: #007AFF;
   box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.08);
   background: #ffffff;
 }
 
-/* ===== ফুটার সোশ্যাল আইকন ===== */
+.form-input::placeholder {
+  color: #8e8e93;
+  opacity: 0.7;
+}
+
+.form-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+textarea.form-input {
+  resize: vertical;
+  min-height: 100px;
+}
+
+select.form-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238e8e93' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+}
+
+/* ================================================================
+   12. FOOTER & SOCIAL ICONS
+   ================================================================ */
 .social-icon {
   display: inline-flex;
   align-items: center;
@@ -255,26 +434,34 @@ body {
   text-decoration: none;
   border: 1px solid rgba(60, 60, 67, 0.08);
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  font-size: 1.1rem;
 }
+
 .social-icon:hover {
   background: #007AFF;
   color: #fff;
   transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 122, 255, 0.2);
+  box-shadow: 0 8px 20px rgba(0, 122, 255, 0.25);
   border-color: #007AFF;
 }
 
-/* ===== ফ্লেক্স লেআউট ===== */
+/* ================================================================
+   13. PAGE LAYOUT
+   ================================================================ */
 .page-wrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
+
 .main-content {
   flex: 1 0 auto;
+  padding-top: 80px; /* navbar height */
 }
 
-/* ===== টোস্ট ===== */
+/* ================================================================
+   14. TOAST NOTIFICATIONS
+   ================================================================ */
 #toast-container {
   position: fixed;
   bottom: 30px;
@@ -283,9 +470,11 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  max-width: 380px;
+  max-width: 420px;
   width: 100%;
+  pointer-events: none;
 }
+
 .toast {
   padding: 16px 20px;
   border-radius: 14px;
@@ -293,34 +482,865 @@ body {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.10);
   font-size: 0.95rem;
   font-weight: 500;
   color: #1c1c1e;
   transform: translateX(calc(100% + 30px));
-  animation: slideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  animation: slideIn 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
   display: flex;
   align-items: center;
   gap: 12px;
+  pointer-events: auto;
+  border-left: 4px solid #007AFF;
 }
-.toast.success { border-left: 4px solid #34C759; }
-.toast.error { border-left: 4px solid #FF3B30; }
-.toast.warning { border-left: 4px solid #FF9500; }
-.toast i { font-size: 1.2rem; }
-.toast.success i { color: #34C759; }
-.toast.error i { color: #FF3B30; }
-.toast.warning i { color: #FF9500; }
-@keyframes slideIn { to { transform: translateX(0); } }
-.toast.hide { animation: slideOut 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
-@keyframes slideOut { to { transform: translateX(calc(100% + 30px)); opacity: 0; } }
 
-/* ===== অর্ডার ব্যাজ ===== */
-.badge-pending { background: #FF9500; color: white; padding: 2px 10px; border-radius: 60px; font-size: 0.7rem; }
-.badge-processing { background: #007AFF; color: white; padding: 2px 10px; border-radius: 60px; font-size: 0.7rem; }
-.badge-completed { background: #34C759; color: white; padding: 2px 10px; border-radius: 60px; font-size: 0.7rem; }
+.toast.success {
+  border-left-color: #34C759;
+}
 
-/* ===== চ্যাট স্টাইল ===== */
-.chat-container { max-height: 65vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding: 4px; }
-.msg-user { align-self: flex-end; background: #007AFF; color: white; border-radius: 18px 18px 0 18px; padding: 10px 16px; max-width: 80%; }
-.msg-admin { align-self: flex-start; background: #e5e5ea; color: #1c1c1e; border-radius: 18px 18px 18px 0; padding: 10px 16px; max-width: 80%; }
-.msg-time { font-size: 0.6rem; opacity: 0.7; margin-top: 4px; text-align: right; }
+.toast.success i {
+  color: #34C759;
+}
+
+.toast.error {
+  border-left-color: #FF3B30;
+}
+
+.toast.error i {
+  color: #FF3B30;
+}
+
+.toast.warning {
+  border-left-color: #FF9500;
+}
+
+.toast.warning i {
+  color: #FF9500;
+}
+
+.toast i {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+@keyframes slideIn {
+  to {
+    transform: translateX(0);
+  }
+}
+
+.toast.hide {
+  animation: slideOut 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes slideOut {
+  to {
+    transform: translateX(calc(100% + 30px));
+    opacity: 0;
+  }
+}
+
+/* ================================================================
+   15. SPINNER / LOADING
+   ================================================================ */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ================================================================
+   16. ORDER BADGES
+   ================================================================ */
+.badge-pending {
+  background: #FF9500;
+  color: white;
+  padding: 2px 12px;
+  border-radius: 60px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.badge-processing {
+  background: #007AFF;
+  color: white;
+  padding: 2px 12px;
+  border-radius: 60px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.badge-completed {
+  background: #34C759;
+  color: white;
+  padding: 2px 12px;
+  border-radius: 60px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+/* ================================================================
+   17. CHAT STYLES
+   ================================================================ */
+.chat-container {
+  max-height: 65vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.msg-user {
+  align-self: flex-end;
+  background: #007AFF;
+  color: white;
+  border-radius: 18px 18px 0 18px;
+  padding: 10px 16px;
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+.msg-admin {
+  align-self: flex-start;
+  background: #e5e5ea;
+  color: #1c1c1e;
+  border-radius: 18px 18px 18px 0;
+  padding: 10px 16px;
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+.msg-time {
+  font-size: 0.6rem;
+  opacity: 0.7;
+  margin-top: 4px;
+  text-align: right;
+}
+
+/* ================================================================
+   18. DARK MODE
+   ================================================================ */
+.dark body {
+  background: #121214;
+  color: #e5e5ea;
+}
+
+.dark .glass {
+  background: rgba(30, 30, 32, 0.8);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.dark .glass-card {
+  background: rgba(30, 30, 32, 0.8);
+  border-color: rgba(255, 255, 255, 0.05);
+  color: #e5e5ea;
+}
+
+.dark .glass-card:hover {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.dark .btn-outline {
+  color: #e5e5ea;
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(30, 30, 32, 0.5);
+}
+
+.dark .btn-outline:hover {
+  background: rgba(0, 122, 255, 0.15);
+  border-color: #007AFF;
+  color: #007AFF;
+}
+
+.dark .form-input {
+  background: rgba(30, 30, 32, 0.8);
+  color: #e5e5ea;
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .form-input:focus {
+  background: #1c1c1e;
+  border-color: #007AFF;
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.12);
+}
+
+.dark .form-input::placeholder {
+  color: #6b6b70;
+}
+
+.dark .nav-link {
+  color: #a0a0a5;
+}
+
+.dark .nav-link:hover {
+  color: #007AFF;
+}
+
+.dark .dropdown-menu {
+  background: #1c1c1e;
+  border-color: #2c2c2e;
+}
+
+.dark .dropdown-menu a {
+  color: #e5e5ea;
+}
+
+.dark .dropdown-menu a:hover {
+  background: #2c2c2e;
+}
+
+.dark .dropdown-menu a i {
+  color: #6b6b70;
+}
+
+.dark .cart-sidebar {
+  background: #1c1c1e;
+  color: #e5e5ea;
+}
+
+.dark .cart-overlay {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.dark .toast {
+  background: rgba(30, 30, 32, 0.95);
+  color: #e5e5ea;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.dark .profile-avatar {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+}
+
+.dark select.form-input {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b6b70' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+}
+
+.dark .msg-admin {
+  background: #2c2c2e;
+  color: #e5e5ea;
+}
+
+.dark .msg-user {
+  background: #007AFF;
+  color: #fff;
+}
+
+.dark .badge-pending {
+  background: #78350f;
+  color: #fbbf24;
+}
+
+.dark .badge-processing {
+  background: #1e3a5f;
+  color: #60a5fa;
+}
+
+.dark .badge-completed {
+  background: #064e3b;
+  color: #6ee7b7;
+}
+
+.dark .social-icon {
+  background: rgba(30, 30, 32, 0.8);
+  color: #a0a0a5;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.dark .social-icon:hover {
+  background: #007AFF;
+  color: #fff;
+}
+
+/* ================================================================
+   19. RESPONSIVE UTILITIES
+   ================================================================ */
+@media (max-width: 768px) {
+  .main-content {
+    padding-top: 68px;
+  }
+
+  .glass-card {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+
+  .btn-primary,
+  .btn-outline,
+  .btn-danger {
+    padding: 10px 20px;
+    font-size: 0.85rem;
+    min-height: 42px;
+  }
+
+  #toast-container {
+    bottom: 16px;
+    right: 16px;
+    max-width: calc(100vw - 32px);
+  }
+
+  .toast {
+    padding: 14px 16px;
+    font-size: 0.85rem;
+  }
+
+  .cart-sidebar {
+    width: 100%;
+    max-width: 100%;
+    right: -100%;
+  }
+
+  .cart-sidebar.open {
+    right: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding-top: 60px;
+  }
+
+  .glass-card {
+    padding: 0.75rem;
+    border-radius: 10px;
+  }
+
+  .form-input {
+    padding: 12px 14px;
+    font-size: 0.9rem;
+    border-radius: 10px;
+  }
+
+  .profile-avatar {
+    width: 34px;
+    height: 34px;
+    font-size: 0.85rem;
+  }
+
+  .dropdown-menu {
+    min-width: 180px;
+    right: -10px;
+  }
+}
+
+/* ================================================================
+   20. UTILITY HELPERS
+   ================================================================ */
+.text-truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-3 {
+  gap: 0.75rem;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+/* scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d0d0d5;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b0b0b5;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #3a3a3c;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #4a4a4c;
+}
+
+/* ================================================================
+   21. ANIMATIONS
+   ================================================================ */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-up {
+  animation: fadeUp 0.4s ease forwards;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ================================================================
+   22. ADMIN PANEL SPECIFIC
+   ================================================================ */
+.dark .nav-item {
+  color: #a0a0a5;
+}
+
+.dark .nav-item:hover,
+.dark .nav-item.active {
+  background: #2c2c2e;
+  color: #007AFF;
+}
+
+/* ================================================================
+   23. MESSENGER / CHAT (Admin & User)
+   ================================================================ */
+.messenger-wrap {
+  display: flex;
+  height: 70vh;
+  min-height: 480px;
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.messenger-wrap .conv-list {
+  width: 300px;
+  min-width: 200px;
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+  background: #fafafc;
+  overflow-y: auto;
+  padding: 0.5rem 0;
+}
+
+.messenger-wrap .conv-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: 0.2s;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.02);
+}
+
+.messenger-wrap .conv-item:hover {
+  background: #f0f0f5;
+}
+
+.messenger-wrap .conv-item.active {
+  background: #e8edf5;
+}
+
+.messenger-wrap .conv-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #007AFF, #5856D6);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.messenger-wrap .conv-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.messenger-wrap .conv-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #1c1c1e;
+}
+
+.messenger-wrap .conv-last {
+  font-size: 0.8rem;
+  color: #8e8e93;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.messenger-wrap .conv-time {
+  font-size: 0.7rem;
+  color: #8e8e93;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.messenger-wrap .conv-unread {
+  background: #007AFF;
+  color: #fff;
+  border-radius: 60px;
+  padding: 0 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 20px;
+  flex-shrink: 0;
+  min-width: 20px;
+  text-align: center;
+}
+
+.messenger-wrap .chat-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  min-width: 0;
+}
+
+.messenger-wrap .chat-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  font-weight: 600;
+  background: #fafafc;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.messenger-wrap .chat-header .chat-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #007AFF, #5856D6);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.messenger-wrap .chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #f8f9fc;
+}
+
+.messenger-wrap .chat-msg {
+  max-width: 78%;
+  padding: 10px 16px;
+  border-radius: 18px;
+  font-size: 0.95rem;
+  word-wrap: break-word;
+  animation: fadeUp 0.2s ease;
+}
+
+.messenger-wrap .chat-msg.sent {
+  align-self: flex-end;
+  background: #007AFF;
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.messenger-wrap .chat-msg.received {
+  align-self: flex-start;
+  background: #fff;
+  color: #1c1c1e;
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.messenger-wrap .chat-msg .msg-time {
+  font-size: 0.6rem;
+  opacity: 0.6;
+  margin-top: 4px;
+  text-align: right;
+}
+
+.messenger-wrap .chat-msg.sent .msg-time {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.messenger-wrap .chat-msg .msg-status {
+  font-size: 0.6rem;
+  margin-left: 6px;
+  opacity: 0.6;
+}
+
+.messenger-wrap .chat-input-wrap {
+  display: flex;
+  gap: 10px;
+  padding: 12px 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.messenger-wrap .chat-input-wrap input {
+  flex: 1;
+  padding: 12px 18px;
+  border-radius: 30px;
+  border: 1.5px solid rgba(60, 60, 67, 0.08);
+  font-size: 0.95rem;
+  transition: 0.2s;
+  background: #f5f5f8;
+  outline: none;
+}
+
+.messenger-wrap .chat-input-wrap input:focus {
+  border-color: #007AFF;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.06);
+}
+
+.messenger-wrap .chat-input-wrap button {
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #007AFF, #5856D6);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.messenger-wrap .chat-input-wrap button:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);
+}
+
+.messenger-wrap .chat-input-wrap button:disabled {
+  opacity: 0.5;
+  transform: none !important;
+}
+
+.messenger-wrap .empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #8e8e93;
+  font-size: 0.95rem;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.messenger-wrap .empty-state i {
+  font-size: 2.4rem;
+  opacity: 0.3;
+}
+
+/* Dark mode for messenger */
+.dark .messenger-wrap {
+  background: #1c1c1e;
+  border-color: #2c2c2e;
+}
+
+.dark .messenger-wrap .conv-list {
+  background: #1c1c1e;
+  border-color: #2c2c2e;
+}
+
+.dark .messenger-wrap .conv-item {
+  border-color: #2c2c2e;
+}
+
+.dark .messenger-wrap .conv-item:hover {
+  background: #2c2c2e;
+}
+
+.dark .messenger-wrap .conv-item.active {
+  background: #1a2a3a;
+}
+
+.dark .messenger-wrap .conv-name {
+  color: #e5e5ea;
+}
+
+.dark .messenger-wrap .conv-last {
+  color: #6b6b70;
+}
+
+.dark .messenger-wrap .conv-time {
+  color: #6b6b70;
+}
+
+.dark .messenger-wrap .chat-area {
+  background: #1c1c1e;
+}
+
+.dark .messenger-wrap .chat-header {
+  background: #2c2c2e;
+  border-color: #3a3a3c;
+  color: #e5e5ea;
+}
+
+.dark .messenger-wrap .chat-messages {
+  background: #121214;
+}
+
+.dark .messenger-wrap .chat-msg.received {
+  background: #2c2c2e;
+  color: #e5e5ea;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dark .messenger-wrap .chat-msg.sent {
+  background: #007AFF;
+  color: #fff;
+}
+
+.dark .messenger-wrap .chat-input-wrap {
+  background: #1c1c1e;
+  border-color: #3a3a3c;
+}
+
+.dark .messenger-wrap .chat-input-wrap input {
+  background: #2c2c2e;
+  color: #e5e5ea;
+  border-color: #3a3a3c;
+}
+
+.dark .messenger-wrap .chat-input-wrap input:focus {
+  background: #1c1c1e;
+  border-color: #007AFF;
+}
+
+/* ================================================================
+   24. MESSENGER SCROLLBARS
+   ================================================================ */
+.messenger-wrap .conv-list::-webkit-scrollbar,
+.messenger-wrap .chat-messages::-webkit-scrollbar {
+  width: 4px;
+}
+
+.messenger-wrap .conv-list::-webkit-scrollbar-thumb,
+.messenger-wrap .chat-messages::-webkit-scrollbar-thumb {
+  background: #d0d0d5;
+  border-radius: 10px;
+}
+
+.messenger-wrap .conv-list::-webkit-scrollbar-track,
+.messenger-wrap .chat-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dark .messenger-wrap .conv-list::-webkit-scrollbar-thumb,
+.dark .messenger-wrap .chat-messages::-webkit-scrollbar-thumb {
+  background: #3a3a3c;
+}
+
+/* ================================================================
+   25. RESPONSIVE MESSENGER
+   ================================================================ */
+@media (max-width: 768px) {
+  .messenger-wrap {
+    flex-direction: column;
+    height: 80vh;
+    min-height: 400px;
+  }
+
+  .messenger-wrap .conv-list {
+    width: 100%;
+    max-height: 200px;
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .messenger-wrap .chat-msg {
+    max-width: 92%;
+  }
+
+  .messenger-wrap .conv-item {
+    padding: 10px 14px;
+  }
+
+  .messenger-wrap .conv-avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
+  }
+
+  .messenger-wrap .chat-input-wrap {
+    padding: 10px 14px;
+    flex-wrap: wrap;
+  }
+
+  .messenger-wrap .chat-input-wrap input {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+
+  .messenger-wrap .chat-input-wrap button {
+    width: 42px;
+    height: 42px;
+    font-size: 1rem;
+  }
+
+  .messenger-wrap .chat-messages {
+    padding: 12px 14px;
+  }
+
+  .messenger-wrap .chat-msg {
+    padding: 8px 14px;
+    font-size: 0.9rem;
+  }
+}
+
+/* ================================================================
+   26. END
+   ================================================================ */

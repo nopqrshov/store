@@ -8,71 +8,174 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .ticket-badge {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .priority-badge {
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .priority-high { background: #fee2e2; color: #dc2626; }
+    .priority-medium { background: #fef3c7; color: #d97706; }
+    .priority-low { background: #d1fae5; color: #059669; }
+    .dark .priority-high { background: #7f1d1d; color: #fca5a5; }
+    .dark .priority-medium { background: #78350f; color: #fbbf24; }
+    .dark .priority-low { background: #064e3b; color: #6ee7b7; }
+  </style>
 </head>
 <body>
-
   <div class="page-wrapper">
     <div id="navbar-placeholder"></div>
 
     <main class="main-content">
       <section class="pt-28 pb-16 px-6 max-w-3xl mx-auto">
-        <h1 class="text-3xl font-bold text-gray-900">Fix My Website</h1>
-        <p class="text-gray-500 mt-2">Describe your issue in detail. We'll get back to you within 24 hours.</p>
+        <!-- হেডার -->
+        <div class="flex items-center gap-3 mb-2">
+          <i class="fas fa-wrench text-3xl text-blue-500"></i>
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Fix My Website</h1>
+        </div>
+        <p class="text-gray-500 dark:text-gray-400 mt-1">
+          Describe your issue in detail. We'll get back to you within 24 hours.
+        </p>
+        <div class="mt-2 flex flex-wrap gap-3 text-sm">
+          <span class="ticket-badge"><i class="fas fa-ticket-alt"></i> Get Ticket Number</span>
+          <span class="text-gray-400"><i class="fas fa-clock"></i> Response: 24h</span>
+        </div>
+
+        <!-- ===== ফর্ম ===== -->
         <form id="fixForm" class="mt-8 space-y-5">
+          <!-- নাম -->
           <div>
-            <label class="block text-sm font-semibold text-gray-700">Your Name *</label>
-            <input type="text" id="fixName" required class="form-input" />
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Your Name <span class="text-red-500">*</span>
+            </label>
+            <input type="text" id="fixName" required class="form-input" placeholder="e.g. John Doe" />
           </div>
+
+          <!-- ইমেইল -->
           <div>
-            <label class="block text-sm font-semibold text-gray-700">Email *</label>
-            <input type="email" id="fixEmail" required class="form-input" />
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Email <span class="text-red-500">*</span>
+            </label>
+            <input type="email" id="fixEmail" required class="form-input" placeholder="your@email.com" />
           </div>
+
+          <!-- ফোন -->
           <div>
-            <label class="block text-sm font-semibold text-gray-700">Phone</label>
-            <input type="tel" id="fixPhone" class="form-input" />
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Phone</label>
+            <input type="tel" id="fixPhone" class="form-input" placeholder="+880 1XXX-XXXXXX" />
           </div>
+
+          <!-- ওয়েবসাইট ইউআরএল -->
           <div>
-            <label class="block text-sm font-semibold text-gray-700">Website URL (if any)</label>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Website URL (if any)</label>
             <input type="url" id="fixUrl" class="form-input" placeholder="https://example.com" />
           </div>
+
+          <!-- ক্যাটাগরি -->
           <div>
-            <label class="block text-sm font-semibold text-gray-700">Describe the problem *</label>
-            <textarea id="fixProblem" rows="5" required class="form-input resize-y" placeholder="What's broken? Slow speed? Error messages?"></textarea>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Problem Category</label>
+            <select id="fixCategory" class="form-input">
+              <option value="speed">🚀 Speed Issue</option>
+              <option value="error">🐛 Error / Bug</option>
+              <option value="design">🎨 Design Issue</option>
+              <option value="hacking">🔒 Security / Hacking</option>
+              <option value="hosting">☁️ Hosting / Domain</option>
+              <option value="other">📌 Other</option>
+            </select>
           </div>
+
+          <!-- প্রায়োরিটি -->
           <div>
-            <label class="block text-sm font-semibold text-gray-700">Screenshot / Image (Google Drive link)</label>
-            <input type="text" id="fixImageLink" class="form-input" placeholder="Paste your Google Drive share link here" />
-            <p class="text-xs text-gray-400 mt-1">Upload image to Google Drive, get shareable link, and paste here.</p>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">Priority</label>
+            <select id="fixPriority" class="form-input">
+              <option value="low">🟢 Low</option>
+              <option value="medium" selected>🟡 Medium</option>
+              <option value="high">🔴 High</option>
+            </select>
           </div>
-          <button type="submit" class="btn-primary w-full justify-center">
+
+          <!-- সমস্যা বিবরণ -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Describe the problem <span class="text-red-500">*</span>
+            </label>
+            <textarea id="fixProblem" rows="5" required class="form-input resize-y" 
+                      placeholder="What's broken? Slow speed? Error messages? Please be as detailed as possible."></textarea>
+          </div>
+
+          <!-- ইমেজ লিংক -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Screenshot / Image (Google Drive link)
+            </label>
+            <div class="relative">
+              <input type="text" id="fixImageLink" class="form-input" 
+                     placeholder="Paste your Google Drive share link here" />
+              <i class="fas fa-image absolute right-3 top-3 text-gray-400"></i>
+            </div>
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+              <i class="fas fa-info-circle"></i> Upload image to Google Drive, get shareable link, and paste here.
+            </p>
+          </div>
+
+          <!-- সাবমিট বাটন -->
+          <button type="submit" class="btn-primary w-full justify-center text-base py-4">
             <i class="fas fa-paper-plane"></i> Submit Fix Request
           </button>
+
+          <!-- ফিডব্যাক -->
           <div id="fixFeedback" class="hidden text-sm font-medium p-4 rounded-xl"></div>
+          <div id="ticketNumber" class="hidden text-sm font-medium p-4 rounded-xl"></div>
         </form>
+
+        <!-- ===== ট্র্যাকিং ইনফো ===== -->
+        <div class="mt-8 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+          <p class="text-sm text-blue-700 dark:text-blue-300">
+            <i class="fas fa-info-circle"></i> 
+            After submitting, you'll receive a <strong>Ticket Number</strong>. 
+            Use it to track your request in 
+            <a href="my-fix-requests.html" class="font-semibold underline">My Fix Requests</a>.
+          </p>
+        </div>
       </section>
     </main>
 
     <div id="footer-placeholder"></div>
   </div>
 
-  <!-- অথ মডাল -->
+  <!-- ===== অথ মডাল ===== -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+    <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 max-w-md w-full shadow-2xl">
       <div class="flex justify-between items-center mb-4">
-        <h3 id="authModalTitle" class="text-2xl font-bold">Sign In</h3>
+        <h3 id="authModalTitle" class="text-2xl font-bold dark:text-white">Sign In</h3>
         <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
       </div>
       <form id="authForm" class="space-y-4">
-        <input type="email" id="authEmail" placeholder="Email" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
-        <input type="password" id="authPassword" placeholder="Password" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
+        <input type="email" id="authEmail" placeholder="Email" required class="form-input" />
+        <div class="relative">
+          <input type="password" id="authPassword" placeholder="Password" required class="form-input pr-10" />
+          <button type="button" onclick="togglePasswordVisibility('authPassword')" class="absolute right-3 top-3 text-gray-400"><i class="fas fa-eye"></i></button>
+        </div>
         <button type="submit" class="btn-primary w-full justify-center">Continue</button>
       </form>
+      <div class="mt-4 flex flex-col gap-2">
+        <button onclick="window.socialLogin('google')" class="btn-outline w-full justify-center"><i class="fab fa-google"></i> Sign in with Google</button>
+        <button onclick="window.socialLogin('github')" class="btn-outline w-full justify-center"><i class="fab fa-github"></i> Sign in with GitHub</button>
+      </div>
       <p class="mt-2 text-sm text-center">
-        <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline">
-          <i class="fas fa-key"></i> Forgot Password?
-        </a>
+        <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline"><i class="fas fa-key"></i> Forgot Password?</a>
       </p>
-      <p class="mt-4 text-sm text-gray-500 text-center">
+      <p class="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
         <span id="authToggleText">Don't have an account?</span>
         <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
       </p>
@@ -83,14 +186,26 @@
   <div id="toast-container"></div>
 
   <script type="module">
-    import { auth, db, collection, addDoc, serverTimestamp, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, doc, setDoc, getDoc } from './firebase-config.js';
-    import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar, setLoading } from './components.js';
+    // ===== ইমপোর্ট =====
+    import { 
+      auth, db, collection, addDoc, serverTimestamp, 
+      signInWithEmailAndPassword, createUserWithEmailAndPassword, 
+      onAuthStateChanged, signOut, doc, setDoc, getDoc,
+      signInWithPopup, googleProvider, githubProvider,
+      sendPasswordResetEmail
+    } from './firebase-config.js';
+    import { 
+      renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
+      renderCartSidebar, setLoading, toggleDarkMode 
+    } from './components.js';
 
+    // ===== রেন্ডার =====
     renderNavbar();
     renderFooter();
     renderCartSidebar();
     updateCartBadge();
 
+    // ===== টোস্ট =====
     window.showToast = (message, type = 'success') => {
       const container = document.getElementById('toast-container');
       if (!container) return;
@@ -101,6 +216,9 @@
       container.appendChild(toast);
       setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
     };
+
+    // ===== ডার্ক মোড =====
+    window.toggleDarkModeGlobal = toggleDarkMode;
 
     // ===== অথ মডাল =====
     let currentAuthMode = 'signin';
@@ -119,6 +237,41 @@
       currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
       window.openAuthModal(currentAuthMode);
     });
+
+    window.togglePasswordVisibility = (id) => {
+      const input = document.getElementById(id);
+      input.type = input.type === 'password' ? 'text' : 'password';
+    };
+
+    window.socialLogin = async (provider) => {
+      try {
+        let result;
+        if (provider === 'google') result = await signInWithPopup(auth, googleProvider);
+        else if (provider === 'github') result = await signInWithPopup(auth, githubProvider);
+        const user = result.user;
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (!userDoc.exists()) {
+          await setDoc(doc(db, 'users', user.uid), {
+            email: user.email,
+            displayName: user.displayName || user.email.split('@')[0],
+            role: 'user',
+            createdAt: new Date().toISOString()
+          });
+        }
+        showToast('✅ Signed in with ' + provider, 'success');
+        closeAuthModal();
+      } catch (err) {
+        showToast('⚠️ ' + err.message, 'error');
+      }
+    };
+
+    window.showResetPasswordModal = () => {
+      const email = prompt('Enter your email address to reset password:');
+      if (!email) return;
+      sendPasswordResetEmail(auth, email)
+        .then(() => alert('✅ Password reset link sent to your email.'))
+        .catch((error) => alert('⚠️ ' + error.message));
+    };
 
     const authForm = document.getElementById('authForm');
     const authSubmitBtn = authForm.querySelector('button[type="submit"]');
@@ -166,52 +319,127 @@
       showToast('✅ Logged out', 'success');
     };
 
-    // ===== ফিক্স ফর্ম =====
+    // ================================================================
+    // ===== ফিক্স ফর্ম লজিক =====
+    // ================================================================
+
     const fixForm = document.getElementById('fixForm');
     const fixBtn = fixForm.querySelector('button[type="submit"]');
+    const feedback = document.getElementById('fixFeedback');
+    const ticketDiv = document.getElementById('ticketNumber');
+
     fixForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      // ===== ফর্ম ডেটা নেওয়া =====
       const name = document.getElementById('fixName').value.trim();
       const email = document.getElementById('fixEmail').value.trim();
       const phone = document.getElementById('fixPhone').value.trim();
       const url = document.getElementById('fixUrl').value.trim();
+      const category = document.getElementById('fixCategory').value;
+      const priority = document.getElementById('fixPriority').value;
       const problem = document.getElementById('fixProblem').value.trim();
       const imageLink = document.getElementById('fixImageLink').value.trim();
-      const feedback = document.getElementById('fixFeedback');
 
+      // ===== ভ্যালিডেশন =====
       if (!name || !email || !problem) {
-        feedback.className = 'block text-sm font-medium p-4 rounded-xl bg-red-50 text-red-600 border border-red-200';
-        feedback.textContent = 'Please fill in name, email and problem.';
+        feedback.className = 'block text-sm font-medium p-4 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200';
+        feedback.textContent = '⚠️ Please fill in name, email and problem.';
         showToast('⚠️ Please fill in all required fields.', 'error');
         return;
       }
 
-      setLoading(fixBtn, true, 'Submit Fix Request');
+      if (!email.includes('@')) {
+        feedback.className = 'block text-sm font-medium p-4 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200';
+        feedback.textContent = '⚠️ Please enter a valid email address.';
+        showToast('⚠️ Invalid email address.', 'error');
+        return;
+      }
+
+      // ===== সাবমিট =====
+      setLoading(fixBtn, true, 'Submitting...');
+      feedback.className = 'hidden';
+      ticketDiv.className = 'hidden';
+
       try {
         const userId = auth.currentUser ? auth.currentUser.uid : null;
-        await addDoc(collection(db, 'fixRequests'), {
-          name, email, phone, url, problem, imageLink,
+        const userEmail = auth.currentUser ? auth.currentUser.email : email;
+
+        // টিকেট নম্বর জেনারেশন
+        const ticketNumber = `FIX-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+
+        const docRef = await addDoc(collection(db, 'fixRequests'), {
+          name,
+          email,
+          phone,
+          url,
+          category,
+          priority,
+          problem,
+          imageLink,
           userId,
+          userEmail,
+          ticketNumber,
           status: 'pending',
           timestamp: serverTimestamp(),
           read: false,
           reply: '',
           replyTimestamp: null
         });
-        feedback.className = 'block text-sm font-medium p-4 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200';
-        feedback.textContent = '✅ Your request has been submitted. We will contact you soon.';
-        showToast('✅ Request submitted!', 'success');
+
+        // ===== সাফল্য =====
+        feedback.className = 'block text-sm font-medium p-4 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200';
+        feedback.innerHTML = `
+          <i class="fas fa-check-circle"></i> 
+          Your request has been submitted successfully! 
+          We will contact you within 24 hours.
+        `;
+
+        ticketDiv.className = 'block text-sm font-medium p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 mt-4';
+        ticketDiv.innerHTML = `
+          <i class="fas fa-ticket-alt"></i> 
+          <strong>Your Ticket Number:</strong> 
+          <span class="font-mono font-bold text-base">${ticketNumber}</span>
+          <br />
+          <span class="text-xs opacity-75">Please save this number to track your request.</span>
+        `;
+
+        showToast('✅ Request submitted! Ticket: ' + ticketNumber, 'success');
         fixForm.reset();
-        setTimeout(() => feedback.className = 'hidden', 8000);
+
+        // ১০ সেকেন্ড পর ফিডব্যাক লুকান
+        setTimeout(() => {
+          feedback.className = 'hidden';
+        }, 10000);
+
       } catch (error) {
-        feedback.className = 'block text-sm font-medium p-4 rounded-xl bg-red-50 text-red-600 border border-red-200';
+        console.error('Fix request error:', error);
+        feedback.className = 'block text-sm font-medium p-4 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200';
         feedback.textContent = '⚠️ Something went wrong. Please try again.';
         showToast('⚠️ ' + error.message, 'error');
-        console.error(error);
       } finally {
         setLoading(fixBtn, false);
       }
     });
+
+    // ===== অটোফিল ইউজার ডেটা (যদি লগইন করা থাকে) =====
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const nameInput = document.getElementById('fixName');
+        const emailInput = document.getElementById('fixEmail');
+        if (!nameInput.value) {
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            if (data.displayName) nameInput.value = data.displayName;
+            if (data.phone) document.getElementById('fixPhone').value = data.phone;
+          }
+          if (!emailInput.value) emailInput.value = user.email;
+        }
+      }
+    });
+
+    console.log('🔧 Fix Website page loaded successfully!');
   </script>
 </body>
 </html>

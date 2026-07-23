@@ -8,34 +8,144 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .settings-card {
+      transition: all 0.3s ease;
+    }
+    .settings-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.06);
+    }
+    .danger-zone {
+      border: 2px solid #fee2e2;
+      background: #fef2f2;
+    }
+    .dark .danger-zone {
+      border-color: #7f1d1d;
+      background: #1f1a1a;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 2px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .status-badge.verified { background: #d1fae5; color: #059669; }
+    .status-badge.unverified { background: #fef3c7; color: #d97706; }
+    .dark .status-badge.verified { background: #064e3b; color: #6ee7b7; }
+    .dark .status-badge.unverified { background: #78350f; color: #fbbf24; }
+  </style>
 </head>
 <body>
-
   <div class="page-wrapper">
     <div id="navbar-placeholder"></div>
 
     <main class="main-content">
       <section class="pt-28 pb-16 px-6 max-w-2xl mx-auto">
-        <h1 class="text-3xl font-bold text-gray-900">Settings</h1>
-        
-        <div class="glass-card mt-6">
-          <h2 class="text-xl font-bold">Email Verification</h2>
-          <div id="emailVerificationStatus" class="mt-2 text-sm">
-            <span id="verifyStatusText">Loading...</span>
+        <!-- হেডার -->
+        <div class="flex items-center gap-3 mb-2">
+          <i class="fas fa-cog text-3xl text-blue-500"></i>
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
+        </div>
+        <p class="text-gray-500 dark:text-gray-400 mb-6">Manage your account preferences and security</p>
+
+        <!-- ===== ১. ডার্ক মোড ===== -->
+        <div class="glass-card settings-card">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-lg font-bold dark:text-white">
+                <i class="fas fa-moon text-blue-500 mr-2"></i> Dark Mode
+              </h2>
+              <p class="text-sm text-gray-500 dark:text-gray-400">Toggle dark/light theme</p>
+            </div>
+            <button onclick="window.toggleDarkModeGlobal()" class="btn-primary text-sm py-2 px-4">
+              <i class="fas fa-sync-alt"></i> Toggle
+            </button>
+          </div>
+        </div>
+
+        <!-- ===== ২. ইমেইল ভেরিফিকেশন ===== -->
+        <div class="glass-card settings-card mt-4">
+          <h2 class="text-lg font-bold dark:text-white">
+            <i class="fas fa-envelope text-blue-500 mr-2"></i> Email Verification
+          </h2>
+          <div id="emailVerificationStatus" class="mt-2">
+            <span id="verifyStatusText" class="text-sm">Checking...</span>
           </div>
           <button id="verifyEmailBtn" class="btn-primary mt-3 text-sm py-2 px-4">
-            <i class="fas fa-envelope"></i> Send Verification Email
+            <i class="fas fa-paper-plane"></i> Send Verification Email
           </button>
-          <hr class="my-6" />
-          
-          <h2 class="text-xl font-bold">Change Password</h2>
+          <button id="refreshVerifyBtn" class="btn-outline mt-3 ml-2 text-sm py-2 px-4" onclick="checkVerificationStatus()">
+            <i class="fas fa-sync"></i> Refresh Status
+          </button>
+          <div id="verifyFeedback" class="mt-2 text-sm hidden"></div>
+        </div>
+
+        <!-- ===== ৩. পাসওয়ার্ড পরিবর্তন ===== -->
+        <div class="glass-card settings-card mt-4">
+          <h2 class="text-lg font-bold dark:text-white">
+            <i class="fas fa-key text-blue-500 mr-2"></i> Change Password
+          </h2>
           <form id="changePasswordForm" class="mt-4 space-y-3">
-            <input type="password" id="currentPassword" placeholder="Current Password" class="form-input" required />
-            <input type="password" id="newPassword" placeholder="New Password" class="form-input" required />
-            <button type="submit" class="btn-primary">Update Password</button>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Password</label>
+              <div class="relative">
+                <input type="password" id="currentPassword" placeholder="Enter current password" required class="form-input pr-10" />
+                <button type="button" onclick="togglePasswordVisibility('currentPassword')" class="absolute right-3 top-3 text-gray-400"><i class="fas fa-eye"></i></button>
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label>
+              <div class="relative">
+                <input type="password" id="newPassword" placeholder="Enter new password" required class="form-input pr-10" />
+                <button type="button" onclick="togglePasswordVisibility('newPassword')" class="absolute right-3 top-3 text-gray-400"><i class="fas fa-eye"></i></button>
+              </div>
+              <p class="text-xs text-gray-400 mt-1">Must be at least 6 characters</p>
+            </div>
+            <button type="submit" class="btn-primary">
+              <i class="fas fa-save"></i> Update Password
+            </button>
+            <div id="passwordFeedback" class="text-sm hidden"></div>
           </form>
-          <hr class="my-6" />
-          <button onclick="deleteAccount()" class="btn-danger w-full">Delete Account</button>
+        </div>
+
+        <!-- ===== ৪. ডেটা এক্সপোর্ট ===== -->
+        <div class="glass-card settings-card mt-4">
+          <h2 class="text-lg font-bold dark:text-white">
+            <i class="fas fa-download text-blue-500 mr-2"></i> Export Data
+          </h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Download all your personal data (profile, orders, fix requests) as JSON.
+          </p>
+          <button onclick="exportUserData()" class="btn-primary mt-3 text-sm py-2 px-4">
+            <i class="fas fa-file-export"></i> Download My Data
+          </button>
+          <div id="exportFeedback" class="mt-2 text-sm hidden"></div>
+        </div>
+
+        <!-- ===== ৫. ডেঞ্জার জোন (অ্যাকাউন্ট ডিলিট) ===== -->
+        <div class="glass-card settings-card mt-4 danger-zone">
+          <h2 class="text-lg font-bold text-red-600 dark:text-red-400">
+            <i class="fas fa-exclamation-triangle mr-2"></i> Danger Zone
+          </h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Once you delete your account, all your data will be permanently removed. This action cannot be undone.
+          </p>
+          <button onclick="deleteAccount()" class="btn-danger mt-3 text-sm py-2 px-4">
+            <i class="fas fa-trash"></i> Delete Account
+          </button>
+          <div id="deleteFeedback" class="mt-2 text-sm hidden"></div>
+        </div>
+
+        <!-- ===== ৬. সেশন ===== -->
+        <div class="glass-card settings-card mt-4">
+          <h2 class="text-lg font-bold dark:text-white">
+            <i class="fas fa-sign-out-alt text-blue-500 mr-2"></i> Session
+          </h2>
+          <button onclick="window.handleLogout()" class="btn-outline mt-2 text-sm py-2 px-4">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
         </div>
       </section>
     </main>
@@ -43,24 +153,29 @@
     <div id="footer-placeholder"></div>
   </div>
 
-  <!-- অথ মডাল (ফরগট পাসওয়ার্ড সহ) -->
+  <!-- ===== অথ মডাল ===== -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
+    <div class="bg-white dark:bg-gray-900 rounded-2xl p-8 max-w-md w-full shadow-2xl">
       <div class="flex justify-between items-center mb-4">
-        <h3 id="authModalTitle" class="text-2xl font-bold">Sign In</h3>
+        <h3 id="authModalTitle" class="text-2xl font-bold dark:text-white">Sign In</h3>
         <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
       </div>
       <form id="authForm" class="space-y-4">
-        <input type="email" id="authEmail" placeholder="Email" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
-        <input type="password" id="authPassword" placeholder="Password" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
+        <input type="email" id="authEmail" placeholder="Email" required class="form-input" />
+        <div class="relative">
+          <input type="password" id="authPassword" placeholder="Password" required class="form-input pr-10" />
+          <button type="button" onclick="togglePasswordVisibility('authPassword')" class="absolute right-3 top-3 text-gray-400"><i class="fas fa-eye"></i></button>
+        </div>
         <button type="submit" class="btn-primary w-full justify-center">Continue</button>
       </form>
+      <div class="mt-4 flex flex-col gap-2">
+        <button onclick="window.socialLogin('google')" class="btn-outline w-full justify-center"><i class="fab fa-google"></i> Sign in with Google</button>
+        <button onclick="window.socialLogin('github')" class="btn-outline w-full justify-center"><i class="fab fa-github"></i> Sign in with GitHub</button>
+      </div>
       <p class="mt-2 text-sm text-center">
-        <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline">
-          <i class="fas fa-key"></i> Forgot Password?
-        </a>
+        <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline"><i class="fas fa-key"></i> Forgot Password?</a>
       </p>
-      <p class="mt-4 text-sm text-gray-500 text-center">
+      <p class="mt-4 text-sm text-gray-500 dark:text-gray-400 text-center">
         <span id="authToggleText">Don't have an account?</span>
         <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
       </p>
@@ -71,14 +186,33 @@
   <div id="toast-container"></div>
 
   <script type="module">
-    import { auth, signOut, reauthenticateWithCredential, EmailAuthProvider, updatePassword, deleteUser, onAuthStateChanged, doc, getDoc, signInWithEmailAndPassword, createUserWithEmailAndPassword, setDoc, deleteDoc, sendEmailVerification } from './firebase-config.js';
-    import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar, setLoading } from './components.js';
+    // ================================================================
+    // ===== ইমপোর্ট =====
+    // ================================================================
+    import { 
+      auth, db, doc, getDoc, getDocs, collection, query, where,
+      updateDoc, deleteDoc, 
+      reauthenticateWithCredential, EmailAuthProvider, updatePassword, 
+      deleteUser, sendEmailVerification, onAuthStateChanged, signOut,
+      signInWithEmailAndPassword, createUserWithEmailAndPassword, setDoc,
+      signInWithPopup, googleProvider, githubProvider, sendPasswordResetEmail
+    } from './firebase-config.js';
+    import { 
+      renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
+      renderCartSidebar, setLoading, toggleDarkMode, initDarkMode 
+    } from './components.js';
 
+    // ================================================================
+    // ===== রেন্ডার =====
+    // ================================================================
     renderNavbar();
     renderFooter();
     renderCartSidebar();
     updateCartBadge();
 
+    // ================================================================
+    // ===== টোস্ট =====
+    // ================================================================
     window.showToast = (message, type = 'success') => {
       const container = document.getElementById('toast-container');
       if (!container) return;
@@ -90,7 +224,14 @@
       setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
     };
 
+    // ================================================================
+    // ===== ডার্ক মোড =====
+    // ================================================================
+    window.toggleDarkModeGlobal = toggleDarkMode;
+
+    // ================================================================
     // ===== অথ মডাল =====
+    // ================================================================
     let currentAuthMode = 'signin';
     window.openAuthModal = (mode) => {
       currentAuthMode = mode;
@@ -108,6 +249,42 @@
       window.openAuthModal(currentAuthMode);
     });
 
+    window.togglePasswordVisibility = (id) => {
+      const input = document.getElementById(id);
+      input.type = input.type === 'password' ? 'text' : 'password';
+    };
+
+    window.socialLogin = async (provider) => {
+      try {
+        let result;
+        if (provider === 'google') result = await signInWithPopup(auth, googleProvider);
+        else if (provider === 'github') result = await signInWithPopup(auth, githubProvider);
+        const user = result.user;
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        if (!userDoc.exists()) {
+          await setDoc(doc(db, 'users', user.uid), {
+            email: user.email,
+            displayName: user.displayName || user.email.split('@')[0],
+            role: 'user',
+            createdAt: new Date().toISOString()
+          });
+        }
+        showToast('✅ Signed in with ' + provider, 'success');
+        closeAuthModal();
+        window.location.reload();
+      } catch (err) {
+        showToast('⚠️ ' + err.message, 'error');
+      }
+    };
+
+    window.showResetPasswordModal = () => {
+      const email = prompt('Enter your email address to reset password:');
+      if (!email) return;
+      sendPasswordResetEmail(auth, email)
+        .then(() => alert('✅ Password reset link sent to your email.'))
+        .catch((error) => alert('⚠️ ' + error.message));
+    };
+
     const authForm = document.getElementById('authForm');
     const authSubmitBtn = authForm.querySelector('button[type="submit"]');
     authForm.addEventListener('submit', async (e) => {
@@ -121,18 +298,17 @@
         let userCred;
         if (currentAuthMode === 'signin') {
           userCred = await signInWithEmailAndPassword(auth, email, password);
-          // ✅ ভেরিফিকেশন চেক সরানো হয়েছে
           showToast('✅ Signed in!', 'success');
         } else {
           userCred = await createUserWithEmailAndPassword(auth, email, password);
-          // ✅ সাইন আপের সময় ইমেইল ভেরিফিকেশন পাঠানো হচ্ছে না (শুধু সেটিংসে অপশন থাকবে)
           await setDoc(doc(db, 'users', userCred.user.uid), {
             email, displayName: email.split('@')[0], role: 'user', createdAt: new Date().toISOString()
           });
-          showToast('✅ Account created! You can now sign in.', 'success');
+          showToast('✅ Account created!', 'success');
         }
         closeAuthModal();
         authForm.reset();
+        window.location.reload();
       } catch (error) {
         errorDiv.textContent = error.message;
         errorDiv.classList.remove('hidden');
@@ -142,88 +318,229 @@
       }
     });
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = 'index.html';
-        return;
-      }
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      updateNavbarAuth(user, userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0]);
-      
-      // ===== ইমেইল ভেরিফিকেশন স্ট্যাটাস আপডেট =====
+    window.handleLogout = async () => {
+      await signOut(auth);
+      showToast('✅ Logged out', 'success');
+      window.location.href = 'index.html';
+    };
+
+    // ================================================================
+    // ===== সেটিংস লজিক =====
+    // ================================================================
+
+    let currentUser = null;
+
+    // ===== ইমেইল ভেরিফিকেশন =====
+    window.checkVerificationStatus = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+      await user.reload();
       const statusText = document.getElementById('verifyStatusText');
       const verifyBtn = document.getElementById('verifyEmailBtn');
+      const feedback = document.getElementById('verifyFeedback');
+      feedback.className = 'hidden';
+
       if (user.emailVerified) {
-        statusText.innerHTML = '<span class="text-green-600"><i class="fas fa-check-circle"></i> Your email is verified.</span>';
+        statusText.innerHTML = `
+          <span class="status-badge verified">
+            <i class="fas fa-check-circle"></i> Verified
+          </span>
+          <span class="text-sm text-green-600 dark:text-green-400 ml-2">Your email is verified.</span>
+        `;
         verifyBtn.style.display = 'none';
       } else {
-        statusText.innerHTML = '<span class="text-orange-500"><i class="fas fa-exclamation-triangle"></i> Your email is not verified. Click below to send verification link.</span>';
+        statusText.innerHTML = `
+          <span class="status-badge unverified">
+            <i class="fas fa-exclamation-triangle"></i> Unverified
+          </span>
+          <span class="text-sm text-orange-500 dark:text-orange-400 ml-2">Please verify your email.</span>
+        `;
         verifyBtn.style.display = 'inline-flex';
       }
-    });
+    };
 
-    // ===== ভেরিফিকেশন ইমেইল পাঠান =====
+    // ভেরিফিকেশন ইমেইল পাঠান
     document.getElementById('verifyEmailBtn').addEventListener('click', async () => {
       const user = auth.currentUser;
-      if (!user) return showToast('You are not logged in.', 'error');
-      if (user.emailVerified) {
-        showToast('Your email is already verified.', 'warning');
-        return;
-      }
-      setLoading(document.getElementById('verifyEmailBtn'), true);
+      if (!user) { showToast('Not logged in', 'error'); return; }
+      const btn = document.getElementById('verifyEmailBtn');
+      const feedback = document.getElementById('verifyFeedback');
+      feedback.className = 'hidden';
+
+      setLoading(btn, true);
       try {
         await sendEmailVerification(user);
-        showToast('✅ Verification email sent! Check your inbox.', 'success');
+        feedback.className = 'block text-sm text-green-600 dark:text-green-400 mt-2';
+        feedback.innerHTML = '✅ Verification email sent! Please check your inbox (and spam folder).';
+        showToast('✅ Verification email sent!', 'success');
       } catch (err) {
+        feedback.className = 'block text-sm text-red-500 mt-2';
+        feedback.textContent = '⚠️ ' + err.message;
         showToast('⚠️ ' + err.message, 'error');
       } finally {
-        setLoading(document.getElementById('verifyEmailBtn'), false);
+        setLoading(btn, false);
       }
     });
 
-    // ===== পাসওয়ার্ড পরিবর্তন =====
+    // ===== পাসওয়ার্ড পরিবর্তন =====
     const changePasswordForm = document.getElementById('changePasswordForm');
     const passBtn = changePasswordForm.querySelector('button[type="submit"]');
+    const passwordFeedback = document.getElementById('passwordFeedback');
+
     changePasswordForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const current = document.getElementById('currentPassword').value;
       const newPass = document.getElementById('newPassword').value;
-      if (!current || !newPass) return showToast('Please fill all fields', 'error');
+      passwordFeedback.className = 'hidden';
+
+      if (!current || !newPass) {
+        passwordFeedback.className = 'block text-sm text-red-500 mt-2';
+        passwordFeedback.textContent = 'Please fill in all fields.';
+        showToast('Please fill in all fields', 'error');
+        return;
+      }
+      if (newPass.length < 6) {
+        passwordFeedback.className = 'block text-sm text-red-500 mt-2';
+        passwordFeedback.textContent = 'New password must be at least 6 characters.';
+        showToast('Password must be at least 6 characters', 'error');
+        return;
+      }
+
       const user = auth.currentUser;
-      if (!user) return showToast('You are not logged in', 'error');
-      setLoading(passBtn, true, 'Update Password');
+      if (!user) { showToast('Not logged in', 'error'); return; }
+
+      setLoading(passBtn, true, 'Updating...');
       try {
         const credential = EmailAuthProvider.credential(user.email, current);
         await reauthenticateWithCredential(user, credential);
         await updatePassword(user, newPass);
-        showToast('✅ Password updated', 'success');
+        passwordFeedback.className = 'block text-sm text-green-600 dark:text-green-400 mt-2';
+        passwordFeedback.innerHTML = '✅ Password updated successfully!';
+        showToast('✅ Password updated!', 'success');
         changePasswordForm.reset();
       } catch (err) {
+        passwordFeedback.className = 'block text-sm text-red-500 mt-2';
+        passwordFeedback.textContent = '⚠️ ' + err.message;
         showToast('⚠️ ' + err.message, 'error');
       } finally {
         setLoading(passBtn, false);
       }
     });
 
-    // ===== অ্যাকাউন্ট ডিলিট =====
-    window.deleteAccount = async () => {
-      if (!confirm('Are you sure you want to delete your account? This action is irreversible.')) return;
+    // ===== ডেটা এক্সপোর্ট =====
+    window.exportUserData = async () => {
       const user = auth.currentUser;
-      if (!user) return showToast('You are not logged in', 'error');
+      if (!user) { showToast('Not logged in', 'error'); return; }
+      const btn = event.target;
+      const feedback = document.getElementById('exportFeedback');
+      feedback.className = 'hidden';
+
+      setLoading(btn, true);
       try {
-        await deleteDoc(doc(db, 'users', user.uid));
-        await deleteUser(user);
-        showToast('✅ Account deleted', 'success');
-        window.location.href = 'index.html';
+        // প্রোফাইল
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+        const profile = userDoc.exists() ? userDoc.data() : {};
+
+        // অর্ডার
+        const ordersSnap = await getDocs(query(collection(db, 'orders'), where('userId', '==', user.uid)));
+        const orders = ordersSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        // ফিক্স রিকোয়েস্ট
+        const fixSnap = await getDocs(query(collection(db, 'fixRequests'), where('userId', '==', user.uid)));
+        const fixRequests = fixSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        const data = {
+          exportedAt: new Date().toISOString(),
+          user: {
+            uid: user.uid,
+            email: user.email,
+            emailVerified: user.emailVerified,
+            ...profile
+          },
+          orders: orders,
+          fixRequests: fixRequests
+        };
+
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `my-data-${new Date().toISOString().slice(0,10)}.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+
+        feedback.className = 'block text-sm text-green-600 dark:text-green-400 mt-2';
+        feedback.innerHTML = '✅ Data exported successfully!';
+        showToast('✅ Data exported!', 'success');
       } catch (err) {
+        feedback.className = 'block text-sm text-red-500 mt-2';
+        feedback.textContent = '⚠️ ' + err.message;
         showToast('⚠️ ' + err.message, 'error');
+      } finally {
+        setLoading(btn, false);
       }
     };
 
-    window.handleLogout = async () => {
-      await signOut(auth);
-      window.location.href = 'index.html';
+    // ===== অ্যাকাউন্ট ডিলিট =====
+    window.deleteAccount = async () => {
+      if (!confirm('⚠️ Are you sure you want to delete your account? This action is IRREVERSIBLE and all your data will be permanently lost.')) {
+        return;
+      }
+      if (!confirm('Type "DELETE" to confirm:')) {
+        // সিম্পল কনফর্মেশন, কিন্তু prompt ব্যবহার করি
+        const confirmText = prompt('Type "DELETE" to permanently delete your account:');
+        if (confirmText !== 'DELETE') {
+          showToast('Account deletion cancelled', 'warning');
+          return;
+        }
+      }
+
+      const user = auth.currentUser;
+      if (!user) { showToast('Not logged in', 'error'); return; }
+      const feedback = document.getElementById('deleteFeedback');
+      feedback.className = 'hidden';
+
+      try {
+        // ইউজার ডক ডিলিট
+        await deleteDoc(doc(db, 'users', user.uid));
+        // অথ ডিলিট
+        await deleteUser(user);
+        showToast('✅ Account deleted successfully.', 'success');
+        window.location.href = 'index.html';
+      } catch (err) {
+        if (err.code === 'auth/requires-recent-login') {
+          feedback.className = 'block text-sm text-red-500 mt-2';
+          feedback.innerHTML = '⚠️ For security, please re-authenticate (logout and login again) before deleting your account.';
+          showToast('Please re-authenticate first', 'error');
+        } else {
+          feedback.className = 'block text-sm text-red-500 mt-2';
+          feedback.textContent = '⚠️ ' + err.message;
+          showToast('⚠️ ' + err.message, 'error');
+        }
+      }
     };
+
+    // ================================================================
+    // ===== অথ স্টেট =====
+    // ================================================================
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      currentUser = user;
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const displayName = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
+      updateNavbarAuth(user, displayName);
+
+      // ভেরিফিকেশন স্ট্যাটাস চেক
+      await checkVerificationStatus();
+    });
+
+    console.log('⚙️ Settings page loaded successfully!');
   </script>
 </body>
 </html>

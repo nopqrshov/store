@@ -3,81 +3,221 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Login</title>
+  <title>Admin Login – SWD Store</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link rel="stylesheet" href="style.css" />
   <style>
-    body { background: #f2f4f7; font-family: 'Inter', sans-serif; }
-    .glass { background: rgba(255,255,255,0.6); backdrop-filter: blur(20px); border:1px solid rgba(255,255,255,0.6); }
-    .btn-primary { background: linear-gradient(135deg,#007AFF,#5856D6); color:#fff; padding:12px 28px; border-radius:60px; font-weight:600; border:none; cursor:pointer; transition:0.3s; }
-    .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(0,122,255,0.35); }
+    body {
+      background: #f2f4f7;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .glass {
+      background: rgba(255,255,255,0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.6);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg,#007AFF,#5856D6);
+      color:#fff;
+      padding:12px 28px;
+      border-radius:60px;
+      font-weight:600;
+      border:none;
+      cursor:pointer;
+      transition:0.3s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-primary:hover {
+      transform:translateY(-2px);
+      box-shadow:0 8px 30px rgba(0,122,255,0.35);
+    }
+    .btn-primary:disabled {
+      opacity:0.6;
+      cursor:not-allowed;
+      transform:none !important;
+    }
+    .dark body {
+      background: #1c1c1e;
+    }
+    .dark .glass {
+      background: rgba(30,30,32,0.8);
+      border-color: rgba(255,255,255,0.1);
+    }
+    .form-input {
+      width: 100%;
+      padding: 14px 18px;
+      border: 1.5px solid rgba(60, 60, 67, 0.08);
+      border-radius: 14px;
+      font-size: 1rem;
+      background: rgba(255,255,255,0.8);
+      transition: all 0.3s ease;
+      outline: none;
+    }
+    .form-input:focus {
+      border-color: #007AFF;
+      box-shadow: 0 0 0 4px rgba(0,122,255,0.08);
+      background: #fff;
+    }
+    .dark .form-input {
+      background: rgba(30,30,32,0.8);
+      color: #e5e5ea;
+      border-color: rgba(255,255,255,0.1);
+    }
+    .dark .form-input:focus {
+      background: #1c1c1e;
+      border-color: #007AFF;
+    }
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body>
-<div class="min-h-screen flex items-center justify-center px-4">
-  <div class="glass rounded-2xl p-8 max-w-md w-full shadow-2xl">
-    <h2 class="text-2xl font-bold text-center text-gray-900">Admin Login</h2>
-    <form id="adminLoginForm" class="mt-6 space-y-4">
-      <input type="email" id="adminEmail" placeholder="Admin Email" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
-      <input type="password" id="adminPassword" placeholder="Password" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
-      <button type="submit" class="btn-primary w-full justify-center">Login</button>
-      <div id="adminLoginError" class="text-red-500 text-sm hidden"></div>
-    </form>
+  <div class="min-h-screen flex items-center justify-center px-4">
+    <div class="glass rounded-2xl p-8 max-w-md w-full shadow-2xl">
+      <div class="text-center mb-6">
+        <i class="fas fa-shield-alt text-4xl text-blue-500"></i>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mt-2">Admin Login</h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Access the admin dashboard</p>
+      </div>
+
+      <form id="adminLoginForm" class="mt-6 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+          <input type="email" id="adminEmail" placeholder="admin@example.com" required class="form-input" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+          <div class="relative">
+            <input type="password" id="adminPassword" placeholder="••••••••" required class="form-input pr-10" />
+            <button type="button" onclick="togglePassword()" class="absolute right-3 top-3 text-gray-400">
+              <i class="fas fa-eye" id="toggleIcon"></i>
+            </button>
+          </div>
+        </div>
+        <div class="flex items-center justify-between">
+          <label class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+            <input type="checkbox" id="rememberMe" /> Remember me
+          </label>
+          <a href="#" onclick="window.showResetPasswordModal()" class="text-sm text-blue-600 hover:underline">
+            Forgot password?
+          </a>
+        </div>
+        <button type="submit" class="btn-primary w-full">
+          <i class="fas fa-sign-in-alt"></i> Login
+        </button>
+        <div id="adminLoginError" class="text-red-500 text-sm hidden"></div>
+      </form>
+
+      <div class="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+        <p>Demo credentials: admin@example.com / admin123</p>
+      </div>
+    </div>
   </div>
-</div>
 
-<script type="module">
-import { auth, db, signInWithEmailAndPassword, onAuthStateChanged, doc, getDoc } from './firebase-config.js';
+  <script type="module">
+    import { auth, db, signInWithEmailAndPassword, onAuthStateChanged, doc, getDoc, sendPasswordResetEmail } from './firebase-config.js';
+    import { setLoading } from './components.js';
 
-onAuthStateChanged(auth, async (user) => {
-  if (user) {
-    try {
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      if (userDoc.exists() && userDoc.data().role === 'admin') {
-        window.location.href = 'admin-panel.html';
+    // টগল পাসওয়ার্ড দৃশ্যমান
+    window.togglePassword = () => {
+      const input = document.getElementById('adminPassword');
+      const icon = document.getElementById('toggleIcon');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fas fa-eye-slash';
       } else {
-        alert('আপনার অ্যাডমিন অনুমতি নেই।');
-        auth.signOut();
+        input.type = 'password';
+        icon.className = 'fas fa-eye';
       }
-    } catch (err) {
-      console.error(err);
+    };
+
+    // ফরগট পাসওয়ার্ড
+    window.showResetPasswordModal = () => {
+      const email = prompt('Enter your admin email:');
+      if (!email) return;
+      sendPasswordResetEmail(auth, email)
+        .then(() => alert('✅ Password reset link sent to your email.'))
+        .catch(err => alert('⚠️ ' + err.message));
+    };
+
+    // অথ স্টেট চেক (ইতিমধ্যে লগইন থাকলে)
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const userDoc = await getDoc(doc(db, 'users', user.uid));
+          if (userDoc.exists() && userDoc.data().role === 'admin') {
+            window.location.href = 'admin-panel.html';
+          } else {
+            alert('আপনার অ্যাডমিন অনুমতি নেই।');
+            auth.signOut();
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    });
+
+    const loginForm = document.getElementById('adminLoginForm');
+    const loginBtn = loginForm.querySelector('button[type="submit"]');
+    const errorDiv = document.getElementById('adminLoginError');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('adminEmail').value.trim();
+      const password = document.getElementById('adminPassword').value.trim();
+      const remember = document.getElementById('rememberMe').checked;
+
+      errorDiv.classList.add('hidden');
+      setLoading(loginBtn, true, 'Logging in...');
+
+      try {
+        const userCred = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCred.user;
+        const userDoc = await getDoc(doc(db, 'users', user.uid));
+
+        if (userDoc.exists() && userDoc.data().role === 'admin') {
+          // রিমেম্বার মি – Firestore এ সেভ (বা লোকাল স্টোরেজে)
+          if (remember) {
+            localStorage.setItem('adminRemember', 'true');
+          } else {
+            localStorage.removeItem('adminRemember');
+          }
+          window.location.href = 'admin-panel.html';
+        } else {
+          await auth.signOut();
+          errorDiv.textContent = '❌ আপনার অ্যাডমিন অনুমতি নেই।';
+          errorDiv.classList.remove('hidden');
+        }
+      } catch (err) {
+        errorDiv.textContent = '⚠️ ' + err.message;
+        errorDiv.classList.remove('hidden');
+      } finally {
+        setLoading(loginBtn, false);
+      }
+    });
+
+    // রিমেম্বার মি চেক – ফর্ম লোড হলে ইমেইল সেট করুন (যদি থাকে)
+    if (localStorage.getItem('adminRemember') === 'true') {
+      // ইমেইল প্রিফিল করতে পারেন, কিন্তু সিকিউরিটি কারণে বাদ দিলাম
     }
-  }
-});
-
-const loginForm = document.getElementById('adminLoginForm');
-const loginBtn = loginForm.querySelector('button[type="submit"]');
-loginForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = document.getElementById('adminEmail').value.trim();
-  const password = document.getElementById('adminPassword').value.trim();
-  const errorDiv = document.getElementById('adminLoginError');
-  errorDiv.classList.add('hidden');
-
-  // লোডিং শুরু
-  loginBtn.disabled = true;
-  loginBtn.innerHTML = '<span class="spinner"></span> Logging in...';
-
-  try {
-    const userCred = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCred.user;
-    const userDoc = await getDoc(doc(db, 'users', user.uid));
-    if (userDoc.exists() && userDoc.data().role === 'admin') {
-      window.location.href = 'admin-panel.html';
-    } else {
-      await auth.signOut();
-      errorDiv.textContent = 'আপনার অ্যাডমিন অনুমতি নেই।';
-      errorDiv.classList.remove('hidden');
-    }
-  } catch (err) {
-    errorDiv.textContent = err.message;
-    errorDiv.classList.remove('hidden');
-  } finally {
-    loginBtn.disabled = false;
-    loginBtn.innerHTML = 'Login';
-  }
-});
-</script>
+  </script>
 </body>
 </html>

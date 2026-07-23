@@ -11,7 +11,10 @@ import {
   EmailAuthProvider,
   updatePassword,
   deleteUser,
-  sendEmailVerification, // ✅ নতুন যোগ
+  sendEmailVerification,
+  GoogleAuthProvider,
+  signInWithPopup,
+  GithubAuthProvider,
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import {
   getFirestore,
@@ -30,6 +33,7 @@ import {
   serverTimestamp,
   arrayUnion,
   arrayRemove,
+  increment,
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -44,6 +48,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const googleProvider = new GoogleAuthProvider();
+const githubProvider = new GithubAuthProvider();
 
 export {
   auth, db,
@@ -56,7 +62,12 @@ export {
   EmailAuthProvider,
   updatePassword,
   deleteUser,
-  sendEmailVerification, // ✅ এক্সপোর্ট
+  sendEmailVerification,
+  GoogleAuthProvider,
+  signInWithPopup,
+  GithubAuthProvider,
+  googleProvider,
+  githubProvider,
   collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, addDoc,
-  query, where, orderBy, onSnapshot, serverTimestamp, arrayUnion, arrayRemove
+  query, where, orderBy, onSnapshot, serverTimestamp, arrayUnion, arrayRemove, increment,
 };
