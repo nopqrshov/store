@@ -85,7 +85,6 @@
     }
     .chat-msg.sent .msg-time { color:rgba(255,255,255,0.7); }
     .chat-msg .msg-status { font-size:0.6rem; margin-left:6px; opacity:0.6; }
-    .chat-msg .msg-emoji { font-size:1.2rem; }
 
     .chat-input-wrap {
       display:flex;
@@ -282,6 +281,9 @@
   <div id="toast-container"></div>
 
   <script type="module">
+    // ================================================================
+    // ===== ইমপোর্ট =====
+    // ================================================================
     import { 
       auth, db, collection, doc, getDoc, setDoc, addDoc, onSnapshot, 
       query, where, serverTimestamp, signOut, onAuthStateChanged,
@@ -293,11 +295,17 @@
       renderCartSidebar, setLoading
     } from './components.js';
 
+    // ================================================================
+    // ===== রেন্ডার =====
+    // ================================================================
     renderNavbar();
     renderFooter();
     renderCartSidebar();
     updateCartBadge();
 
+    // ================================================================
+    // ===== টোস্ট =====
+    // ================================================================
     window.showToast = (message, type = 'success') => {
       const container = document.getElementById('toast-container');
       if (!container) return;
@@ -309,7 +317,9 @@
       setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
     };
 
+    // ================================================================
     // ===== অথ মডাল =====
+    // ================================================================
     let currentAuthMode = 'signin';
     window.openAuthModal = (mode) => {
       currentAuthMode = mode;
@@ -349,6 +359,11 @@
         }
         showToast('✅ Signed in with ' + provider, 'success');
         closeAuthModal();
+        // পেজ রিফ্রেশ না করেই চ্যাট শুরু হবে
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+          initializeChat(currentUser);
+        }
       } catch (err) {
         showToast('⚠️ ' + err.message, 'error');
       }
@@ -385,6 +400,8 @@
         }
         closeAuthModal();
         authForm.reset();
+        // চ্যাট শুরু
+        initializeChat(userCred.user);
       } catch (error) {
         errorDiv.textContent = error.message;
         errorDiv.classList.remove('hidden');
@@ -400,7 +417,10 @@
       window.location.href = 'index.html';
     };
 
-    // ===== চ্যাট লজিক =====
+    // ================================================================
+    // ===== চ্যাট লজিক (ইনডেক্স-ফ্রি) =====
+    // ================================================================
+
     const chatMessages = document.getElementById('chatMessages');
     const chatInput = document.getElementById('chatInput');
     const chatSendBtn = document.getElementById('chatSendBtn');
@@ -410,12 +430,15 @@
     let conversationId = null;
     let unsubMessages = null;
     let typingTimeout = null;
+    let unsubTyping = null;
 
+    // ইমোজি ইনসার্ট
     window.insertEmoji = (emoji) => {
       chatInput.value += emoji;
       chatInput.focus();
     };
 
+    // মেসেজ রেন্ডার
     function renderMessages(msgs) {
       if (!msgs || msgs.length === 0) {
         chatMessages.innerHTML = `
@@ -457,8 +480,10 @@
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
+    // মেসেজ লিসেনার (শুধু conversationId দিয়ে)
     function listenMessages(user) {
       if (unsubMessages) unsubMessages();
+      if (unsubTyping) unsubTyping();
 
       const q = query(
         collection(db, 'messages'), 
@@ -479,6 +504,7 @@
 
         renderMessages(msgs);
 
+        // অ্যাডমিনের পাঠানো আনরিড মেসেজ রিড মার্ক করুন
         const unreadAdminMsgs = msgs.filter(m => 
           m.fromUserId === 'admin' && !m.read
         );
@@ -496,11 +522,13 @@
         }
       }, (error) => {
         console.error('Snapshot error:', error);
-        showToast('Error loading messages: ' + error.message, 'error');
+        // এখানে conversationId কোয়েরি কোনো ইনডেক্স চায় না
+        showToast('⚠️ Error loading messages: ' + error.message, 'error');
       });
 
+      // টাইপিং ইন্ডিকেটর (অ্যাডমিন টাইপ করলে দেখাবে)
       const typingRef = doc(db, 'typing', conversationId);
-      onSnapshot(typingRef, (docSnap) => {
+      unsubTyping = onSnapshot(typingRef, (docSnap) => {
         if (docSnap.exists() && docSnap.data().adminTyping) {
           typingIndicator.textContent = '👤 Admin is typing...';
         } else {
@@ -509,21 +537,7 @@
       });
     }
 
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = 'index.html';
-        return;
-      }
-
-      currentUser = user;
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      const displayName = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
-      updateNavbarAuth(user, displayName);
-
-      conversationId = `conv_${user.uid}_admin`;
-      listenMessages(user);
-    });
-
+    // ইউজার টাইপিং ইন্ডিকেটর
     chatInput.addEventListener('input', async () => {
       if (!conversationId || !currentUser) return;
       
@@ -543,6 +557,7 @@
       }, 3000);
     });
 
+    // মেসেজ পাঠান
     const chatForm = document.querySelector('.input-row');
     chatForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -567,8 +582,8 @@
           toUserId: 'admin',
           content: content,
           timestamp: serverTimestamp(),
-          read: false,
-          participants: [currentUser.uid, 'admin']
+          read: false
+          // ⚠️ participants ফিল্ড নেই – কারণ আমরা conversationId দিয়ে কোয়েরি করি
         });
 
         chatInput.value = '';
@@ -586,11 +601,53 @@
       }
     });
 
-    window.addEventListener('beforeunload', () => {
-      if (unsubMessages) unsubMessages();
+    // ===== চ্যাট ইনিশিয়ালাইজ =====
+    function initializeChat(user) {
+      if (!user) return;
+      currentUser = user;
+      conversationId = `conv_${user.uid}_admin`;
+      
+      // ইউজারের নাম আপডেট
+      const userDoc = getDoc(doc(db, 'users', user.uid)).then(doc => {
+        if (doc.exists()) {
+          const data = doc.data();
+          updateNavbarAuth(user, data.displayName || user.email.split('@')[0]);
+        }
+      });
+
+      // মেসেজ লিসেনার শুরু
+      listenMessages(user);
+    }
+
+    // ===== অথ স্টেট =====
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        // ইউজার না থাকলে লগইন পেজে রিডাইরেক্ট না করে মডাল দেখান
+        // কিন্তু আমরা চাইলে রিডাইরেক্ট করতে পারি
+        // window.location.href = 'index.html';
+        // return;
+        // বরং মডাল দেখাই
+        setTimeout(() => {
+          openAuthModal('signin');
+        }, 500);
+        return;
+      }
+
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const displayName = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
+      updateNavbarAuth(user, displayName);
+
+      // চ্যাট শুরু
+      initializeChat(user);
     });
 
-    console.log('💬 Support Chat loaded successfully!');
+    // উইন্ডো ক্লোজে আনসাবস্ক্রাইব
+    window.addEventListener('beforeunload', () => {
+      if (unsubMessages) unsubMessages();
+      if (unsubTyping) unsubTyping();
+    });
+
+    console.log('💬 Support Chat (Fixed) loaded successfully!');
   </script>
 </body>
 </html>
