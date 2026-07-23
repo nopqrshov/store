@@ -100,9 +100,7 @@
           <label class="flex items-center gap-2 text-sm text-gray-600">
             <input type="checkbox" id="rememberMe" /> Remember me
           </label>
-          <a href="#" onclick="window.showResetPasswordModal()" class="text-sm text-blue-600 hover:underline">
-            Forgot password?
-          </a>
+          <!-- Forgot Password লিংক সরানো হয়েছে -->
         </div>
         <button type="submit" class="btn-primary w-full">
           <i class="fas fa-sign-in-alt"></i> Login
@@ -117,7 +115,7 @@
   </div>
 
   <script type="module">
-    import { auth, db, signInWithEmailAndPassword, onAuthStateChanged, doc, getDoc, sendPasswordResetEmail } from './firebase-config.js';
+    import { auth, db, signInWithEmailAndPassword, onAuthStateChanged, doc, getDoc } from './firebase-config.js';
     import { setLoading } from './components.js';
 
     window.togglePassword = () => {
@@ -130,14 +128,6 @@
         input.type = 'password';
         icon.className = 'fas fa-eye';
       }
-    };
-
-    window.showResetPasswordModal = () => {
-      const email = prompt('Enter your admin email:');
-      if (!email) return;
-      sendPasswordResetEmail(auth, email)
-        .then(() => alert('✅ Password reset link sent to your email.'))
-        .catch(err => alert('⚠️ ' + err.message));
     };
 
     onAuthStateChanged(auth, async (user) => {

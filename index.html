@@ -8,6 +8,52 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ===== Scroll Animation ===== */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ===== Back to Top Button ===== */
+    .scroll-top-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(0,122,255,0.35);
+      z-index: 999;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+    }
+    .scroll-top-btn.show {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+    .scroll-top-btn:hover {
+      transform: scale(1.05);
+    }
+
+    /* ===== Hero Gradient ===== */
+    .hero-gradient {
+      background: radial-gradient(ellipse at top, rgba(0,122,255,0.06), transparent 70%);
+    }
+  </style>
 </head>
 <body>
   <div class="page-wrapper">
@@ -15,37 +61,50 @@
 
     <main class="main-content">
       <!-- ===== হিরো ===== -->
-      <section class="pt-32 pb-16 px-6 min-h-screen flex items-center">
+      <section class="hero-gradient pt-32 pb-16 px-6 min-h-screen flex items-center">
         <div class="max-w-7xl mx-auto text-center">
-          <h1 class="text-5xl md:text-7xl font-bold text-gray-900 leading-tight">
+          <h1 class="text-5xl md:text-7xl font-bold text-gray-900 leading-tight fade-up">
             Build Your <span class="gradient-text">Dream Website</span> Today
           </h1>
-          <p class="text-xl text-gray-500 mt-4 max-w-2xl mx-auto">
+          <p class="text-xl text-gray-500 mt-4 max-w-2xl mx-auto fade-up" style="transition-delay:0.1s;">
             Choose from ready-made packages or get a fully custom solution. Fast, reliable, and modern.
           </p>
-          <div class="mt-10 flex flex-wrap justify-center gap-4">
+          <div class="mt-10 flex flex-wrap justify-center gap-4 fade-up" style="transition-delay:0.2s;">
             <a href="get-new-website.html" class="btn-primary"><i class="fas fa-shopping-cart"></i> Explore Store</a>
             <a href="fix-website.html" class="btn-outline"><i class="fas fa-wrench"></i> Fix My Site</a>
           </div>
 
           <!-- ===== ডাইনামিক প্যাকেজ ===== -->
-          <div id="featuredPackages" class="mt-16 grid md:grid-cols-3 gap-6 text-left"></div>
+          <div id="featuredPackages" class="mt-16 grid md:grid-cols-3 gap-6 text-left">
+            <!-- Skeleton Loading -->
+            <div class="glass-card fade-up"><div class="h-8 w-20 bg-gray-200 rounded animate-pulse"></div><div class="h-6 w-3/4 bg-gray-200 rounded mt-3 animate-pulse"></div><div class="h-4 w-1/2 bg-gray-200 rounded mt-2 animate-pulse"></div><div class="h-8 w-16 bg-gray-200 rounded mt-3 animate-pulse"></div></div>
+            <div class="glass-card fade-up"><div class="h-8 w-20 bg-gray-200 rounded animate-pulse"></div><div class="h-6 w-3/4 bg-gray-200 rounded mt-3 animate-pulse"></div><div class="h-4 w-1/2 bg-gray-200 rounded mt-2 animate-pulse"></div><div class="h-8 w-16 bg-gray-200 rounded mt-3 animate-pulse"></div></div>
+            <div class="glass-card fade-up"><div class="h-8 w-20 bg-gray-200 rounded animate-pulse"></div><div class="h-6 w-3/4 bg-gray-200 rounded mt-3 animate-pulse"></div><div class="h-4 w-1/2 bg-gray-200 rounded mt-2 animate-pulse"></div><div class="h-8 w-16 bg-gray-200 rounded mt-3 animate-pulse"></div></div>
+          </div>
         </div>
       </section>
 
       <!-- ===== টেস্টিমোনিয়াল ===== -->
       <section id="testimonials" class="py-16 px-6 bg-gray-50">
         <div class="max-w-6xl mx-auto">
-          <h2 class="text-3xl font-bold text-center">What Our Clients Say</h2>
-          <div id="testimonialList" class="mt-8 grid md:grid-cols-3 gap-6"></div>
+          <h2 class="text-3xl font-bold text-center fade-up">What Our Clients Say</h2>
+          <div id="testimonialList" class="mt-8 grid md:grid-cols-3 gap-6">
+            <div class="glass-card text-center fade-up"><div class="h-16 bg-gray-200 rounded animate-pulse"></div><div class="h-6 w-1/2 bg-gray-200 rounded mx-auto mt-3 animate-pulse"></div></div>
+            <div class="glass-card text-center fade-up"><div class="h-16 bg-gray-200 rounded animate-pulse"></div><div class="h-6 w-1/2 bg-gray-200 rounded mx-auto mt-3 animate-pulse"></div></div>
+            <div class="glass-card text-center fade-up"><div class="h-16 bg-gray-200 rounded animate-pulse"></div><div class="h-6 w-1/2 bg-gray-200 rounded mx-auto mt-3 animate-pulse"></div></div>
+          </div>
         </div>
       </section>
 
       <!-- ===== FAQ ===== -->
       <section id="faq" class="py-16 px-6">
         <div class="max-w-3xl mx-auto">
-          <h2 class="text-3xl font-bold text-center">Frequently Asked Questions</h2>
-          <div id="faqList" class="mt-8 space-y-4"></div>
+          <h2 class="text-3xl font-bold text-center fade-up">Frequently Asked Questions</h2>
+          <div id="faqList" class="mt-8 space-y-4">
+            <div class="glass-card fade-up"><div class="h-6 bg-gray-200 rounded animate-pulse"></div></div>
+            <div class="glass-card fade-up"><div class="h-6 bg-gray-200 rounded animate-pulse"></div></div>
+            <div class="glass-card fade-up"><div class="h-6 bg-gray-200 rounded animate-pulse"></div></div>
+          </div>
         </div>
       </section>
     </main>
@@ -53,7 +112,12 @@
     <div id="footer-placeholder"></div>
   </div>
 
-  <!-- ===== অথ মডাল ===== -->
+  <!-- ===== Back to Top Button ===== -->
+  <button class="scroll-top-btn" id="scrollTopBtn" aria-label="Back to top">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <!-- ===== অথ মডাল (Forgot Password লিংক সরানো হয়েছে) ===== -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
       <div class="flex justify-between items-center mb-4">
@@ -72,9 +136,7 @@
         <button onclick="window.socialLogin('google')" class="btn-outline w-full justify-center"><i class="fab fa-google"></i> Sign in with Google</button>
         <button onclick="window.socialLogin('github')" class="btn-outline w-full justify-center"><i class="fab fa-github"></i> Sign in with GitHub</button>
       </div>
-      <p class="mt-2 text-sm text-center">
-        <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline"><i class="fas fa-key"></i> Forgot Password?</a>
-      </p>
+      <!-- Forgot Password লিংক সম্পূর্ণ সরানো হয়েছে -->
       <p class="mt-4 text-sm text-gray-500 text-center">
         <span id="authToggleText">Don't have an account?</span>
         <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
@@ -86,6 +148,7 @@
   <div id="toast-container"></div>
 
   <script type="module">
+    // ===== ইমপোর্ট =====
     import { 
       auth, db, collection, doc, getDoc, getDocs, onSnapshot, 
       signInWithEmailAndPassword, createUserWithEmailAndPassword, 
@@ -97,12 +160,14 @@
       renderCartSidebar, setLoading, renderPaymentModal
     } from './components.js';
 
+    // ===== রেন্ডার =====
     renderNavbar();
     renderFooter();
     renderCartSidebar();
-    renderPaymentModal();  // ✅ নতুন লাইন
+    renderPaymentModal();
     updateCartBadge();
 
+    // ===== টোস্ট =====
     window.showToast = (message, type = 'success') => {
       const container = document.getElementById('toast-container');
       if (!container) return;
@@ -114,11 +179,33 @@
       setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
     };
 
-    window.togglePasswordVisibility = (id) => {
-      const input = document.getElementById(id);
-      input.type = input.type === 'password' ? 'text' : 'password';
-    };
+    // ===== Scroll Animation (Intersection Observer) =====
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+    });
+
+    // ===== Back to Top Button =====
+    const scrollBtn = document.getElementById('scrollTopBtn');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 400) {
+        scrollBtn.classList.add('show');
+      } else {
+        scrollBtn.classList.remove('show');
+      }
+    });
+    scrollBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // ===== অথ মডাল =====
     let currentAuthMode = 'signin';
     window.openAuthModal = (mode) => {
       currentAuthMode = mode;
@@ -135,6 +222,11 @@
       currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
       window.openAuthModal(currentAuthMode);
     });
+
+    window.togglePasswordVisibility = (id) => {
+      const input = document.getElementById(id);
+      input.type = input.type === 'password' ? 'text' : 'password';
+    };
 
     const authForm = document.getElementById('authForm');
     const authSubmitBtn = authForm.querySelector('button[type="submit"]');
@@ -190,15 +282,7 @@
       }
     };
 
-    window.showResetPasswordModal = () => {
-      const email = prompt('Enter your email address to reset password:');
-      if (!email) return;
-      import('./firebase-config.js').then(({ sendPasswordResetEmail }) => {
-        sendPasswordResetEmail(auth, email)
-          .then(() => alert('✅ Password reset link sent to your email.'))
-          .catch((error) => alert('⚠️ ' + error.message));
-      });
-    };
+    // showResetPasswordModal সম্পূর্ণ সরানো হয়েছে
 
     onAuthStateChanged(auth, async (user) => {
       let name = null;
@@ -217,11 +301,15 @@
     // ===== ডাইনামিক প্যাকেজ =====
     const packagesContainer = document.getElementById('featuredPackages');
     onSnapshot(collection(db, 'products'), (snapshot) => {
+      if (snapshot.empty) {
+        packagesContainer.innerHTML = `<p class="text-gray-500 col-span-3 text-center">No packages available.</p>`;
+        return;
+      }
       let html = '';
       snapshot.forEach(doc => {
         const p = doc.data();
         html += `
-          <div class="glass-card">
+          <div class="glass-card fade-up">
             <i class="fas fa-file-code text-3xl text-blue-500"></i>
             <h3 class="font-bold mt-2">${p.name}</h3>
             <p class="text-sm text-gray-500">${p.desc || p.description || ''}</p>
@@ -230,36 +318,47 @@
           </div>
         `;
       });
-      packagesContainer.innerHTML = html || '<p class="text-gray-500 col-span-3 text-center">No packages available.</p>';
+      packagesContainer.innerHTML = html;
+      // নতুন এলিমেন্টগুলোর জন্য Observer পুনরায় চালু
+      document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
     });
 
     // ===== টেস্টিমোনিয়াল =====
     const testimonialContainer = document.getElementById('testimonialList');
     onSnapshot(collection(db, 'testimonials'), (snapshot) => {
+      if (snapshot.empty) {
+        testimonialContainer.innerHTML = `<p class="text-gray-500 col-span-3 text-center">No testimonials yet.</p>`;
+        return;
+      }
       let html = '';
       snapshot.forEach(doc => {
         const t = doc.data();
         html += `
-          <div class="glass-card text-center">
+          <div class="glass-card text-center fade-up">
             <p class="text-gray-600 italic">“${t.text}”</p>
             <p class="font-bold mt-2">- ${t.name}</p>
             <p class="text-sm text-gray-400">${t.role || ''}</p>
           </div>
         `;
       });
-      testimonialContainer.innerHTML = html || '<p class="text-gray-500 col-span-3 text-center">No testimonials yet.</p>';
+      testimonialContainer.innerHTML = html;
+      document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
     });
 
     // ===== FAQ =====
     const faqContainer = document.getElementById('faqList');
     onSnapshot(collection(db, 'faqs'), (snapshot) => {
+      if (snapshot.empty) {
+        faqContainer.innerHTML = `<p class="text-gray-500 text-center">No FAQs yet.</p>`;
+        return;
+      }
       let html = '';
       let index = 0;
       snapshot.forEach(doc => {
         const f = doc.data();
         const idx = index++;
         html += `
-          <div class="glass-card cursor-pointer" onclick="toggleFaq(${idx})">
+          <div class="glass-card cursor-pointer fade-up" onclick="toggleFaq(${idx})">
             <div class="flex justify-between items-center">
               <h3 class="font-semibold">${f.question}</h3>
               <i class="fas fa-chevron-down text-gray-400 transition-transform" id="faqIcon${idx}"></i>
@@ -268,7 +367,8 @@
           </div>
         `;
       });
-      faqContainer.innerHTML = html || '<p class="text-gray-500 text-center">No FAQs yet.</p>';
+      faqContainer.innerHTML = html;
+      document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
     });
 
     window.toggleFaq = (index) => {

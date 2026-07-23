@@ -9,212 +9,140 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <style>
-    .settings-card {
-      transition: all 0.3s ease;
+    .settings-card { transition: all 0.3s ease; }
+    .settings-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.06); }
+    .danger-zone { border: 2px solid #fee2e2; background: #fef2f2; }
+    .status-badge { display: inline-block; padding: 2px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+
+    .fade-up { opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease, transform 0.5s ease; }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+    .scroll-top-btn {
+      position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; border-radius: 50%;
+      background: linear-gradient(135deg, #007AFF, #5856D6); color: #fff; border: none; font-size: 1.2rem;
+      cursor: pointer; box-shadow: 0 8px 30px rgba(0,122,255,0.35); z-index: 999;
+      opacity: 0; transform: scale(0.8); transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
     }
-    .settings-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(0,0,0,0.06);
-    }
-    .danger-zone {
-      border: 2px solid #fee2e2;
-      background: #fef2f2;
-    }
-    .status-badge {
-      display: inline-block;
-      padding: 2px 12px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-    .status-badge.verified { background: #d1fae5; color: #059669; }
-    .status-badge.unverified { background: #fef3c7; color: #d97706; }
+    .scroll-top-btn.show { opacity: 1; transform: scale(1); pointer-events: auto; }
+    .scroll-top-btn:hover { transform: scale(1.05); }
   </style>
 </head>
 <body>
   <div class="page-wrapper">
     <div id="navbar-placeholder"></div>
-
     <main class="main-content">
       <section class="pt-28 pb-16 px-6 max-w-2xl mx-auto">
-        <!-- হেডার -->
-        <div class="flex items-center gap-3 mb-2">
-          <i class="fas fa-cog text-3xl text-blue-500"></i>
-          <h1 class="text-3xl font-bold text-gray-900">Settings</h1>
-        </div>
-        <p class="text-gray-500 mb-6">Manage your account preferences and security</p>
+        <div class="flex items-center gap-3 mb-2 fade-up"><i class="fas fa-cog text-3xl text-blue-500"></i><h1 class="text-3xl font-bold text-gray-900">Settings</h1></div>
+        <p class="text-gray-500 mb-6 fade-up">Manage your account preferences and security</p>
 
-        <!-- ===== ১. ইমেইল ভেরিফিকেশন ===== -->
-        <div class="glass-card settings-card">
-          <h2 class="text-lg font-bold text-gray-900">
-            <i class="fas fa-envelope text-blue-500 mr-2"></i> Email Verification
-          </h2>
-          <div id="emailVerificationStatus" class="mt-2">
-            <span id="verifyStatusText" class="text-sm text-gray-600">Checking...</span>
-          </div>
-          <button id="verifyEmailBtn" class="btn-primary mt-3 text-sm py-2 px-4">
-            <i class="fas fa-paper-plane"></i> Send Verification Email
-          </button>
-          <button id="refreshVerifyBtn" class="btn-outline mt-3 ml-2 text-sm py-2 px-4" onclick="checkVerificationStatus()">
-            <i class="fas fa-sync"></i> Refresh Status
-          </button>
-          <div id="verifyFeedback" class="mt-2 text-sm hidden"></div>
+        <!-- ১. Email Change (Verification সরিয়ে) -->
+        <div class="glass-card settings-card fade-up">
+          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-envelope text-blue-500 mr-2"></i> Change Email Address</h2>
+          <form id="changeEmailForm" class="mt-4 space-y-3">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Current Email</label>
+              <input type="email" id="currentEmailDisplay" class="form-input" disabled />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">New Email Address</label>
+              <input type="email" id="newEmail" placeholder="Enter new email" required class="form-input" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Current Password (to confirm)</label>
+              <div class="relative">
+                <input type="password" id="confirmPasswordForEmail" placeholder="Enter your current password" required class="form-input pr-10" />
+                <button type="button" onclick="togglePasswordVisibility('confirmPasswordForEmail')" class="absolute right-3 top-3 text-gray-400"><i class="fas fa-eye"></i></button>
+              </div>
+            </div>
+            <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Update Email</button>
+            <div id="emailChangeFeedback" class="text-sm hidden"></div>
+          </form>
         </div>
 
-        <!-- ===== ২. পাসওয়ার্ড পরিবর্তন ===== -->
-        <div class="glass-card settings-card mt-4">
-          <h2 class="text-lg font-bold text-gray-900">
-            <i class="fas fa-key text-blue-500 mr-2"></i> Change Password
-          </h2>
+        <!-- ২. Change Password (পুরাতন) -->
+        <div class="glass-card settings-card mt-4 fade-up">
+          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-key text-blue-500 mr-2"></i> Change Password</h2>
           <form id="changePasswordForm" class="mt-4 space-y-3">
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Current Password</label>
-              <div class="relative">
-                <input type="password" id="currentPassword" placeholder="Enter current password" required class="form-input pr-10" />
-                <button type="button" onclick="togglePasswordVisibility('currentPassword')" class="absolute right-3 top-3 text-gray-400"><i class="fas fa-eye"></i></button>
-              </div>
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">New Password</label>
-              <div class="relative">
-                <input type="password" id="newPassword" placeholder="Enter new password" required class="form-input pr-10" />
-                <button type="button" onclick="togglePasswordVisibility('newPassword')" class="absolute right-3 top-3 text-gray-400"><i class="fas fa-eye"></i></button>
-              </div>
-              <p class="text-xs text-gray-400 mt-1">Must be at least 6 characters</p>
-            </div>
-            <button type="submit" class="btn-primary">
-              <i class="fas fa-save"></i> Update Password
-            </button>
+            <div><label class="block text-sm font-medium text-gray-700">Current Password</label><div class="relative"><input type="password" id="currentPassword" placeholder="Enter current password" required class="form-input pr-10" /><button type="button" onclick="togglePasswordVisibility('currentPassword')" class="absolute right-3 top-3 text-gray-400"><i class="fas fa-eye"></i></button></div></div>
+            <div><label class="block text-sm font-medium text-gray-700">New Password</label><div class="relative"><input type="password" id="newPassword" placeholder="Enter new password" required class="form-input pr-10" /><button type="button" onclick="togglePasswordVisibility('newPassword')" class="absolute right-3 top-3 text-gray-400"><i class="fas fa-eye"></i></button></div><p class="text-xs text-gray-400 mt-1">Must be at least 6 characters</p></div>
+            <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Update Password</button>
             <div id="passwordFeedback" class="text-sm hidden"></div>
           </form>
         </div>
 
-        <!-- ===== ৩. ডেটা এক্সপোর্ট ===== -->
-        <div class="glass-card settings-card mt-4">
-          <h2 class="text-lg font-bold text-gray-900">
-            <i class="fas fa-download text-blue-500 mr-2"></i> Export Data
-          </h2>
-          <p class="text-sm text-gray-500 mt-1">
-            Download all your personal data (profile, orders, fix requests) as JSON.
-          </p>
-          <button onclick="exportUserData()" class="btn-primary mt-3 text-sm py-2 px-4">
-            <i class="fas fa-file-export"></i> Download My Data
-          </button>
+        <!-- ৩. Export Data -->
+        <div class="glass-card settings-card mt-4 fade-up">
+          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-download text-blue-500 mr-2"></i> Export Data</h2>
+          <p class="text-sm text-gray-500 mt-1">Download all your personal data (profile, orders, fix requests) as JSON.</p>
+          <button onclick="exportUserData()" class="btn-primary mt-3 text-sm py-2 px-4"><i class="fas fa-file-export"></i> Download My Data</button>
           <div id="exportFeedback" class="mt-2 text-sm hidden"></div>
         </div>
 
-        <!-- ===== ৪. ডেঞ্জার জোন (অ্যাকাউন্ট ডিলিট) ===== -->
-        <div class="glass-card settings-card mt-4 danger-zone">
-          <h2 class="text-lg font-bold text-red-600">
-            <i class="fas fa-exclamation-triangle mr-2"></i> Danger Zone
-          </h2>
-          <p class="text-sm text-gray-500 mt-1">
-            Once you delete your account, all your data will be permanently removed. This action cannot be undone.
-          </p>
-          <button onclick="deleteAccount()" class="btn-danger mt-3 text-sm py-2 px-4">
-            <i class="fas fa-trash"></i> Delete Account
-          </button>
+        <!-- ৪. Danger Zone -->
+        <div class="glass-card settings-card mt-4 danger-zone fade-up">
+          <h2 class="text-lg font-bold text-red-600"><i class="fas fa-exclamation-triangle mr-2"></i> Danger Zone</h2>
+          <p class="text-sm text-gray-500 mt-1">Once you delete your account, all your data will be permanently removed. This action cannot be undone.</p>
+          <button onclick="deleteAccount()" class="btn-danger mt-3 text-sm py-2 px-4"><i class="fas fa-trash"></i> Delete Account</button>
           <div id="deleteFeedback" class="mt-2 text-sm hidden"></div>
         </div>
 
-        <!-- ===== ৫. সেশন ===== -->
-        <div class="glass-card settings-card mt-4">
-          <h2 class="text-lg font-bold text-gray-900">
-            <i class="fas fa-sign-out-alt text-blue-500 mr-2"></i> Session
-          </h2>
-          <button onclick="window.handleLogout()" class="btn-outline mt-2 text-sm py-2 px-4">
-            <i class="fas fa-sign-out-alt"></i> Logout
-          </button>
+        <!-- ৫. Session -->
+        <div class="glass-card settings-card mt-4 fade-up">
+          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-sign-out-alt text-blue-500 mr-2"></i> Session</h2>
+          <button onclick="window.handleLogout()" class="btn-outline mt-2 text-sm py-2 px-4"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
       </section>
     </main>
-
     <div id="footer-placeholder"></div>
   </div>
 
-  <!-- ===== অথ মডাল ===== -->
+  <button class="scroll-top-btn" id="scrollTopBtn"><i class="fas fa-arrow-up"></i></button>
+
+  <!-- Auth Modal (Forgot Password সরানো) -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
-      <div class="flex justify-between items-center mb-4">
-        <h3 id="authModalTitle" class="text-2xl font-bold">Sign In</h3>
-        <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
-      </div>
+      <div class="flex justify-between items-center mb-4"><h3 id="authModalTitle" class="text-2xl font-bold">Sign In</h3><button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button></div>
       <form id="authForm" class="space-y-4">
         <input type="email" id="authEmail" placeholder="Email" required class="form-input" />
-        <div class="relative">
-          <input type="password" id="authPassword" placeholder="Password" required class="form-input pr-10" />
-          <button type="button" onclick="togglePasswordVisibility('authPassword')" class="absolute right-3 top-3 text-gray-400"><i class="fas fa-eye"></i></button>
-        </div>
+        <div class="relative"><input type="password" id="authPassword" placeholder="Password" required class="form-input pr-10" /><button type="button" onclick="togglePasswordVisibility('authPassword')" class="absolute right-3 top-3 text-gray-400"><i class="fas fa-eye"></i></button></div>
         <button type="submit" class="btn-primary w-full justify-center">Continue</button>
       </form>
-      <div class="mt-4 flex flex-col gap-2">
-        <button onclick="window.socialLogin('google')" class="btn-outline w-full justify-center"><i class="fab fa-google"></i> Sign in with Google</button>
-        <button onclick="window.socialLogin('github')" class="btn-outline w-full justify-center"><i class="fab fa-github"></i> Sign in with GitHub</button>
-      </div>
-      <p class="mt-2 text-sm text-center">
-        <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline"><i class="fas fa-key"></i> Forgot Password?</a>
-      </p>
-      <p class="mt-4 text-sm text-gray-500 text-center">
-        <span id="authToggleText">Don't have an account?</span>
-        <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
-      </p>
+      <div class="mt-4 flex flex-col gap-2"><button onclick="window.socialLogin('google')" class="btn-outline w-full justify-center"><i class="fab fa-google"></i> Sign in with Google</button><button onclick="window.socialLogin('github')" class="btn-outline w-full justify-center"><i class="fab fa-github"></i> Sign in with GitHub</button></div>
+      <p class="mt-4 text-sm text-gray-500 text-center"><span id="authToggleText">Don't have an account?</span><a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a></p>
       <div id="authError" class="text-red-500 text-sm mt-2 hidden"></div>
     </div>
   </div>
-
   <div id="toast-container"></div>
 
   <script type="module">
-    // ================================================================
-    // ===== ইমপোর্ট (সমস্ত প্রয়োজনীয় ফাংশন যোগ করা হয়েছে) =====
-    // ================================================================
-    import { 
-      auth, db, collection, doc, getDoc, setDoc, addDoc, onSnapshot, 
-      query, where, serverTimestamp, signOut, onAuthStateChanged,
-      signInWithEmailAndPassword, createUserWithEmailAndPassword, updateDoc,
-      signInWithPopup, googleProvider, githubProvider, sendPasswordResetEmail,
-      // ===== নতুন ইমপোর্ট (Fixed) =====
-      sendEmailVerification,
-      reauthenticateWithCredential,
-      updatePassword,
-      deleteUser,
-      EmailAuthProvider
-    } from './firebase-config.js';
-    import { 
-      renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
-      renderCartSidebar, setLoading, renderPaymentModal
-    } from './components.js';
+    import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar, setLoading, renderPaymentModal } from './components.js';
+    import { auth, db, collection, doc, getDoc, getDocs, query, where, signOut, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateDoc, deleteDoc, signInWithPopup, googleProvider, githubProvider, sendPasswordResetEmail, reauthenticateWithCredential, updatePassword, deleteUser, EmailAuthProvider, updateEmail } from './firebase-config.js';
 
-    // ================================================================
-    // ===== রেন্ডার =====
-    // ================================================================
-    renderNavbar();
-    renderPaymentModal(); 
-    renderFooter();
-    renderCartSidebar();
-    updateCartBadge();
+    renderNavbar(); renderPaymentModal(); renderFooter(); renderCartSidebar(); updateCartBadge();
 
-    // ================================================================
-    // ===== টোস্ট =====
-    // ================================================================
-    // window.showToast ইতিমধ্যে components.js থেকে সেট করা আছে, 
-    // কিন্তু সিকিউরিটির জন্য এখানে ফলব্যাক রাখা হলো।
-    if (typeof window.showToast !== 'function') {
-      window.showToast = (message, type = 'success') => {
-        const container = document.getElementById('toast-container');
-        if (!container) return;
-        const toast = document.createElement('div');
-        const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
-        toast.className = `toast ${type}`;
-        toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
-        container.appendChild(toast);
-        setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
-      };
-    }
+    window.showToast = (message, type = 'success') => {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
+      container.appendChild(toast);
+      setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
+    };
 
-    // ================================================================
-    // ===== অথ মডাল =====
-    // ================================================================
+    // Scroll Animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.addEventListener('DOMContentLoaded', () => { document.querySelectorAll('.fade-up').forEach(el => observer.observe(el)); });
+
+    const scrollBtn = document.getElementById('scrollTopBtn');
+    window.addEventListener('scroll', () => { scrollBtn.classList.toggle('show', window.scrollY > 400); });
+    scrollBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+
+    // Auth Modal Logic
     let currentAuthMode = 'signin';
     window.openAuthModal = (mode) => {
       currentAuthMode = mode;
@@ -225,18 +153,15 @@
       document.getElementById('authModal').classList.remove('hidden');
     };
     window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
-
     document.getElementById('authToggleLink').addEventListener('click', (e) => {
       e.preventDefault();
       currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
       window.openAuthModal(currentAuthMode);
     });
-
     window.togglePasswordVisibility = (id) => {
       const input = document.getElementById(id);
       input.type = input.type === 'password' ? 'text' : 'password';
     };
-
     window.socialLogin = async (provider) => {
       try {
         let result;
@@ -246,27 +171,15 @@
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (!userDoc.exists()) {
           await setDoc(doc(db, 'users', user.uid), {
-            email: user.email,
-            displayName: user.displayName || user.email.split('@')[0],
-            role: 'user',
-            createdAt: new Date().toISOString()
+            email: user.email, displayName: user.displayName || user.email.split('@')[0],
+            role: 'user', createdAt: new Date().toISOString()
           });
         }
-        window.showToast('✅ Signed in with ' + provider, 'success');
+        showToast('✅ Signed in with ' + provider, 'success');
         closeAuthModal();
-        window.location.reload();
-      } catch (err) {
-        window.showToast('⚠️ ' + err.message, 'error');
-      }
+      } catch (err) { showToast('⚠️ ' + err.message, 'error'); }
     };
-
-    window.showResetPasswordModal = () => {
-      const email = prompt('Enter your email address to reset password:');
-      if (!email) return;
-      sendPasswordResetEmail(auth, email)
-        .then(() => alert('✅ Password reset link sent to your email.'))
-        .catch((error) => alert('⚠️ ' + error.message));
-    };
+    // showResetPasswordModal সরানো
 
     const authForm = document.getElementById('authForm');
     const authSubmitBtn = authForm.querySelector('button[type="submit"]');
@@ -281,117 +194,102 @@
         let userCred;
         if (currentAuthMode === 'signin') {
           userCred = await signInWithEmailAndPassword(auth, email, password);
-          window.showToast('✅ Signed in!', 'success');
+          showToast('✅ Signed in!', 'success');
         } else {
           userCred = await createUserWithEmailAndPassword(auth, email, password);
           await setDoc(doc(db, 'users', userCred.user.uid), {
             email, displayName: email.split('@')[0], role: 'user', createdAt: new Date().toISOString()
           });
-          window.showToast('✅ Account created!', 'success');
+          showToast('✅ Account created!', 'success');
         }
         closeAuthModal();
         authForm.reset();
-        window.location.reload();
       } catch (error) {
         errorDiv.textContent = error.message;
         errorDiv.classList.remove('hidden');
-        window.showToast('⚠️ ' + error.message, 'error');
-      } finally {
-        setLoading(authSubmitBtn, false);
-      }
+        showToast('⚠️ ' + error.message, 'error');
+      } finally { setLoading(authSubmitBtn, false); }
     });
 
     window.handleLogout = async () => {
       await signOut(auth);
-      window.showToast('✅ Logged out', 'success');
+      showToast('✅ Logged out', 'success');
       window.location.href = 'index.html';
     };
 
-    // ================================================================
-    // ===== সেটিংস লজিক =====
-    // ================================================================
+    // ===== Settings Logic =====
+    let currentUserData = null;
 
-    let currentUser = null;
+    // 1. Email Change
+    const changeEmailForm = document.getElementById('changeEmailForm');
+    const emailBtn = changeEmailForm.querySelector('button[type="submit"]');
+    const emailFeedback = document.getElementById('emailChangeFeedback');
+    const currentEmailDisplay = document.getElementById('currentEmailDisplay');
 
-    // ===== ইমেইল ভেরিফিকেশন =====
-    window.checkVerificationStatus = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-      await user.reload();
-      const statusText = document.getElementById('verifyStatusText');
-      const verifyBtn = document.getElementById('verifyEmailBtn');
-      const feedback = document.getElementById('verifyFeedback');
-      feedback.className = 'hidden';
-
-      if (user.emailVerified) {
-        statusText.innerHTML = `
-          <span class="status-badge verified">
-            <i class="fas fa-check-circle"></i> Verified
-          </span>
-          <span class="text-sm text-green-600 ml-2">Your email is verified.</span>
-        `;
-        verifyBtn.style.display = 'none';
-      } else {
-        statusText.innerHTML = `
-          <span class="status-badge unverified">
-            <i class="fas fa-exclamation-triangle"></i> Unverified
-          </span>
-          <span class="text-sm text-orange-500 ml-2">Please verify your email.</span>
-        `;
-        verifyBtn.style.display = 'inline-flex';
-      }
-    };
-
-    // ভেরিফিকেশন ইমেইল পাঠান
-    document.getElementById('verifyEmailBtn').addEventListener('click', async () => {
-      const user = auth.currentUser;
-      if (!user) { window.showToast('Not logged in', 'error'); return; }
-      const btn = document.getElementById('verifyEmailBtn');
-      const feedback = document.getElementById('verifyFeedback');
-      feedback.className = 'hidden';
-
-      setLoading(btn, true);
-      try {
-        await sendEmailVerification(user);
-        feedback.className = 'block text-sm text-green-600 mt-2';
-        feedback.innerHTML = '✅ Verification email sent! Please check your inbox (and spam folder).';
-        window.showToast('✅ Verification email sent!', 'success');
-      } catch (err) {
-        feedback.className = 'block text-sm text-red-500 mt-2';
-        feedback.textContent = '⚠️ ' + err.message;
-        window.showToast('⚠️ ' + err.message, 'error');
-      } finally {
-        setLoading(btn, false);
-      }
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = 'index.html'; return; }
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const displayName = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
+      updateNavbarAuth(user, displayName);
+      currentEmailDisplay.value = user.email || '';
     });
 
-    // ===== পাসওয়ার্ড পরিবর্তন =====
+    changeEmailForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const user = auth.currentUser;
+      if (!user) { showToast('Not logged in', 'error'); return; }
+      const newEmail = document.getElementById('newEmail').value.trim();
+      const password = document.getElementById('confirmPasswordForEmail').value;
+      emailFeedback.className = 'hidden';
+
+      if (!newEmail || !password) {
+        emailFeedback.className = 'block text-sm text-red-500 mt-2';
+        emailFeedback.textContent = 'Please fill in all fields.';
+        showToast('Please fill in all fields.', 'error');
+        return;
+      }
+
+      setLoading(emailBtn, true, 'Updating...');
+      try {
+        const credential = EmailAuthProvider.credential(user.email, password);
+        await reauthenticateWithCredential(user, credential);
+        await updateEmail(user, newEmail);
+        await updateDoc(doc(db, 'users', user.uid), { email: newEmail });
+        currentEmailDisplay.value = newEmail;
+        emailFeedback.className = 'block text-sm text-green-600 mt-2';
+        emailFeedback.innerHTML = '✅ Email updated successfully!';
+        showToast('✅ Email updated successfully!', 'success');
+        changeEmailForm.reset();
+      } catch (err) {
+        emailFeedback.className = 'block text-sm text-red-500 mt-2';
+        emailFeedback.textContent = '⚠️ ' + err.message;
+        showToast('⚠️ ' + err.message, 'error');
+      } finally { setLoading(emailBtn, false); }
+    });
+
+    // 2. Password Change
     const changePasswordForm = document.getElementById('changePasswordForm');
     const passBtn = changePasswordForm.querySelector('button[type="submit"]');
     const passwordFeedback = document.getElementById('passwordFeedback');
-
     changePasswordForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const current = document.getElementById('currentPassword').value;
       const newPass = document.getElementById('newPassword').value;
       passwordFeedback.className = 'hidden';
-
       if (!current || !newPass) {
         passwordFeedback.className = 'block text-sm text-red-500 mt-2';
         passwordFeedback.textContent = 'Please fill in all fields.';
-        window.showToast('Please fill in all fields', 'error');
+        showToast('Please fill in all fields', 'error');
         return;
       }
       if (newPass.length < 6) {
         passwordFeedback.className = 'block text-sm text-red-500 mt-2';
         passwordFeedback.textContent = 'New password must be at least 6 characters.';
-        window.showToast('Password must be at least 6 characters', 'error');
+        showToast('Password must be at least 6 characters', 'error');
         return;
       }
-
       const user = auth.currentUser;
-      if (!user) { window.showToast('Not logged in', 'error'); return; }
-
+      if (!user) { showToast('Not logged in', 'error'); return; }
       setLoading(passBtn, true, 'Updating...');
       try {
         const credential = EmailAuthProvider.credential(user.email, current);
@@ -399,128 +297,73 @@
         await updatePassword(user, newPass);
         passwordFeedback.className = 'block text-sm text-green-600 mt-2';
         passwordFeedback.innerHTML = '✅ Password updated successfully!';
-        window.showToast('✅ Password updated!', 'success');
+        showToast('✅ Password updated!', 'success');
         changePasswordForm.reset();
       } catch (err) {
         passwordFeedback.className = 'block text-sm text-red-500 mt-2';
         passwordFeedback.textContent = '⚠️ ' + err.message;
-        window.showToast('⚠️ ' + err.message, 'error');
-      } finally {
-        setLoading(passBtn, false);
-      }
+        showToast('⚠️ ' + err.message, 'error');
+      } finally { setLoading(passBtn, false); }
     });
 
-    // ===== ডেটা এক্সপোর্ট =====
+    // 3. Export Data
     window.exportUserData = async () => {
       const user = auth.currentUser;
-      if (!user) { window.showToast('Not logged in', 'error'); return; }
+      if (!user) { showToast('Not logged in', 'error'); return; }
       const btn = event.target;
       const feedback = document.getElementById('exportFeedback');
       feedback.className = 'hidden';
-
       setLoading(btn, true);
       try {
-        // প্রোফাইল
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         const profile = userDoc.exists() ? userDoc.data() : {};
-
-        // অর্ডার
         const ordersSnap = await getDocs(query(collection(db, 'orders'), where('userId', '==', user.uid)));
         const orders = ordersSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-        // ফিক্স রিকোয়েস্ট
         const fixSnap = await getDocs(query(collection(db, 'fixRequests'), where('userId', '==', user.uid)));
         const fixRequests = fixSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-
-        const data = {
-          exportedAt: new Date().toISOString(),
-          user: {
-            uid: user.uid,
-            email: user.email,
-            emailVerified: user.emailVerified,
-            ...profile
-          },
-          orders: orders,
-          fixRequests: fixRequests
-        };
-
+        const data = { exportedAt: new Date().toISOString(), user: { uid: user.uid, email: user.email, emailVerified: user.emailVerified, ...profile }, orders, fixRequests };
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
         link.download = `my-data-${new Date().toISOString().slice(0,10)}.json`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
         URL.revokeObjectURL(link.href);
-
         feedback.className = 'block text-sm text-green-600 mt-2';
         feedback.innerHTML = '✅ Data exported successfully!';
-        window.showToast('✅ Data exported!', 'success');
+        showToast('✅ Data exported!', 'success');
       } catch (err) {
         feedback.className = 'block text-sm text-red-500 mt-2';
         feedback.textContent = '⚠️ ' + err.message;
-        window.showToast('⚠️ ' + err.message, 'error');
-      } finally {
-        setLoading(btn, false);
-      }
+        showToast('⚠️ ' + err.message, 'error');
+      } finally { setLoading(btn, false); }
     };
 
-    // ===== অ্যাকাউন্ট ডিলিট =====
+    // 4. Delete Account
     window.deleteAccount = async () => {
-      if (!confirm('⚠️ Are you sure you want to delete your account? This action is IRREVERSIBLE and all your data will be permanently lost.')) {
-        return;
-      }
+      if (!confirm('⚠️ Are you sure you want to delete your account? This action is IRREVERSIBLE and all your data will be permanently lost.')) return;
       const confirmText = prompt('Type "DELETE" to permanently delete your account:');
-      if (confirmText !== 'DELETE') {
-        window.showToast('Account deletion cancelled', 'warning');
-        return;
-      }
-
+      if (confirmText !== 'DELETE') { showToast('Account deletion cancelled', 'warning'); return; }
       const user = auth.currentUser;
-      if (!user) { window.showToast('Not logged in', 'error'); return; }
+      if (!user) { showToast('Not logged in', 'error'); return; }
       const feedback = document.getElementById('deleteFeedback');
       feedback.className = 'hidden';
-
       try {
-        // ইউজার ডক ডিলিট
         await deleteDoc(doc(db, 'users', user.uid));
-        // অথ ডিলিট
         await deleteUser(user);
-        window.showToast('✅ Account deleted successfully.', 'success');
+        showToast('✅ Account deleted successfully.', 'success');
         window.location.href = 'index.html';
       } catch (err) {
         if (err.code === 'auth/requires-recent-login') {
           feedback.className = 'block text-sm text-red-500 mt-2';
           feedback.innerHTML = '⚠️ For security, please re-authenticate (logout and login again) before deleting your account.';
-          window.showToast('Please re-authenticate first', 'error');
+          showToast('Please re-authenticate first', 'error');
         } else {
           feedback.className = 'block text-sm text-red-500 mt-2';
           feedback.textContent = '⚠️ ' + err.message;
-          window.showToast('⚠️ ' + err.message, 'error');
+          showToast('⚠️ ' + err.message, 'error');
         }
       }
     };
-
-    // ================================================================
-    // ===== অথ স্টেট =====
-    // ================================================================
-
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = 'index.html';
-        return;
-      }
-
-      currentUser = user;
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      const displayName = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
-      updateNavbarAuth(user, displayName);
-
-      // ভেরিফিকেশন স্ট্যাটাস চেক
-      await checkVerificationStatus();
-    });
-
-    console.log('⚙️ Settings page loaded successfully!');
   </script>
 </body>
 </html>

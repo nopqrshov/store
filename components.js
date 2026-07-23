@@ -1,12 +1,11 @@
 // components.js
 import { 
-  auth, onAuthStateChanged, signOut, sendPasswordResetEmail,
-  signInWithPopup, googleProvider, githubProvider, db, doc, getDoc, setDoc,
+  auth, onAuthStateChanged, signOut, db, doc, getDoc, setDoc,
   updateDoc, serverTimestamp, collection, addDoc, query, where, onSnapshot,
   deleteDoc, getDocs
 } from './firebase-config.js';
 
-// ===== টোস্ট ফাংশন (সর্বত্র ব্যবহারের জন্য) =====
+// ===== টোস্ট ফাংশন =====
 window.showToast = function(message, type = 'success') {
   let container = document.getElementById('toast-container');
   if (!container) {
@@ -36,6 +35,27 @@ export function updateCartBadge() {
     cartBadge.style.display = 'none';
   }
 }
+
+// ===== মোবাইল মেনু টগল =====
+window.toggleMobileMenu = function() {
+  const menu = document.getElementById('mobileMenu');
+  const icon = document.getElementById('hamburgerIcon');
+  if (menu) {
+    menu.classList.toggle('hidden');
+    if (icon) {
+      icon.classList.toggle('fa-bars');
+      icon.classList.toggle('fa-times');
+    }
+  }
+};
+
+// ===== নোটিফিকেশন টগল (ডেমো) =====
+window.toggleNotifications = function() {
+  const dropdown = document.getElementById('notificationDropdown');
+  if (dropdown) {
+    dropdown.classList.toggle('hidden');
+  }
+};
 
 // ===== নেভবার =====
 export function renderNavbar() {
@@ -273,18 +293,6 @@ export function setLoading(button, isLoading, originalText = null) {
     }
   }
 }
-
-// ===== ফরগট পাসওয়ার্ড =====
-export function showResetPasswordModal() {
-  const email = prompt('Enter your email address to reset password:');
-  if (!email) return;
-  setLoading(document.activeElement, true);
-  sendPasswordResetEmail(auth, email)
-    .then(() => alert('✅ Password reset link sent to your email.'))
-    .catch((error) => alert('⚠️ ' + error.message))
-    .finally(() => setLoading(document.activeElement, false));
-}
-window.showResetPasswordModal = showResetPasswordModal;
 
 // ===== পেমেন্ট মডাল =====
 export function renderPaymentModal() {

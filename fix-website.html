@@ -150,7 +150,7 @@
     <div id="footer-placeholder"></div>
   </div>
 
-  <!-- ===== অথ মডাল ===== -->
+  <!-- ===== অথ মডাল (Forgot Password লিংক সরানো হয়েছে) ===== -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
       <div class="flex justify-between items-center mb-4">
@@ -169,9 +169,7 @@
         <button onclick="window.socialLogin('google')" class="btn-outline w-full justify-center"><i class="fab fa-google"></i> Sign in with Google</button>
         <button onclick="window.socialLogin('github')" class="btn-outline w-full justify-center"><i class="fab fa-github"></i> Sign in with GitHub</button>
       </div>
-      <p class="mt-2 text-sm text-center">
-        <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline"><i class="fas fa-key"></i> Forgot Password?</a>
-      </p>
+      <!-- Forgot Password লিংক সরানো হয়েছে -->
       <p class="mt-4 text-sm text-gray-500 text-center">
         <span id="authToggleText">Don't have an account?</span>
         <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
@@ -185,28 +183,21 @@
   <script type="module">
     // ===== ইমপোর্ট =====
     import { 
-  renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
-  renderCartSidebar, setLoading, renderPaymentModal   // ← renderPaymentModal যোগ
-} from './components.js';
-renderCartSidebar();
-renderPaymentModal();  // ← এই লাইন যোগ করুন
-updateCartBadge();
+      renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
+      renderCartSidebar, setLoading, renderPaymentModal
+    } from './components.js';
     import { 
       auth, db, collection, addDoc, serverTimestamp, 
       signInWithEmailAndPassword, createUserWithEmailAndPassword, 
       onAuthStateChanged, signOut, doc, setDoc, getDoc,
-      signInWithPopup, googleProvider, githubProvider,
-      sendPasswordResetEmail
+      signInWithPopup, googleProvider, githubProvider
     } from './firebase-config.js';
-    import { 
-      renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
-      renderCartSidebar, setLoading
-    } from './components.js';
 
     // ===== রেন্ডার =====
     renderNavbar();
     renderFooter();
     renderCartSidebar();
+    renderPaymentModal();
     updateCartBadge();
 
     // ===== টোস্ট =====
@@ -266,13 +257,7 @@ updateCartBadge();
       }
     };
 
-    window.showResetPasswordModal = () => {
-      const email = prompt('Enter your email address to reset password:');
-      if (!email) return;
-      sendPasswordResetEmail(auth, email)
-        .then(() => alert('✅ Password reset link sent to your email.'))
-        .catch((error) => alert('⚠️ ' + error.message));
-    };
+    // Forgot Password ফাংশন সরানো হয়েছে
 
     const authForm = document.getElementById('authForm');
     const authSubmitBtn = authForm.querySelector('button[type="submit"]');

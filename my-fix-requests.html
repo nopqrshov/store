@@ -62,10 +62,64 @@
       padding: 12px;
       border-radius: 8px;
     }
+    .empty-state-icon { font-size: 4rem; opacity: 0.3; }
 
-    .empty-state-icon {
-      font-size: 4rem;
-      opacity: 0.3;
+    /* ===== Fade-up Animation ===== */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ===== Back to Top ===== */
+    .scroll-top-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(0,122,255,0.35);
+      z-index: 999;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+    }
+    .scroll-top-btn.show {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+    .scroll-top-btn:hover { transform: scale(1.05); }
+
+    /* ===== Skeleton ===== */
+    .skeleton-card {
+      background: #f3f4f6;
+      border-radius: 16px;
+      padding: 1.5rem;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    .skeleton-card .skeleton-line {
+      height: 16px;
+      background: #e5e7eb;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+    }
+    .skeleton-card .skeleton-line.short { width: 40%; }
+    .skeleton-card .skeleton-line.medium { width: 70%; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
     }
   </style>
 </head>
@@ -76,14 +130,14 @@
     <main class="main-content">
       <section class="pt-28 pb-16 px-6 max-w-4xl mx-auto">
         <!-- হেডার -->
-        <div class="flex items-center gap-3 mb-2">
+        <div class="flex items-center gap-3 mb-2 fade-up">
           <i class="fas fa-tools text-3xl text-blue-500"></i>
           <h1 class="text-3xl font-bold text-gray-900">My Fix Requests</h1>
         </div>
-        <p class="text-gray-500 mb-4">Track all your website fix requests and replies from admin.</p>
+        <p class="text-gray-500 mb-4 fade-up">Track all your website fix requests and replies from admin.</p>
 
         <!-- ===== ফিল্টার ===== -->
-        <div class="flex flex-wrap gap-3 items-center mb-6">
+        <div class="flex flex-wrap gap-3 items-center mb-6 fade-up">
           <div class="relative flex-1 min-w-[200px]">
             <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
             <input type="text" id="searchRequests" placeholder="Search by ticket number..." class="form-input pl-10" />
@@ -108,16 +162,16 @@
           </a>
         </div>
 
-        <!-- ===== রিকোয়েস্ট লিস্ট ===== -->
+        <!-- ===== রিকোয়েস্ট লিস্ট (Skeleton সহ) ===== -->
         <div id="requestList" class="space-y-4">
-          <div class="text-center py-12 text-gray-400">
-            <i class="fas fa-spinner fa-spin text-2xl"></i>
-            <p class="mt-2">Loading your requests...</p>
-          </div>
+          <!-- Skeleton Cards -->
+          <div class="skeleton-card fade-up"><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line"></div></div>
+          <div class="skeleton-card fade-up"><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line"></div></div>
+          <div class="skeleton-card fade-up"><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line"></div></div>
         </div>
 
         <!-- ===== স্ট্যাটিস্টিক্স ===== -->
-        <div id="statsContainer" class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 hidden">
+        <div id="statsContainer" class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-3 hidden fade-up">
           <div class="glass-card text-center">
             <p class="text-2xl font-bold text-gray-900" id="totalCount">0</p>
             <p class="text-xs text-gray-500">Total</p>
@@ -141,7 +195,12 @@
     <div id="footer-placeholder"></div>
   </div>
 
-  <!-- ===== অথ মডাল ===== -->
+  <!-- ===== Back to Top Button ===== -->
+  <button class="scroll-top-btn" id="scrollTopBtn" aria-label="Back to top">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <!-- ===== অথ মডাল (Forgot Password লিংক সরানো হয়েছে) ===== -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
       <div class="flex justify-between items-center mb-4">
@@ -160,9 +219,7 @@
         <button onclick="window.socialLogin('google')" class="btn-outline w-full justify-center"><i class="fab fa-google"></i> Sign in with Google</button>
         <button onclick="window.socialLogin('github')" class="btn-outline w-full justify-center"><i class="fab fa-github"></i> Sign in with GitHub</button>
       </div>
-      <p class="mt-2 text-sm text-center">
-        <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline"><i class="fas fa-key"></i> Forgot Password?</a>
-      </p>
+      <!-- Forgot Password লিংক সম্পূর্ণ সরানো হয়েছে -->
       <p class="mt-4 text-sm text-gray-500 text-center">
         <span id="authToggleText">Don't have an account?</span>
         <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
@@ -177,29 +234,22 @@
     // ================================================================
     // ===== ইমপোর্ট =====
     // ================================================================
-     import { 
-  renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
-  renderCartSidebar, setLoading, renderPaymentModal   // ← renderPaymentModal যোগ
-} from './components.js';
-
-  // ← এই লাইন যোগ করুন
-
+    import { 
+      renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
+      renderCartSidebar, setLoading, renderPaymentModal
+    } from './components.js';
     import { 
       auth, db, collection, doc, getDoc, setDoc, addDoc, onSnapshot, 
       query, where, serverTimestamp, signOut, onAuthStateChanged,
       signInWithEmailAndPassword, createUserWithEmailAndPassword, updateDoc,
-      signInWithPopup, googleProvider, githubProvider, sendPasswordResetEmail
+      signInWithPopup, googleProvider, githubProvider
     } from './firebase-config.js';
-    import { 
-      renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
-      renderCartSidebar, setLoading
-    } from './components.js';
 
     // ================================================================
     // ===== রেন্ডার =====
     // ================================================================
     renderNavbar();
-    renderPaymentModal(); 
+    renderPaymentModal();
     renderFooter();
     renderCartSidebar();
     updateCartBadge();
@@ -217,6 +267,41 @@
       container.appendChild(toast);
       setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
     };
+
+    // ===== Scroll Animation (Intersection Observer) =====
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+    });
+
+    // ===== Back to Top Button =====
+    const scrollBtn = document.getElementById('scrollTopBtn');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 400) {
+        scrollBtn.classList.add('show');
+      } else {
+        scrollBtn.classList.remove('show');
+      }
+    });
+    scrollBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // ===== Debounce Function =====
+    function debounce(func, wait) {
+      let timeout;
+      return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+      };
+    }
 
     // ================================================================
     // ===== অথ মডাল =====
@@ -265,13 +350,7 @@
       }
     };
 
-    window.showResetPasswordModal = () => {
-      const email = prompt('Enter your email address to reset password:');
-      if (!email) return;
-      sendPasswordResetEmail(auth, email)
-        .then(() => alert('✅ Password reset link sent to your email.'))
-        .catch((error) => alert('⚠️ ' + error.message));
-    };
+    // showResetPasswordModal সম্পূর্ণ সরানো হয়েছে
 
     const authForm = document.getElementById('authForm');
     const authSubmitBtn = authForm.querySelector('button[type="submit"]');
@@ -345,7 +424,7 @@
     function renderRequests(requests) {
       if (!requests || requests.length === 0) {
         requestList.innerHTML = `
-          <div class="text-center py-16">
+          <div class="text-center py-16 fade-up">
             <i class="fas fa-inbox empty-state-icon text-gray-300"></i>
             <p class="text-gray-500 mt-4 text-lg">No fix requests found</p>
             <p class="text-gray-400 text-sm">Submit a fix request to get help from our team.</p>
@@ -354,6 +433,7 @@
             </a>
           </div>
         `;
+        document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
         updateStats([]);
         return;
       }
@@ -370,7 +450,6 @@
           hour: '2-digit', minute: '2-digit' 
         });
 
-        // রিপ্লাই ডিসপ্লে
         let replyHtml = '';
         if (r.reply) {
           const replyDate = r.replyTimestamp?.toDate?.() || new Date(r.replyTimestamp);
@@ -399,19 +478,14 @@
           `;
         }
 
-        // ক্যাটাগরি আইকন
         const categoryIcons = {
-          speed: '🚀',
-          error: '🐛',
-          design: '🎨',
-          hacking: '🔒',
-          hosting: '☁️',
-          other: '📌'
+          speed: '🚀', error: '🐛', design: '🎨',
+          hacking: '🔒', hosting: '☁️', other: '📌'
         };
         const categoryIcon = categoryIcons[r.category] || '📌';
 
         html += `
-          <div class="glass-card request-card">
+          <div class="glass-card request-card fade-up">
             <div class="flex flex-wrap justify-between items-start gap-3">
               <div class="flex-1 min-w-[150px]">
                 <div class="flex items-center gap-3 flex-wrap">
@@ -434,24 +508,19 @@
                 </span>
               </div>
             </div>
-
-            <!-- রিপ্লাই -->
             ${replyHtml}
-
-            <!-- রিকোয়েস্ট আইডি -->
-            <div class="text-xs text-gray-400 mt-2">
-              ID: ${r.id?.slice(0, 12) || 'N/A'}
-            </div>
+            <div class="text-xs text-gray-400 mt-2">ID: ${r.id?.slice(0, 12) || 'N/A'}</div>
           </div>
         `;
       });
 
       requestList.innerHTML = html;
+      document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
       updateStats(requests);
     }
 
-    // ===== ফিল্টার অ্যাপ্লাই =====
-    function applyFilters() {
+    // ===== ফিল্টার অ্যাপ্লাই (Debounced) =====
+    const applyFilters = () => {
       const search = searchInput.value.toLowerCase().trim();
       const status = statusFilter.value;
       const priority = priorityFilter.value;
@@ -468,7 +537,9 @@
       });
 
       renderRequests(filteredRequests);
-    }
+    };
+
+    const debouncedApplyFilters = debounce(applyFilters, 300);
 
     // ===== রিসেট ফিল্টার =====
     window.resetFilters = () => {
@@ -527,8 +598,8 @@
       loadRequests(user.uid);
     });
 
-    // ===== ফিল্টার ইভেন্ট =====
-    searchInput.addEventListener('input', applyFilters);
+    // ===== ফিল্টার ইভেন্ট (Debounced) =====
+    searchInput.addEventListener('input', debouncedApplyFilters);
     statusFilter.addEventListener('change', applyFilters);
     priorityFilter.addEventListener('change', applyFilters);
 

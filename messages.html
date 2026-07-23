@@ -10,7 +10,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* (আপনার আগের স্টাইল একই থাকবে) */
     .messenger-wrap { display: flex; flex-direction: column; height: 70vh; min-height: 460px; background: #fff; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.04); border:1px solid rgba(0,0,0,0.04); }
     .chat-header { padding: 14px 20px; border-bottom: 1px solid rgba(0,0,0,0.04); font-weight: 600; background: #fafafc; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
     .chat-header .chat-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg,#007AFF,#5856D6); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:600; font-size:1rem; }
@@ -37,6 +36,59 @@
     .chat-messages::-webkit-scrollbar-thumb { background:#d0d0d5; border-radius:10px; }
     .chat-messages::-webkit-scrollbar-track { background:transparent; }
     @media (max-width:640px) { .chat-msg { max-width:92%; } .messenger-wrap { height:75vh; min-height:400px; } }
+
+    /* ===== Fade-up Animation ===== */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ===== Back to Top ===== */
+    .scroll-top-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(0,122,255,0.35);
+      z-index: 999;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+    }
+    .scroll-top-btn.show {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+    .scroll-top-btn:hover { transform: scale(1.05); }
+
+    /* ===== Skeleton ===== */
+    .skeleton-msg {
+      height: 50px;
+      background: #e5e7eb;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    .skeleton-msg.sent { align-self: flex-end; width: 60%; }
+    .skeleton-msg.received { align-self: flex-start; width: 70%; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
   </style>
 </head>
 <body>
@@ -46,10 +98,10 @@
 
     <main class="main-content">
       <section class="pt-28 pb-16 px-6 max-w-3xl mx-auto">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Support Chat</h1>
-        <p class="text-gray-500 mb-6">Chat directly with our support team.</p>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2 fade-up">Support Chat</h1>
+        <p class="text-gray-500 mb-6 fade-up">Chat directly with our support team.</p>
 
-        <div class="messenger-wrap">
+        <div class="messenger-wrap fade-up">
           <div class="chat-header">
             <div class="chat-avatar"><i class="fas fa-headset"></i></div>
             <div class="chat-info">
@@ -58,7 +110,10 @@
             </div>
           </div>
           <div class="chat-messages" id="chatMessages">
-            <div class="empty-state"><i class="fas fa-inbox"></i><span>No messages yet. Start the conversation!</span></div>
+            <!-- Skeleton Loader -->
+            <div class="skeleton-msg received"></div>
+            <div class="skeleton-msg sent"></div>
+            <div class="skeleton-msg received" style="width:50%;"></div>
           </div>
           <form class="chat-input-wrap" id="chatForm">
             <input type="text" id="chatInput" placeholder="Type a message..." required autocomplete="off" />
@@ -71,7 +126,12 @@
     <div id="footer-placeholder"></div>
   </div>
 
-  <!-- অথ মডাল -->
+  <!-- ===== Back to Top Button ===== -->
+  <button class="scroll-top-btn" id="scrollTopBtn" aria-label="Back to top">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <!-- ===== অথ মডাল (Forgot Password লিংক সরানো হয়েছে) ===== -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
       <div class="flex justify-between items-center mb-4">
@@ -83,11 +143,7 @@
         <input type="password" id="authPassword" placeholder="Password" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
         <button type="submit" class="btn-primary w-full justify-center">Continue</button>
       </form>
-      <p class="mt-2 text-sm text-center">
-        <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline">
-          <i class="fas fa-key"></i> Forgot Password?
-        </a>
-      </p>
+      <!-- Forgot Password লিংক সম্পূর্ণ সরানো হয়েছে -->
       <p class="mt-4 text-sm text-gray-500 text-center">
         <span id="authToggleText">Don't have an account?</span>
         <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
@@ -107,6 +163,7 @@
     renderCartSidebar();
     updateCartBadge();
 
+    // ===== টোস্ট =====
     window.showToast = (message, type = 'success') => {
       const container = document.getElementById('toast-container');
       if (!container) return;
@@ -117,6 +174,32 @@
       container.appendChild(toast);
       setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
     };
+
+    // ===== Scroll Animation (Intersection Observer) =====
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+    });
+
+    // ===== Back to Top Button =====
+    const scrollBtn = document.getElementById('scrollTopBtn');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 400) {
+        scrollBtn.classList.add('show');
+      } else {
+        scrollBtn.classList.remove('show');
+      }
+    });
+    scrollBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
 
     // ===== অথ মডাল =====
     let currentAuthMode = 'signin';

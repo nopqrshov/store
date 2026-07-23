@@ -14,6 +14,72 @@
     .rating-stars .star:hover { transform: scale(1.2); }
     .wishlist-btn { transition: 0.3s; }
     .wishlist-btn.active { color: #ef4444; }
+
+    /* ===== Skeleton Loading ===== */
+    .skeleton-card {
+      background: #f3f4f6;
+      border-radius: 16px;
+      padding: 1.5rem;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    .skeleton-card .skeleton-img {
+      width: 100%;
+      height: 180px;
+      background: #e5e7eb;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+    .skeleton-card .skeleton-line {
+      height: 16px;
+      background: #e5e7eb;
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+    }
+    .skeleton-card .skeleton-line.short { width: 60%; }
+    .skeleton-card .skeleton-line.medium { width: 80%; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* ===== Fade-up Animation ===== */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ===== Back to Top ===== */
+    .scroll-top-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #007AFF, #5856D6);
+      color: #fff;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(0,122,255,0.35);
+      z-index: 999;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      pointer-events: none;
+    }
+    .scroll-top-btn.show {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+    .scroll-top-btn:hover { transform: scale(1.05); }
   </style>
 </head>
 <body>
@@ -23,10 +89,10 @@
     <main class="main-content">
       <section class="pt-24 pb-12 px-6">
         <div class="max-w-7xl mx-auto">
-          <h1 class="text-3xl font-bold text-gray-900">Choose Your Website Package</h1>
+          <h1 class="text-3xl font-bold text-gray-900 fade-up">Choose Your Website Package</h1>
           
           <!-- ===== ফিল্টার, সার্চ, সর্ট ===== -->
-          <div class="flex flex-wrap gap-4 mt-4 items-center">
+          <div class="flex flex-wrap gap-4 mt-4 items-center fade-up">
             <div class="relative flex-1 min-w-[200px]">
               <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
               <input type="text" id="searchInput" placeholder="Search packages..." class="form-input pl-10" />
@@ -48,14 +114,21 @@
             </button>
           </div>
 
-          <!-- ===== প্রোডাক্ট গ্রিড ===== -->
-          <div id="productGrid" class="grid md:grid-cols-3 gap-6 mt-8"></div>
+          <!-- ===== প্রোডাক্ট গ্রিড (Skeleton সহ) ===== -->
+          <div id="productGrid" class="grid md:grid-cols-3 gap-6 mt-8">
+            <!-- 6টি Skeleton কার্ড দেখানো হবে JS-এর মাধ্যমে -->
+          </div>
         </div>
       </section>
     </main>
 
     <div id="footer-placeholder"></div>
   </div>
+
+  <!-- ===== Back to Top Button ===== -->
+  <button class="scroll-top-btn" id="scrollTopBtn" aria-label="Back to top">
+    <i class="fas fa-arrow-up"></i>
+  </button>
 
   <!-- ===== প্রোডাক্ট ডিটেইল মডাল ===== -->
   <div id="productDetailModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[300] hidden">
@@ -64,7 +137,7 @@
         <h3 id="detailName" class="text-2xl font-bold text-gray-900"></h3>
         <button onclick="closeDetailModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
       </div>
-      <img id="detailImage" src="" alt="" class="w-full h-64 object-cover rounded-lg mb-4" />
+      <img id="detailImage" src="" alt="" class="w-full h-64 object-cover rounded-lg mb-4" loading="lazy" />
       <p id="detailDesc" class="text-gray-600"></p>
       <p id="detailPrice" class="text-2xl font-bold text-blue-600 mt-2"></p>
       <div id="detailRating" class="mt-2 text-yellow-500"></div>
@@ -99,7 +172,7 @@
     </div>
   </div>
 
-  <!-- ===== অথ মডাল ===== -->
+  <!-- ===== অথ মডাল (Forgot Password লিংক সরানো হয়েছে) ===== -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
       <div class="flex justify-between items-center mb-4">
@@ -118,9 +191,7 @@
         <button onclick="window.socialLogin('google')" class="btn-outline w-full justify-center"><i class="fab fa-google"></i> Sign in with Google</button>
         <button onclick="window.socialLogin('github')" class="btn-outline w-full justify-center"><i class="fab fa-github"></i> Sign in with GitHub</button>
       </div>
-      <p class="mt-2 text-sm text-center">
-        <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline"><i class="fas fa-key"></i> Forgot Password?</a>
-      </p>
+      <!-- Forgot Password লিংক সম্পূর্ণ সরানো হয়েছে -->
       <p class="mt-4 text-sm text-gray-500 text-center">
         <span id="authToggleText">Don't have an account?</span>
         <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
@@ -150,7 +221,7 @@
     renderNavbar();
     renderFooter();
     renderCartSidebar();
-    renderPaymentModal();  // ✅ নতুন লাইন
+    renderPaymentModal();
     updateCartBadge();
 
     // ===== টোস্ট =====
@@ -164,6 +235,41 @@
       container.appendChild(toast);
       setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
     };
+
+    // ===== Scroll Animation (Intersection Observer) =====
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+    });
+
+    // ===== Back to Top Button =====
+    const scrollBtn = document.getElementById('scrollTopBtn');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 400) {
+        scrollBtn.classList.add('show');
+      } else {
+        scrollBtn.classList.remove('show');
+      }
+    });
+    scrollBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // ===== Debounce Function =====
+    function debounce(func, wait) {
+      let timeout;
+      return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+      };
+    }
 
     // ===== অথ মডাল =====
     let currentAuthMode = 'signin';
@@ -210,15 +316,7 @@
       }
     };
 
-    window.showResetPasswordModal = () => {
-      const email = prompt('Enter your email address to reset password:');
-      if (!email) return;
-      import('./firebase-config.js').then(({ sendPasswordResetEmail }) => {
-        sendPasswordResetEmail(auth, email)
-          .then(() => alert('✅ Password reset link sent to your email.'))
-          .catch((error) => alert('⚠️ ' + error.message));
-      });
-    };
+    // showResetPasswordModal সম্পূর্ণ সরানো হয়েছে
 
     const authForm = document.getElementById('authForm');
     const authSubmitBtn = authForm.querySelector('button[type="submit"]');
@@ -275,11 +373,29 @@
     let currentProductId = null;
     let currentProductData = null;
     let wishlistItems = [];
+    let isLoading = true;
 
     const grid = document.getElementById('productGrid');
     const searchInput = document.getElementById('searchInput');
     const categoryFilter = document.getElementById('categoryFilter');
     const sortFilter = document.getElementById('sortFilter');
+
+    // ===== Skeleton Render =====
+    function renderSkeletons(count = 6) {
+      let html = '';
+      for (let i = 0; i < count; i++) {
+        html += `
+          <div class="skeleton-card fade-up">
+            <div class="skeleton-img"></div>
+            <div class="skeleton-line medium"></div>
+            <div class="skeleton-line short"></div>
+            <div class="skeleton-line" style="width:40%;"></div>
+          </div>
+        `;
+      }
+      grid.innerHTML = html;
+      document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+    }
 
     // ===== রেন্ডার প্রোডাক্ট =====
     function renderProducts() {
@@ -311,10 +427,11 @@
         const rating = p.averageRating || 0;
         const stock = p.stock !== undefined ? p.stock : 999;
         return `
-          <div class="glass-card hover:shadow-xl transition-all duration-300">
+          <div class="glass-card hover:shadow-xl transition-all duration-300 fade-up">
             <img src="${p.imageUrl || 'https://via.placeholder.com/300x200?text=No+Image'}" 
                  alt="${p.name}" 
-                 class="w-full h-48 object-cover rounded-t-lg mb-3" />
+                 class="w-full h-48 object-cover rounded-t-lg mb-3"
+                 loading="lazy" />
             <div class="flex justify-between items-start">
               <h3 class="font-bold text-xl text-gray-900">${p.name}</h3>
               <button onclick="window.toggleWishlist('${p.id}')" 
@@ -340,6 +457,9 @@
           </div>
         `;
       }).join('');
+
+      // নতুন এলিমেন্টগুলো Observer-এ যোগ
+      document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
     }
 
     function renderStars(rating) {
@@ -352,17 +472,21 @@
       return s;
     }
 
-    // ===== প্রোডাক্ট লোড =====
+    // ===== প্রোডাক্ট লোড (Skeleton → Real Data) =====
+    renderSkeletons();
+
     onSnapshot(collection(db, 'products'), (snapshot) => {
       allProducts = [];
       snapshot.forEach(doc => {
         allProducts.push({ id: doc.id, ...doc.data() });
       });
+      isLoading = false;
       renderProducts();
     });
 
-    // ===== ফিল্টার ইভেন্ট =====
-    searchInput.addEventListener('input', renderProducts);
+    // ===== Debounced Search =====
+    const debouncedRender = debounce(renderProducts, 300);
+    searchInput.addEventListener('input', debouncedRender);
     categoryFilter.addEventListener('change', renderProducts);
     sortFilter.addEventListener('change', renderProducts);
 
@@ -374,18 +498,16 @@
     };
 
     // ================================================================
-    // ===== কার্ট =====
+    // ===== কার্ট, উইশলিস্ট, ডিটেইল, রেটিং (পূর্বের মতোই) =====
     // ================================================================
 
     window.addToCart = (productId) => {
       const product = allProducts.find(p => p.id === productId);
       if (!product) { showToast('Product not found', 'error'); return; }
-      
       if (product.stock !== undefined && product.stock <= 0) {
         showToast('❌ Out of stock!', 'error');
         return;
       }
-
       const cart = JSON.parse(localStorage.getItem('cart')) || [];
       const existing = cart.find(item => item.id === productId);
       if (existing) {
@@ -400,7 +522,7 @@
         });
       }
       localStorage.setItem('cart', JSON.stringify(cart));
-      updateCartUI();
+      window.updateCartUI?.();
       showToast(`✅ "${product.name}" added to cart`, 'success');
     };
 
@@ -409,10 +531,7 @@
       updateCartBadge();
     };
 
-    // ================================================================
     // ===== উইশলিস্ট =====
-    // ================================================================
-
     async function loadWishlist() {
       const user = auth.currentUser;
       if (!user) { wishlistItems = []; return; }
@@ -429,7 +548,6 @@
     window.toggleWishlist = async (productId) => {
       const user = auth.currentUser;
       if (!user) { showToast('Please sign in to add to wishlist', 'warning'); return; }
-      
       const inWishlist = wishlistItems.includes(productId);
       try {
         if (inWishlist) {
@@ -475,10 +593,7 @@
       await loadWishlist();
     }
 
-    // ================================================================
     // ===== প্রোডাক্ট ডিটেইল =====
-    // ================================================================
-
     window.openProductDetail = async (id) => {
       currentProductId = id;
       const docSnap = await getDoc(doc(db, 'products', id));
@@ -497,9 +612,7 @@
 
       const inWishlist = wishlistItems.includes(id);
       updateDetailWishlistBtn(inWishlist);
-
       loadReviews(id);
-
       document.getElementById('productDetailModal').classList.remove('hidden');
     };
 
@@ -520,12 +633,8 @@
       }
     };
 
-    // ================================================================
     // ===== রেটিং সিস্টেম =====
-    // ================================================================
-
     let selectedRating = 0;
-
     document.querySelectorAll('#ratingStars .star').forEach(el => {
       el.addEventListener('click', () => {
         selectedRating = parseInt(el.dataset.val);
@@ -541,9 +650,7 @@
       const user = auth.currentUser;
       if (!user) { showToast('Please sign in to rate', 'warning'); return; }
       if (!currentProductId) { showToast('No product selected', 'error'); return; }
-
       const review = document.getElementById('ratingReview').value.trim();
-      
       try {
         await addDoc(collection(db, 'ratings'), {
           productId: currentProductId,
@@ -553,22 +660,16 @@
           review: review,
           timestamp: serverTimestamp()
         });
-
         const productRef = doc(db, 'products', currentProductId);
         const snap = await getDoc(productRef);
         const data = snap.data();
         const count = (data.ratingCount || 0) + 1;
         const avg = ((data.averageRating || 0) * (data.ratingCount || 0) + selectedRating) / count;
-        await updateDoc(productRef, { 
-          averageRating: avg, 
-          ratingCount: count 
-        });
-
+        await updateDoc(productRef, { averageRating: avg, ratingCount: count });
         showToast('✅ Review submitted!', 'success');
         selectedRating = 0;
         document.querySelectorAll('#ratingStars .star').forEach(s => s.textContent = '☆');
         document.getElementById('ratingReview').value = '';
-        
         loadReviews(currentProductId);
         renderProducts();
       } catch (err) {
@@ -605,12 +706,6 @@
         container.innerHTML = '<p class="text-gray-400 text-sm">Error loading reviews.</p>';
       }
     }
-
-    // ================================================================
-    // ===== চেকআউট এবং পেমেন্ট এখন components.js থেকে আসে =====
-    // ================================================================
-    // window.checkout, window.openPaymentModal, window.closePaymentModal
-    // এখন components.js-এ ডিফাইন করা আছে। তাই এখানে আর ডিফাইন করলাম না।
 
     console.log('🚀 SWD Store Loaded Successfully!');
   </script>
