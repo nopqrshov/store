@@ -8,7 +8,6 @@ import {
 
 // ===== টোস্ট ফাংশন (সর্বত্র ব্যবহারের জন্য) =====
 window.showToast = function(message, type = 'success') {
-  // container তৈরি করুন যদি না থাকে
   let container = document.getElementById('toast-container');
   if (!container) {
     container = document.createElement('div');
@@ -55,7 +54,6 @@ export function renderNavbar() {
         </div>
 
         <div class="flex items-center gap-3 md:gap-4">
-          <!-- নোটিফিকেশন বেল -->
           <div class="relative">
             <a href="#" onclick="window.toggleNotifications()" class="text-gray-700 hover:text-blue-500 text-xl relative">
               <i class="fas fa-bell"></i>
@@ -92,19 +90,17 @@ export function renderNavbar() {
               <a href="my-orders.html"><i class="fas fa-box mr-2"></i> My Orders</a>
               <a href="my-fix-requests.html"><i class="fas fa-tools mr-2"></i> My Fix Requests</a>
               <a href="settings.html"><i class="fas fa-cog mr-2"></i> Settings</a>
-              ${auth.currentUser ? (auth.currentUser.email === 'shovon@admin.com' || true ? `<a href="admin-panel.html"><i class="fas fa-shield-alt mr-2"></i> Admin Panel</a>` : '') : ''}
+              <a href="admin-panel.html"><i class="fas fa-shield-alt mr-2"></i> Admin Panel</a>
               <a href="#" onclick="window.handleLogout()"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
             </div>
           </div>
 
-          <!-- মোবাইল হ্যাম্বার্গার -->
           <button onclick="window.toggleMobileMenu()" class="md:hidden text-gray-700 text-2xl">
             <i class="fas fa-bars" id="hamburgerIcon"></i>
           </button>
         </div>
       </div>
     </nav>
-    <!-- মোবাইল মেনু -->
     <div id="mobileMenu" class="fixed top-16 left-0 w-full bg-white shadow-lg z-40 hidden md:hidden">
       <div class="flex flex-col p-4 gap-3">
         <a href="index.html" class="nav-link py-2">Home</a>
@@ -115,7 +111,6 @@ export function renderNavbar() {
   `;
   document.getElementById('navbar-placeholder').innerHTML = navbarHTML;
 
-  // ড্রপডাউন
   const avatar = document.getElementById('profileAvatar');
   const dropdown = document.getElementById('dropdownMenu');
   if (avatar) {
@@ -127,7 +122,6 @@ export function renderNavbar() {
     }
   });
 
-  // কার্ট টগল
   const cartToggle = document.querySelector('#navbar-placeholder .cart-toggle');
   if (cartToggle) {
     cartToggle.addEventListener('click', (e) => {
@@ -153,21 +147,6 @@ export function updateNavbarAuth(user, displayName) {
     if (authBtns) authBtns.classList.add('hidden');
     if (profileSection) profileSection.classList.remove('hidden');
     if (avatar) avatar.textContent = (displayName || user.email).charAt(0).toUpperCase();
-    // অ্যাডমিন চেক
-    const isAdmin = user.email === 'shovon@admin.com';
-    if (dropdown) {
-      const adminLink = dropdown.querySelector('a[href="admin-panel.html"]');
-      if (isAdmin) {
-        if (!adminLink) {
-          const link = document.createElement('a');
-          link.href = 'admin-panel.html';
-          link.innerHTML = '<i class="fas fa-shield-alt mr-2"></i> Admin Panel';
-          dropdown.insertBefore(link, dropdown.querySelector('a[href="#"]'));
-        }
-      } else if (adminLink) {
-        adminLink.remove();
-      }
-    }
   } else {
     if (authBtns) authBtns.classList.remove('hidden');
     if (profileSection) profileSection.classList.add('hidden');
@@ -307,11 +286,9 @@ export function showResetPasswordModal() {
 }
 window.showResetPasswordModal = showResetPasswordModal;
 
-// ================================================================
-// ===== পেমেন্ট মডাল রেন্ডার (সর্বত্র ব্যবহারের জন্য) =====
-// ================================================================
+// ===== পেমেন্ট মডাল =====
 export function renderPaymentModal() {
-  if (document.getElementById('paymentModal')) return; // ইতিমধ্যে আছে
+  if (document.getElementById('paymentModal')) return;
 
   const modalHTML = `
     <div id="paymentModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[400] hidden">
@@ -339,7 +316,6 @@ export function renderPaymentModal() {
   `;
   document.body.insertAdjacentHTML('beforeend', modalHTML);
 
-  // পেমেন্ট ফর্ম সাবমিট ইভেন্ট লিসেনার (একবারই)
   const paymentForm = document.getElementById('paymentForm');
   if (paymentForm) {
     paymentForm.addEventListener('submit', async (e) => {
@@ -390,9 +366,7 @@ export function renderPaymentModal() {
   }
 }
 
-// ================================================================
-// ===== চেকআউট ফাংশন (সর্বত্র ব্যবহারযোগ্য) =====
-// ================================================================
+// ===== চেকআউট =====
 window.checkout = async function() {
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
   if (cart.length === 0) {
@@ -445,9 +419,6 @@ window.checkout = async function() {
   }
 };
 
-// ================================================================
-// ===== পেমেন্ট মডাল কন্ট্রোল =====
-// ================================================================
 window.openPaymentModal = function(orderId, settings) {
   const numbersDiv = document.getElementById('paymentNumbers');
   if (!numbersDiv) {
