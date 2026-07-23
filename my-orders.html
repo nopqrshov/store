@@ -27,11 +27,9 @@
     .detail-item:last-child { border-bottom: none; }
     .empty-state-icon { font-size: 4rem; opacity: 0.3; }
 
-    /* ===== Fade-up Animation ===== */
     .fade-up { opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease, transform 0.5s ease; }
     .fade-up.visible { opacity: 1; transform: translateY(0); }
 
-    /* ===== Back to Top ===== */
     .scroll-top-btn {
       position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; border-radius: 50%;
       background: linear-gradient(135deg, #007AFF, #5856D6); color: #fff; border: none; font-size: 1.2rem;
@@ -42,7 +40,6 @@
     .scroll-top-btn.show { opacity: 1; transform: scale(1); pointer-events: auto; }
     .scroll-top-btn:hover { transform: scale(1.05); }
 
-    /* ===== Skeleton ===== */
     .skeleton-card { background: #f3f4f6; border-radius: 16px; padding: 1.5rem; animation: pulse 1.5s ease-in-out infinite; }
     .skeleton-card .skeleton-line { height: 16px; background: #e5e7eb; border-radius: 8px; margin-bottom: 0.75rem; }
     .skeleton-card .skeleton-line.short { width: 40%; }
@@ -79,20 +76,19 @@
         </div>
 
         <div id="orderList" class="space-y-4">
+          <!-- Skeleton -->
           <div class="skeleton-card fade-up"><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line"></div></div>
           <div class="skeleton-card fade-up"><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line"></div></div>
         </div>
-        <div id="loadMoreContainer" class="text-center mt-6 hidden"><button onclick="loadMoreOrders()" class="btn-outline"><i class="fas fa-chevron-down"></i> Load More</button></div>
       </section>
     </main>
 
     <div id="footer-placeholder"></div>
   </div>
 
-  <!-- ===== Back to Top ===== -->
   <button class="scroll-top-btn" id="scrollTopBtn"><i class="fas fa-arrow-up"></i></button>
 
-  <!-- ===== Order Detail Modal ===== -->
+  <!-- Order Detail Modal -->
   <div id="orderDetailModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[300] hidden">
     <div class="bg-white rounded-2xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center mb-4">
@@ -108,7 +104,7 @@
     </div>
   </div>
 
-  <!-- ===== Auth Modal (Forgot Password সরানো) ===== -->
+  <!-- Auth Modal -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
       <div class="flex justify-between items-center mb-4">
@@ -202,7 +198,6 @@
         closeAuthModal();
       } catch (err) { showToast('⚠️ ' + err.message, 'error'); }
     };
-    // showResetPasswordModal সরানো হয়েছে
 
     const authForm = document.getElementById('authForm');
     const authSubmitBtn = authForm.querySelector('button[type="submit"]');
@@ -240,7 +235,7 @@
       window.location.href = 'index.html';
     };
 
-    // Orders Logic
+    // ===== Orders Logic (FIXED) =====
     const orderList = document.getElementById('orderList');
     const searchInput = document.getElementById('searchOrders');
     const statusFilter = document.getElementById('statusFilter');
@@ -297,17 +292,38 @@
       });
       renderOrders(filteredOrders);
     };
+
     window.resetFilters = () => { searchInput.value = ''; statusFilter.value = 'all'; applyFilters(); };
 
     function loadOrders(userId) {
       if (unsubOrders) unsubOrders();
-      const q = query(collection(db, 'orders'), where('userId', '==', userId), orderBy('createdAt', 'desc'));
+      
+      // ✅ FIX: `orderBy` সরিয়ে দেওয়া হয়েছে (কারণ ইনডেক্স না থাকলে error হয়)
+      // ✅ এখন শুধু `where` ব্যবহার করে সব অর্ডার আনা হচ্ছে, তারপর JS দিয়ে সাজানো হচ্ছে
+      const q = query(collection(db, 'orders'), where('userId', '==', userId));
+      
       unsubOrders = onSnapshot(q, (snapshot) => {
         allOrders = [];
-        snapshot.forEach(doc => allOrders.push({ id: doc.id, ...doc.data() }));
+        snapshot.forEach(doc => {
+          allOrders.push({ id: doc.id, ...doc.data() });
+        });
+        // ✅ JS দিয়ে সাজানো (নতুন -> পুরোনো)
+        allOrders.sort((a, b) => {
+          const ta = a.createdAt?.toDate?.()?.getTime() || 0;
+          const tb = b.createdAt?.toDate?.()?.getTime() || 0;
+          return tb - ta;
+        });
         applyFilters();
       }, (error) => {
-        orderList.innerHTML = `<div class="text-center py-12 text-red-500"><i class="fas fa-exclamation-circle text-3xl"></i><p class="mt-2">Error loading orders: ${error.message}</p><button onclick="window.location.reload()" class="btn-primary mt-4 inline-block"><i class="fas fa-sync"></i> Retry</button></div>`;
+        console.error('Orders load error:', error);
+        orderList.innerHTML = `
+          <div class="text-center py-12 text-red-500">
+            <i class="fas fa-exclamation-circle text-3xl"></i>
+            <p class="mt-2">Error loading orders: ${error.message}</p>
+            <button onclick="window.location.reload()" class="btn-primary mt-4 inline-block">
+              <i class="fas fa-sync"></i> Retry
+            </button>
+          </div>`;
         showToast('⚠️ Error loading orders: ' + error.message, 'error');
       });
     }
