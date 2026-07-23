@@ -166,24 +166,23 @@
 
   <script type="module">
     // ================================================================
-    // ===== ইমপোর্ট =====
+    // ===== ইমপোর্ট (সমস্ত প্রয়োজনীয় ফাংশন যোগ করা হয়েছে) =====
     // ================================================================
-   import { 
-  renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
-  renderCartSidebar, setLoading, renderPaymentModal   // ← renderPaymentModal যোগ
-} from './components.js';
-
-  // ← এই লাইন যোগ করুন
-
     import { 
       auth, db, collection, doc, getDoc, setDoc, addDoc, onSnapshot, 
       query, where, serverTimestamp, signOut, onAuthStateChanged,
       signInWithEmailAndPassword, createUserWithEmailAndPassword, updateDoc,
-      signInWithPopup, googleProvider, githubProvider, sendPasswordResetEmail
+      signInWithPopup, googleProvider, githubProvider, sendPasswordResetEmail,
+      // ===== নতুন ইমপোর্ট (Fixed) =====
+      sendEmailVerification,
+      reauthenticateWithCredential,
+      updatePassword,
+      deleteUser,
+      EmailAuthProvider
     } from './firebase-config.js';
     import { 
       renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
-      renderCartSidebar, setLoading
+      renderCartSidebar, setLoading, renderPaymentModal
     } from './components.js';
 
     // ================================================================
@@ -194,19 +193,24 @@
     renderFooter();
     renderCartSidebar();
     updateCartBadge();
+
     // ================================================================
     // ===== টোস্ট =====
     // ================================================================
-    window.showToast = (message, type = 'success') => {
-      const container = document.getElementById('toast-container');
-      if (!container) return;
-      const toast = document.createElement('div');
-      const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
-      toast.className = `toast ${type}`;
-      toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
-      container.appendChild(toast);
-      setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
-    };
+    // window.showToast ইতিমধ্যে components.js থেকে সেট করা আছে, 
+    // কিন্তু সিকিউরিটির জন্য এখানে ফলব্যাক রাখা হলো।
+    if (typeof window.showToast !== 'function') {
+      window.showToast = (message, type = 'success') => {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        const toast = document.createElement('div');
+        const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
+        container.appendChild(toast);
+        setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
+      };
+    }
 
     // ================================================================
     // ===== অথ মডাল =====
@@ -248,11 +252,11 @@
             createdAt: new Date().toISOString()
           });
         }
-        showToast('✅ Signed in with ' + provider, 'success');
+        window.showToast('✅ Signed in with ' + provider, 'success');
         closeAuthModal();
         window.location.reload();
       } catch (err) {
-        showToast('⚠️ ' + err.message, 'error');
+        window.showToast('⚠️ ' + err.message, 'error');
       }
     };
 
@@ -277,13 +281,13 @@
         let userCred;
         if (currentAuthMode === 'signin') {
           userCred = await signInWithEmailAndPassword(auth, email, password);
-          showToast('✅ Signed in!', 'success');
+          window.showToast('✅ Signed in!', 'success');
         } else {
           userCred = await createUserWithEmailAndPassword(auth, email, password);
           await setDoc(doc(db, 'users', userCred.user.uid), {
             email, displayName: email.split('@')[0], role: 'user', createdAt: new Date().toISOString()
           });
-          showToast('✅ Account created!', 'success');
+          window.showToast('✅ Account created!', 'success');
         }
         closeAuthModal();
         authForm.reset();
@@ -291,7 +295,7 @@
       } catch (error) {
         errorDiv.textContent = error.message;
         errorDiv.classList.remove('hidden');
-        showToast('⚠️ ' + error.message, 'error');
+        window.showToast('⚠️ ' + error.message, 'error');
       } finally {
         setLoading(authSubmitBtn, false);
       }
@@ -299,7 +303,7 @@
 
     window.handleLogout = async () => {
       await signOut(auth);
-      showToast('✅ Logged out', 'success');
+      window.showToast('✅ Logged out', 'success');
       window.location.href = 'index.html';
     };
 
@@ -341,7 +345,7 @@
     // ভেরিফিকেশন ইমেইল পাঠান
     document.getElementById('verifyEmailBtn').addEventListener('click', async () => {
       const user = auth.currentUser;
-      if (!user) { showToast('Not logged in', 'error'); return; }
+      if (!user) { window.showToast('Not logged in', 'error'); return; }
       const btn = document.getElementById('verifyEmailBtn');
       const feedback = document.getElementById('verifyFeedback');
       feedback.className = 'hidden';
@@ -351,11 +355,11 @@
         await sendEmailVerification(user);
         feedback.className = 'block text-sm text-green-600 mt-2';
         feedback.innerHTML = '✅ Verification email sent! Please check your inbox (and spam folder).';
-        showToast('✅ Verification email sent!', 'success');
+        window.showToast('✅ Verification email sent!', 'success');
       } catch (err) {
         feedback.className = 'block text-sm text-red-500 mt-2';
         feedback.textContent = '⚠️ ' + err.message;
-        showToast('⚠️ ' + err.message, 'error');
+        window.showToast('⚠️ ' + err.message, 'error');
       } finally {
         setLoading(btn, false);
       }
@@ -375,18 +379,18 @@
       if (!current || !newPass) {
         passwordFeedback.className = 'block text-sm text-red-500 mt-2';
         passwordFeedback.textContent = 'Please fill in all fields.';
-        showToast('Please fill in all fields', 'error');
+        window.showToast('Please fill in all fields', 'error');
         return;
       }
       if (newPass.length < 6) {
         passwordFeedback.className = 'block text-sm text-red-500 mt-2';
         passwordFeedback.textContent = 'New password must be at least 6 characters.';
-        showToast('Password must be at least 6 characters', 'error');
+        window.showToast('Password must be at least 6 characters', 'error');
         return;
       }
 
       const user = auth.currentUser;
-      if (!user) { showToast('Not logged in', 'error'); return; }
+      if (!user) { window.showToast('Not logged in', 'error'); return; }
 
       setLoading(passBtn, true, 'Updating...');
       try {
@@ -395,12 +399,12 @@
         await updatePassword(user, newPass);
         passwordFeedback.className = 'block text-sm text-green-600 mt-2';
         passwordFeedback.innerHTML = '✅ Password updated successfully!';
-        showToast('✅ Password updated!', 'success');
+        window.showToast('✅ Password updated!', 'success');
         changePasswordForm.reset();
       } catch (err) {
         passwordFeedback.className = 'block text-sm text-red-500 mt-2';
         passwordFeedback.textContent = '⚠️ ' + err.message;
-        showToast('⚠️ ' + err.message, 'error');
+        window.showToast('⚠️ ' + err.message, 'error');
       } finally {
         setLoading(passBtn, false);
       }
@@ -409,7 +413,7 @@
     // ===== ডেটা এক্সপোর্ট =====
     window.exportUserData = async () => {
       const user = auth.currentUser;
-      if (!user) { showToast('Not logged in', 'error'); return; }
+      if (!user) { window.showToast('Not logged in', 'error'); return; }
       const btn = event.target;
       const feedback = document.getElementById('exportFeedback');
       feedback.className = 'hidden';
@@ -451,11 +455,11 @@
 
         feedback.className = 'block text-sm text-green-600 mt-2';
         feedback.innerHTML = '✅ Data exported successfully!';
-        showToast('✅ Data exported!', 'success');
+        window.showToast('✅ Data exported!', 'success');
       } catch (err) {
         feedback.className = 'block text-sm text-red-500 mt-2';
         feedback.textContent = '⚠️ ' + err.message;
-        showToast('⚠️ ' + err.message, 'error');
+        window.showToast('⚠️ ' + err.message, 'error');
       } finally {
         setLoading(btn, false);
       }
@@ -468,12 +472,12 @@
       }
       const confirmText = prompt('Type "DELETE" to permanently delete your account:');
       if (confirmText !== 'DELETE') {
-        showToast('Account deletion cancelled', 'warning');
+        window.showToast('Account deletion cancelled', 'warning');
         return;
       }
 
       const user = auth.currentUser;
-      if (!user) { showToast('Not logged in', 'error'); return; }
+      if (!user) { window.showToast('Not logged in', 'error'); return; }
       const feedback = document.getElementById('deleteFeedback');
       feedback.className = 'hidden';
 
@@ -482,17 +486,17 @@
         await deleteDoc(doc(db, 'users', user.uid));
         // অথ ডিলিট
         await deleteUser(user);
-        showToast('✅ Account deleted successfully.', 'success');
+        window.showToast('✅ Account deleted successfully.', 'success');
         window.location.href = 'index.html';
       } catch (err) {
         if (err.code === 'auth/requires-recent-login') {
           feedback.className = 'block text-sm text-red-500 mt-2';
           feedback.innerHTML = '⚠️ For security, please re-authenticate (logout and login again) before deleting your account.';
-          showToast('Please re-authenticate first', 'error');
+          window.showToast('Please re-authenticate first', 'error');
         } else {
           feedback.className = 'block text-sm text-red-500 mt-2';
           feedback.textContent = '⚠️ ' + err.message;
-          showToast('⚠️ ' + err.message, 'error');
+          window.showToast('⚠️ ' + err.message, 'error');
         }
       }
     };

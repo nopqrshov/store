@@ -466,6 +466,9 @@
 
   </div>
 
+  <!-- ===== TOAST CONTAINER (Fixed) ===== -->
+  <div id="toast-container"></div>
+
   <!-- ============================================================ -->
   <!-- ===== SCRIPT ===== -->
   <script type="module">
@@ -677,7 +680,7 @@
       if (!replyText) { alert('Please write a reply.'); return; }
       try {
         await updateDoc(doc(db, 'fixRequests', requestId), { reply: replyText, replyTimestamp: serverTimestamp() });
-        showToast('✅ Reply sent!', 'success');
+        window.showToast('✅ Reply sent!', 'success');
       } catch (err) { alert('Error: ' + err.message); }
     };
 
@@ -844,7 +847,7 @@
       const content = adminChatInput.value.trim();
       if (!content) return;
       if (!activeConversationUserId) {
-        showToast('Please select a conversation first.', 'warning');
+        window.showToast('Please select a conversation first.', 'warning');
         return;
       }
       const convId = getConvId(activeConversationUserId);
@@ -861,7 +864,7 @@
         });
         adminChatInput.value = '';
       } catch (err) {
-        showToast('Error: ' + err.message, 'error');
+        window.showToast('Error: ' + err.message, 'error');
       } finally {
         setLoading(adminChatSendBtn, false);
         adminChatInput.focus();
@@ -909,7 +912,6 @@
 
     // ---------- listen to all messages (NO participants filter) ----------
     function listenAllMessages() {
-      // Simply fetch all messages from the 'messages' collection
       const q = collection(db, 'messages');
       onSnapshot(q,
         async (snapshot) => {
@@ -944,7 +946,7 @@
         },
         (error) => {
           console.error('❌ Messages listener error:', error);
-          showToast('⚠️ Error loading messages. Check console for details.', 'error');
+          window.showToast('⚠️ Error loading messages. Check console for details.', 'error');
           convListEl.innerHTML = `
             <div class="empty-state" style="height:100%;font-size:0.85rem;color:#e74c3c;">
               <i class="fas fa-exclamation-triangle"></i>
@@ -978,20 +980,20 @@
     // ================================================================
     // ===== TOAST =====
     // ================================================================
-    window.showToast = function(message, type = 'success') {
-      const container = document.getElementById('toast-container') || (() => {
-        const el = document.createElement('div');
-        el.id = 'toast-container';
-        document.body.appendChild(el);
-        return el;
-      })();
-      const toast = document.createElement('div');
-      const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
-      toast.className = `toast ${type}`;
-      toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
-      container.appendChild(toast);
-      setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
-    };
+    // showToast is now globally defined via window object (from components.js)
+    // but we also keep a fallback here if components.js doesn't load
+    if (typeof window.showToast !== 'function') {
+      window.showToast = function(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        const toast = document.createElement('div');
+        const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
+        container.appendChild(toast);
+        setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
+      };
+    }
 
     // ================================================================
     // ===== LOGOUT & ORDER STATUS =====

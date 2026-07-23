@@ -6,6 +6,23 @@ import {
   deleteDoc, getDocs
 } from './firebase-config.js';
 
+// ===== টোস্ট ফাংশন (সর্বত্র ব্যবহারের জন্য) =====
+window.showToast = function(message, type = 'success') {
+  // container তৈরি করুন যদি না থাকে
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement('div');
+  const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
+  container.appendChild(toast);
+  setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
+};
+
 // ===== কার্ট ব্যাজ =====
 export function updateCartBadge() {
   const cartBadge = document.getElementById('cartCount');
@@ -353,13 +370,11 @@ export function renderPaymentModal() {
       const btn = paymentForm.querySelector('button[type="submit"]');
       setLoading(btn, true, 'Confirm Payment');
       try {
-        // শুধু transactionId ও paymentMethod আপডেট করুন, status পরিবর্তন করবেন না
         await updateDoc(doc(db, 'orders', orderId), {
           transactionId: txnId,
           paymentMethod: 'Manual'
-          // status অপরিবর্তিত রাখা হলো
         });
-        showToast('✅ Payment confirmed! Admin will verify soon.', 'success');
+        window.showToast('✅ Payment confirmed! Admin will verify soon.', 'success');
         window.closePaymentModal();
         localStorage.removeItem('cart');
         window.updateCartUI();
@@ -367,7 +382,7 @@ export function renderPaymentModal() {
       } catch (err) {
         errorDiv.textContent = '⚠️ ' + err.message;
         errorDiv.classList.remove('hidden');
-        showToast('⚠️ ' + err.message, 'error');
+        window.showToast('⚠️ ' + err.message, 'error');
       } finally {
         setLoading(btn, false);
       }
@@ -381,13 +396,12 @@ export function renderPaymentModal() {
 window.checkout = async function() {
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
   if (cart.length === 0) {
-    showToast('🛒 Your cart is empty', 'warning');
+    window.showToast('🛒 Your cart is empty', 'warning');
     return;
   }
   const user = auth.currentUser;
   if (!user) {
-    showToast('⚠️ Please sign in to checkout', 'error');
-    // অথ মডাল খোলার জন্য (ধরে নিচ্ছি window.openAuthModal আছে)
+    window.showToast('⚠️ Please sign in to checkout', 'error');
     if (typeof window.openAuthModal === 'function') window.openAuthModal('signin');
     return;
   }
@@ -399,7 +413,7 @@ window.checkout = async function() {
     const settingsSnap = await getDoc(doc(db, 'settings', 'payment'));
     const settings = settingsSnap.exists() ? settingsSnap.data() : {};
     if (!settings.bkash && !settings.nagad && !settings.usdt) {
-      showToast('⚠️ Payment methods not set. Contact admin.', 'error');
+      window.showToast('⚠️ Payment methods not set. Contact admin.', 'error');
       if (checkoutBtn) setLoading(checkoutBtn, false);
       return;
     }
@@ -415,7 +429,7 @@ window.checkout = async function() {
         imageUrl: item.imageUrl || ''
       })),
       total: cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0),
-      status: 'pending', // সর্বদা pending দিয়ে শুরু
+      status: 'pending',
       paymentMethod: '',
       transactionId: '',
       createdAt: serverTimestamp()
@@ -426,7 +440,7 @@ window.checkout = async function() {
 
     if (checkoutBtn) setLoading(checkoutBtn, false);
   } catch (err) {
-    showToast('⚠️ ' + err.message, 'error');
+    window.showToast('⚠️ ' + err.message, 'error');
     if (checkoutBtn) setLoading(checkoutBtn, false);
   }
 };
