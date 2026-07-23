@@ -190,9 +190,9 @@ export function renderFooter() {
   const footerHTML = `
     <footer class="glass border-t border-gray-200/30 py-8 px-6 sm:px-8 lg:px-12 mt-auto">
       <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500">
-        <div class="font-medium text-gray-700">&copy; 2026 SWD Store. All rights reserved.</div>
+        <div class="font-medium text-gray-700">&copy; ২০২৬ SWD স্টোর। সকল অধিকার সংরক্ষিত।</div>
         <div class="flex items-center gap-4">
-          <a href="https://shovon337.github.io/web-developer" target="_blank" class="text-blue-600 hover:underline font-medium">Portfolio</a>
+          <a href="https://nopqrshov.github.io/portfolio/" target="_blank" class="text-blue-600 hover:underline font-medium">পোর্টফোলিও</a>
           <a href="https://github.com/shovon337" target="_blank" class="social-icon" aria-label="GitHub"><i class="fab fa-github"></i></a>
           <a href="https://www.linkedin.com/in/shovon-s-mind-67aa4b260/" target="_blank" class="social-icon" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
         </div>
