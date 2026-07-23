@@ -94,12 +94,13 @@
     } from './firebase-config.js';
     import { 
       renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
-      renderCartSidebar, setLoading 
+      renderCartSidebar, setLoading, renderPaymentModal
     } from './components.js';
 
     renderNavbar();
     renderFooter();
     renderCartSidebar();
+    renderPaymentModal();  // ✅ নতুন লাইন
     updateCartBadge();
 
     window.showToast = (message, type = 'success') => {

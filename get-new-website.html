@@ -99,30 +99,6 @@
     </div>
   </div>
 
-  <!-- ===== পেমেন্ট মডাল ===== -->
-  <div id="paymentModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[400] hidden">
-    <div class="bg-white rounded-2xl p-8 max-w-lg w-full">
-      <div class="flex justify-between items-center mb-4">
-        <h3 class="text-2xl font-bold text-gray-900">Complete Payment</h3>
-        <button onclick="closePaymentModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
-      </div>
-      <div id="paymentDetails" class="space-y-3 text-sm bg-gray-50 p-4 rounded-xl">
-        <p class="font-semibold text-gray-700">Send payment to any of these:</p>
-        <div id="paymentNumbers" class="space-y-2"></div>
-      </div>
-      <form id="paymentForm" class="mt-4 space-y-4">
-        <div>
-          <label class="block text-sm font-semibold text-gray-700">Transaction ID *</label>
-          <input type="text" id="transactionId" placeholder="Enter your payment transaction ID" required class="form-input" />
-        </div>
-        <button type="submit" class="btn-primary w-full justify-center">
-          <i class="fas fa-check"></i> Confirm Payment
-        </button>
-        <div id="paymentError" class="text-red-500 text-sm hidden"></div>
-      </form>
-    </div>
-  </div>
-
   <!-- ===== অথ মডাল ===== -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
@@ -167,13 +143,14 @@
     } from './firebase-config.js';
     import { 
       renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
-      renderCartSidebar, setLoading
+      renderCartSidebar, setLoading, renderPaymentModal
     } from './components.js';
 
     // ===== রেন্ডার =====
     renderNavbar();
     renderFooter();
     renderCartSidebar();
+    renderPaymentModal();  // ✅ নতুন লাইন
     updateCartBadge();
 
     // ===== টোস্ট =====
@@ -280,7 +257,6 @@
       if (user) {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         name = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
-        // উইশলিস্ট চেক
         checkWishlistStatus();
       }
       updateNavbarAuth(user, name);
@@ -631,120 +607,10 @@
     }
 
     // ================================================================
-    // ===== চেকআউট =====
+    // ===== চেকআউট এবং পেমেন্ট এখন components.js থেকে আসে =====
     // ================================================================
-
-    window.checkout = async () => {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
-      if (cart.length === 0) {
-        showToast('🛒 Your cart is empty', 'warning');
-        return;
-      }
-      const user = auth.currentUser;
-      if (!user) {
-        showToast('⚠️ Please sign in to checkout', 'error');
-        openAuthModal('signin');
-        return;
-      }
-
-      const checkoutBtn = document.querySelector('#cartSidebar .btn-primary');
-      if (checkoutBtn) setLoading(checkoutBtn, true, 'Proceed to Checkout');
-
-      try {
-        const settingsSnap = await getDoc(doc(db, 'settings', 'payment'));
-        const settings = settingsSnap.exists() ? settingsSnap.data() : {};
-        if (!settings.bkash && !settings.nagad && !settings.usdt) {
-          showToast('⚠️ Payment methods not set. Contact admin.', 'error');
-          if (checkoutBtn) setLoading(checkoutBtn, false);
-          return;
-        }
-
-        const orderData = {
-          userId: user.uid,
-          userEmail: user.email,
-          items: cart.map(item => ({
-            id: item.id,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity || 1,
-            imageUrl: item.imageUrl || ''
-          })),
-          total: cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0),
-          status: 'pending',
-          paymentMethod: '',
-          transactionId: '',
-          createdAt: serverTimestamp()
-        };
-        const docRef = await addDoc(collection(db, 'orders'), orderData);
-        
-        window.openPaymentModal(docRef.id, settings);
-
-        if (checkoutBtn) setLoading(checkoutBtn, false);
-      } catch (err) {
-        showToast('⚠️ ' + err.message, 'error');
-        if (checkoutBtn) setLoading(checkoutBtn, false);
-      }
-    };
-
-    window.openPaymentModal = (orderId, settings) => {
-      const numbersDiv = document.getElementById('paymentNumbers');
-      let html = '';
-      if (settings.bkash) html += `<p><i class="fas fa-mobile-alt text-blue-500"></i> BKash: <strong>${settings.bkash}</strong></p>`;
-      if (settings.nagad) html += `<p><i class="fas fa-mobile-alt text-orange-500"></i> Nagad: <strong>${settings.nagad}</strong></p>`;
-      if (settings.usdt) html += `<p><i class="fab fa-bitcoin text-yellow-500"></i> USDT (BEP20): <strong>${settings.usdt}</strong></p>`;
-      if (settings.rocket) html += `<p><i class="fas fa-mobile-alt text-red-500"></i> Rocket: <strong>${settings.rocket}</strong></p>`;
-      if (!html) html = '<p class="text-gray-500">Payment methods not set. Contact admin.</p>';
-      numbersDiv.innerHTML = html;
-      document.getElementById('paymentModal').classList.remove('hidden');
-      document.getElementById('paymentError').classList.add('hidden');
-      document.getElementById('transactionId').value = '';
-      document.getElementById('paymentForm').dataset.orderId = orderId;
-    };
-
-    window.closePaymentModal = () => {
-      document.getElementById('paymentModal').classList.add('hidden');
-    };
-
-    const paymentForm = document.getElementById('paymentForm');
-    const paySubmitBtn = paymentForm.querySelector('button[type="submit"]');
-    paymentForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const txnId = document.getElementById('transactionId').value.trim();
-      const errorDiv = document.getElementById('paymentError');
-      const orderId = e.target.dataset.orderId;
-      errorDiv.classList.add('hidden');
-
-      if (!txnId) {
-        errorDiv.textContent = 'Please enter transaction ID.';
-        errorDiv.classList.remove('hidden');
-        return;
-      }
-      if (!orderId) {
-        errorDiv.textContent = 'Order not found.';
-        errorDiv.classList.remove('hidden');
-        return;
-      }
-
-      setLoading(paySubmitBtn, true, 'Confirm Payment');
-      try {
-        await updateDoc(doc(db, 'orders', orderId), {
-          transactionId: txnId,
-          paymentMethod: 'Manual',
-          status: 'processing'
-        });
-        showToast('✅ Payment confirmed! Admin will verify soon.', 'success');
-        closePaymentModal();
-        localStorage.removeItem('cart');
-        window.updateCartUI();
-        if (typeof window.toggleCart === 'function') window.toggleCart();
-      } catch (err) {
-        errorDiv.textContent = '⚠️ ' + err.message;
-        errorDiv.classList.remove('hidden');
-        showToast('⚠️ ' + err.message, 'error');
-      } finally {
-        setLoading(paySubmitBtn, false);
-      }
-    });
+    // window.checkout, window.openPaymentModal, window.closePaymentModal
+    // এখন components.js-এ ডিফাইন করা আছে। তাই এখানে আর ডিফাইন করলাম না।
 
     console.log('🚀 SWD Store Loaded Successfully!');
   </script>

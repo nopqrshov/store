@@ -179,8 +179,16 @@
     // ===== ইমপোর্ট =====
     // ================================================================
     import { 
-      auth, db, doc, getDoc, updateDoc, onAuthStateChanged, signOut,
-      signInWithEmailAndPassword, createUserWithEmailAndPassword, setDoc,
+  renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
+  renderCartSidebar, setLoading, renderPaymentModal   // ← renderPaymentModal যোগ
+} from './components.js';
+
+  // ← এই লাইন যোগ করুন
+
+    import { 
+      auth, db, collection, doc, getDoc, setDoc, addDoc, onSnapshot, 
+      query, where, serverTimestamp, signOut, onAuthStateChanged,
+      signInWithEmailAndPassword, createUserWithEmailAndPassword, updateDoc,
       signInWithPopup, googleProvider, githubProvider, sendPasswordResetEmail
     } from './firebase-config.js';
     import { 
@@ -192,6 +200,7 @@
     // ===== রেন্ডার =====
     // ================================================================
     renderNavbar();
+    renderPaymentModal(); 
     renderFooter();
     renderCartSidebar();
     updateCartBadge();

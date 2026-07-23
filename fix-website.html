@@ -185,6 +185,13 @@
   <script type="module">
     // ===== ইমপোর্ট =====
     import { 
+  renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
+  renderCartSidebar, setLoading, renderPaymentModal   // ← renderPaymentModal যোগ
+} from './components.js';
+renderCartSidebar();
+renderPaymentModal();  // ← এই লাইন যোগ করুন
+updateCartBadge();
+    import { 
       auth, db, collection, addDoc, serverTimestamp, 
       signInWithEmailAndPassword, createUserWithEmailAndPassword, 
       onAuthStateChanged, signOut, doc, setDoc, getDoc,

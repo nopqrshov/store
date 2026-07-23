@@ -262,10 +262,6 @@ window.removeFromCart = function(index) {
   updateCartUI();
 };
 
-window.checkout = window.checkout || function() {
-  alert('Please go to the Store page to checkout.');
-};
-
 // ===== লোডিং =====
 export function setLoading(button, isLoading, originalText = null) {
   if (!button) return;
@@ -293,3 +289,170 @@ export function showResetPasswordModal() {
     .finally(() => setLoading(document.activeElement, false));
 }
 window.showResetPasswordModal = showResetPasswordModal;
+
+// ================================================================
+// ===== পেমেন্ট মডাল রেন্ডার (সর্বত্র ব্যবহারের জন্য) =====
+// ================================================================
+export function renderPaymentModal() {
+  if (document.getElementById('paymentModal')) return; // ইতিমধ্যে আছে
+
+  const modalHTML = `
+    <div id="paymentModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[400] hidden">
+      <div class="bg-white rounded-2xl p-8 max-w-lg w-full">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-2xl font-bold text-gray-900">Complete Payment</h3>
+          <button onclick="window.closePaymentModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="paymentDetails" class="space-y-3 text-sm bg-gray-50 p-4 rounded-xl">
+          <p class="font-semibold text-gray-700">Send payment to any of these:</p>
+          <div id="paymentNumbers" class="space-y-2"></div>
+        </div>
+        <form id="paymentForm" class="mt-4 space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700">Transaction ID *</label>
+            <input type="text" id="transactionId" placeholder="Enter your payment transaction ID" required class="form-input" />
+          </div>
+          <button type="submit" class="btn-primary w-full justify-center">
+            <i class="fas fa-check"></i> Confirm Payment
+          </button>
+          <div id="paymentError" class="text-red-500 text-sm hidden"></div>
+        </form>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+  // পেমেন্ট ফর্ম সাবমিট ইভেন্ট লিসেনার (একবারই)
+  const paymentForm = document.getElementById('paymentForm');
+  if (paymentForm) {
+    paymentForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const txnId = document.getElementById('transactionId').value.trim();
+      const errorDiv = document.getElementById('paymentError');
+      const orderId = e.target.dataset.orderId;
+      errorDiv.classList.add('hidden');
+
+      if (!txnId) {
+        errorDiv.textContent = 'Please enter transaction ID.';
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+      if (!orderId) {
+        errorDiv.textContent = 'Order not found.';
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+
+      const user = auth.currentUser;
+      if (!user) {
+        errorDiv.textContent = 'You are not logged in.';
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+
+      const btn = paymentForm.querySelector('button[type="submit"]');
+      setLoading(btn, true, 'Confirm Payment');
+      try {
+        // শুধু transactionId ও paymentMethod আপডেট করুন, status পরিবর্তন করবেন না
+        await updateDoc(doc(db, 'orders', orderId), {
+          transactionId: txnId,
+          paymentMethod: 'Manual'
+          // status অপরিবর্তিত রাখা হলো
+        });
+        showToast('✅ Payment confirmed! Admin will verify soon.', 'success');
+        window.closePaymentModal();
+        localStorage.removeItem('cart');
+        window.updateCartUI();
+        if (typeof window.toggleCart === 'function') window.toggleCart();
+      } catch (err) {
+        errorDiv.textContent = '⚠️ ' + err.message;
+        errorDiv.classList.remove('hidden');
+        showToast('⚠️ ' + err.message, 'error');
+      } finally {
+        setLoading(btn, false);
+      }
+    });
+  }
+}
+
+// ================================================================
+// ===== চেকআউট ফাংশন (সর্বত্র ব্যবহারযোগ্য) =====
+// ================================================================
+window.checkout = async function() {
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  if (cart.length === 0) {
+    showToast('🛒 Your cart is empty', 'warning');
+    return;
+  }
+  const user = auth.currentUser;
+  if (!user) {
+    showToast('⚠️ Please sign in to checkout', 'error');
+    // অথ মডাল খোলার জন্য (ধরে নিচ্ছি window.openAuthModal আছে)
+    if (typeof window.openAuthModal === 'function') window.openAuthModal('signin');
+    return;
+  }
+
+  const checkoutBtn = document.querySelector('#cartSidebar .btn-primary');
+  if (checkoutBtn) setLoading(checkoutBtn, true, 'Proceed to Checkout');
+
+  try {
+    const settingsSnap = await getDoc(doc(db, 'settings', 'payment'));
+    const settings = settingsSnap.exists() ? settingsSnap.data() : {};
+    if (!settings.bkash && !settings.nagad && !settings.usdt) {
+      showToast('⚠️ Payment methods not set. Contact admin.', 'error');
+      if (checkoutBtn) setLoading(checkoutBtn, false);
+      return;
+    }
+
+    const orderData = {
+      userId: user.uid,
+      userEmail: user.email,
+      items: cart.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity || 1,
+        imageUrl: item.imageUrl || ''
+      })),
+      total: cart.reduce((sum, item) => sum + (item.price * (item.quantity || 1)), 0),
+      status: 'pending', // সর্বদা pending দিয়ে শুরু
+      paymentMethod: '',
+      transactionId: '',
+      createdAt: serverTimestamp()
+    };
+    const docRef = await addDoc(collection(db, 'orders'), orderData);
+    
+    window.openPaymentModal(docRef.id, settings);
+
+    if (checkoutBtn) setLoading(checkoutBtn, false);
+  } catch (err) {
+    showToast('⚠️ ' + err.message, 'error');
+    if (checkoutBtn) setLoading(checkoutBtn, false);
+  }
+};
+
+// ================================================================
+// ===== পেমেন্ট মডাল কন্ট্রোল =====
+// ================================================================
+window.openPaymentModal = function(orderId, settings) {
+  const numbersDiv = document.getElementById('paymentNumbers');
+  if (!numbersDiv) {
+    console.error('Payment modal not found.');
+    return;
+  }
+  let html = '';
+  if (settings.bkash) html += `<p><i class="fas fa-mobile-alt text-blue-500"></i> BKash: <strong>${settings.bkash}</strong></p>`;
+  if (settings.nagad) html += `<p><i class="fas fa-mobile-alt text-orange-500"></i> Nagad: <strong>${settings.nagad}</strong></p>`;
+  if (settings.usdt) html += `<p><i class="fab fa-bitcoin text-yellow-500"></i> USDT (BEP20): <strong>${settings.usdt}</strong></p>`;
+  if (settings.rocket) html += `<p><i class="fas fa-mobile-alt text-red-500"></i> Rocket: <strong>${settings.rocket}</strong></p>`;
+  if (!html) html = '<p class="text-gray-500">Payment methods not set. Contact admin.</p>';
+  numbersDiv.innerHTML = html;
+  document.getElementById('paymentModal').classList.remove('hidden');
+  document.getElementById('paymentError').classList.add('hidden');
+  document.getElementById('transactionId').value = '';
+  document.getElementById('paymentForm').dataset.orderId = orderId;
+};
+
+window.closePaymentModal = function() {
+  document.getElementById('paymentModal').classList.add('hidden');
+};
