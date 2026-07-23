@@ -110,7 +110,8 @@ export function renderNavbar() {
               <a href="my-orders.html"><i class="fas fa-box mr-2"></i> My Orders</a>
               <a href="my-fix-requests.html"><i class="fas fa-tools mr-2"></i> My Fix Requests</a>
               <a href="settings.html"><i class="fas fa-cog mr-2"></i> Settings</a>
-              <a href="admin-panel.html"><i class="fas fa-shield-alt mr-2"></i> Admin Panel</a>
+              <!-- ✅ Admin Panel লিংক hidden ক্লাস সহ – শুধুমাত্র অ্যাডমিন দেখবে -->
+              <a href="admin-panel.html" class="admin-link hidden"><i class="fas fa-shield-alt mr-2"></i> Admin Panel</a>
               <a href="#" onclick="window.handleLogout()"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
             </div>
           </div>
@@ -153,13 +154,16 @@ export function renderNavbar() {
   updateCartBadge();
 }
 
-// ===== নেভবার অথ আপডেট =====
-export function updateNavbarAuth(user, displayName) {
+// ===== নেভবার অথ আপডেট (role প্যারামিটার যোগ) =====
+export function updateNavbarAuth(user, displayName, role = null) {
   const authBtns = document.getElementById('auth-buttons');
   const profileSection = document.getElementById('profile-section');
   const loadingEl = document.getElementById('auth-loading');
   const avatar = document.getElementById('profileAvatar');
   const dropdown = document.getElementById('dropdownMenu');
+  
+  // Admin লিংক নির্বাচন
+  const adminLink = document.querySelector('#profile-section .dropdown-menu a.admin-link');
 
   if (loadingEl) loadingEl.style.display = 'none';
 
@@ -167,6 +171,15 @@ export function updateNavbarAuth(user, displayName) {
     if (authBtns) authBtns.classList.add('hidden');
     if (profileSection) profileSection.classList.remove('hidden');
     if (avatar) avatar.textContent = (displayName || user.email).charAt(0).toUpperCase();
+    
+    // ✅ অ্যাডমিন চেক – শুধুমাত্র role === 'admin' হলে লিংক দেখাবে
+    if (adminLink) {
+      if (role === 'admin') {
+        adminLink.classList.remove('hidden');
+      } else {
+        adminLink.classList.add('hidden');
+      }
+    }
   } else {
     if (authBtns) authBtns.classList.remove('hidden');
     if (profileSection) profileSection.classList.add('hidden');
@@ -294,10 +307,7 @@ export function setLoading(button, isLoading, originalText = null) {
   }
 }
 
-// ================================================================
-// ===== ✅ পেমেন্ট মডাল (FIXED – orderId hidden input ব্যবহার) =====
-// ================================================================
-
+// ===== পেমেন্ট মডাল (FIXED) =====
 export function renderPaymentModal() {
   if (document.getElementById('paymentModal')) return;
 
@@ -313,9 +323,7 @@ export function renderPaymentModal() {
           <div id="paymentNumbers" class="space-y-2"></div>
         </div>
         <form id="paymentForm" class="mt-4 space-y-4">
-          <!-- ✅ Hidden input for orderId (সবচেয়ে নিরাপদ পদ্ধতি) -->
           <input type="hidden" id="paymentOrderId" />
-          
           <div>
             <label class="block text-sm font-semibold text-gray-700">Transaction ID *</label>
             <input type="text" id="transactionId" placeholder="Enter your payment transaction ID" required class="form-input" />
@@ -330,17 +338,13 @@ export function renderPaymentModal() {
   `;
   document.body.insertAdjacentHTML('beforeend', modalHTML);
 
-  // ===== Payment Form Submit Handler (FIXED) =====
   const paymentForm = document.getElementById('paymentForm');
   if (paymentForm) {
     paymentForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
-      // ✅ orderId hidden input থেকে নেওয়া হচ্ছে (dataset না)
       const orderId = document.getElementById('paymentOrderId').value;
       const txnId = document.getElementById('transactionId').value.trim();
       const errorDiv = document.getElementById('paymentError');
-      
       errorDiv.classList.add('hidden');
 
       if (!orderId) {
@@ -365,7 +369,6 @@ export function renderPaymentModal() {
 
       const btn = paymentForm.querySelector('button[type="submit"]');
       setLoading(btn, true, 'Confirm Payment');
-      
       try {
         await updateDoc(doc(db, 'orders', orderId), {
           transactionId: txnId,
@@ -388,18 +391,14 @@ export function renderPaymentModal() {
   }
 }
 
-// ===== পেমেন্ট মডাল খোলা (FIXED) =====
 window.openPaymentModal = function(orderId, settings) {
   const numbersDiv = document.getElementById('paymentNumbers');
   const orderInput = document.getElementById('paymentOrderId');
-  
   if (!numbersDiv || !orderInput) {
-    console.error('Payment modal not found. Did you call renderPaymentModal()?');
+    console.error('Payment modal not found.');
     window.showToast('Payment system not ready. Please refresh.', 'error');
     return;
   }
-
-  // ✅ hidden input এ orderId সেট করা হচ্ছে
   orderInput.value = orderId;
 
   let html = '';
@@ -419,7 +418,7 @@ window.closePaymentModal = function() {
   document.getElementById('paymentModal').classList.add('hidden');
 };
 
-// ===== চেকআউট (অপরিবর্তিত) =====
+// ===== চেকআউট =====
 window.checkout = async function() {
   const cart = JSON.parse(localStorage.getItem('cart')) || [];
   if (cart.length === 0) {
