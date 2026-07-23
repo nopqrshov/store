@@ -1,7 +1,7 @@
 // components.js
 import { auth, onAuthStateChanged, signOut, sendPasswordResetEmail } from './firebase-config.js';
 
-// ===== কার্ট ব্যাজ আপডেট (কোয়ান্টিটি সহ) =====
+// ===== কার্ট ব্যাজ আপডেট =====
 export function updateCartBadge() {
   const cartBadge = document.getElementById('cartCount');
   if (!cartBadge) return;
@@ -14,7 +14,7 @@ export function updateCartBadge() {
   }
 }
 
-// ===== নেভবার রেন্ডার =====
+// ===== নেভবার রেন্ডার (লোডিং স্কেলেটন সহ) =====
 export function renderNavbar() {
   const navbarHTML = `
     <nav class="fixed top-0 left-0 w-full glass z-50 h-16 md:h-20 flex items-center px-6 sm:px-8 lg:px-12">
@@ -35,16 +35,25 @@ export function renderNavbar() {
             <i class="fas fa-shopping-cart"></i>
             <span id="cartCount" class="cart-badge">0</span>
           </a>
-          <div id="auth-buttons" class="flex items-center gap-3">
+          
+          <!-- ✅ লোডিং স্টেট -->
+          <div id="auth-loading" class="flex items-center gap-3">
+            <div class="w-16 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+            <div class="w-24 h-10 bg-gray-200 rounded-full animate-pulse"></div>
+          </div>
+
+          <!-- লগআউট স্টেট -->
+          <div id="auth-buttons" class="hidden flex items-center gap-3">
             <a href="#" onclick="window.openAuthModal('signin')" class="nav-link text-sm">Sign In</a>
             <a href="#" onclick="window.openAuthModal('signup')" class="btn-primary text-sm py-2 px-5">Get Started</a>
           </div>
+
+          <!-- লগইন স্টেট -->
           <div id="profile-section" class="relative hidden">
             <div class="profile-avatar" id="profileAvatar">S</div>
             <div class="dropdown-menu" id="dropdownMenu">
               <a href="my-profile.html"><i class="fas fa-user mr-2"></i> My Profile</a>
               <a href="my-orders.html"><i class="fas fa-box mr-2"></i> My Orders</a>
-              <!-- ✅ নতুন লিংক -->
               <a href="my-fix-requests.html"><i class="fas fa-tools mr-2"></i> My Fix Requests</a>
               <a href="settings.html"><i class="fas fa-cog mr-2"></i> Settings</a>
               <a href="#" onclick="window.handleLogout()"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
@@ -80,6 +89,25 @@ export function renderNavbar() {
   updateCartBadge();
 }
 
+// ===== নেভবার অথ স্টেট আপডেট (ফ্লিকার মুক্ত) =====
+export function updateNavbarAuth(user, displayName) {
+  const authBtns = document.getElementById('auth-buttons');
+  const profileSection = document.getElementById('profile-section');
+  const loadingEl = document.getElementById('auth-loading');
+  const avatar = document.getElementById('profileAvatar');
+
+  if (loadingEl) loadingEl.style.display = 'none';
+
+  if (user) {
+    if (authBtns) authBtns.classList.add('hidden');
+    if (profileSection) profileSection.classList.remove('hidden');
+    if (avatar) avatar.textContent = (displayName || user.email).charAt(0).toUpperCase();
+  } else {
+    if (authBtns) authBtns.classList.remove('hidden');
+    if (profileSection) profileSection.classList.add('hidden');
+  }
+}
+
 // ===== ফুটার =====
 export function renderFooter() {
   const footerHTML = `
@@ -95,21 +123,6 @@ export function renderFooter() {
     </footer>
   `;
   document.getElementById('footer-placeholder').innerHTML = footerHTML;
-}
-
-// ===== অথ স্টেট =====
-export function updateNavbarAuth(user, displayName) {
-  const authBtns = document.getElementById('auth-buttons');
-  const profileSection = document.getElementById('profile-section');
-  const avatar = document.getElementById('profileAvatar');
-  if (user) {
-    authBtns.classList.add('hidden');
-    profileSection.classList.remove('hidden');
-    avatar.textContent = (displayName || user.email).charAt(0).toUpperCase();
-  } else {
-    authBtns.classList.remove('hidden');
-    profileSection.classList.add('hidden');
-  }
 }
 
 // ===== কার্ট সাইডবার =====
@@ -143,7 +156,6 @@ export function toggleCart() {
   if (overlay) overlay.classList.toggle('open');
 }
 
-// ===== কার্ট UI (কোয়ান্টিটি সহ) =====
 export function updateCartUI() {
   const container = document.getElementById('cartItems');
   const totalEl = document.getElementById('cartTotal');
@@ -180,7 +192,6 @@ export function updateCartUI() {
   updateCartBadge();
 }
 
-// ===== গ্লোবাল কার্ট ফাংশন =====
 window.toggleCart = toggleCart;
 window.updateCartUI = updateCartUI;
 
@@ -222,7 +233,7 @@ export function setLoading(button, isLoading, originalText = null) {
   }
 }
 
-// ===== পাসওয়ার্ড রিসেট =====
+// ===== ফরগট পাসওয়ার্ড (গ্লোবাল) =====
 export function showResetPasswordModal() {
   const email = prompt('Enter your email address to reset password:');
   if (!email) return;

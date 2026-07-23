@@ -11,6 +11,7 @@ import {
   EmailAuthProvider,
   updatePassword,
   deleteUser,
+  sendEmailVerification, // ✅ নতুন যোগ
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import {
   getFirestore,
@@ -55,6 +56,7 @@ export {
   EmailAuthProvider,
   updatePassword,
   deleteUser,
+  sendEmailVerification, // ✅ এক্সপোর্ট
   collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, addDoc,
   query, where, orderBy, onSnapshot, serverTimestamp, arrayUnion, arrayRemove
 };

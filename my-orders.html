@@ -24,7 +24,7 @@
     <div id="footer-placeholder"></div>
   </div>
 
-  <!-- অথ মডাল -->
+  <!-- অথ মডাল (ফরগট পাসওয়ার্ড সহ) -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
       <div class="flex justify-between items-center mb-4">
@@ -36,6 +36,11 @@
         <input type="password" id="authPassword" placeholder="Password" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
         <button type="submit" class="btn-primary w-full justify-center">Continue</button>
       </form>
+      <p class="mt-2 text-sm text-center">
+        <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline">
+          <i class="fas fa-key"></i> Forgot Password?
+        </a>
+      </p>
       <p class="mt-4 text-sm text-gray-500 text-center">
         <span id="authToggleText">Don't have an account?</span>
         <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
@@ -47,116 +52,124 @@
   <div id="toast-container"></div>
 
   <script type="module">
-   import { auth, db, collection, query, where, onSnapshot, signOut, onAuthStateChanged, doc, getDoc, signInWithEmailAndPassword, createUserWithEmailAndPassword, setDoc } from './firebase-config.js';
-import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar, setLoading } from './components.js';
+    import { auth, db, collection, query, where, onSnapshot, signOut, onAuthStateChanged, doc, getDoc, signInWithEmailAndPassword, createUserWithEmailAndPassword, setDoc, sendEmailVerification } from './firebase-config.js';
+    import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar, setLoading } from './components.js';
 
-renderNavbar();
-renderFooter();
-renderCartSidebar();
-updateCartBadge();
+    renderNavbar();
+    renderFooter();
+    renderCartSidebar();
+    updateCartBadge();
 
-window.showToast = (message, type = 'success') => {
-  const container = document.getElementById('toast-container');
-  if (!container) return;
-  const toast = document.createElement('div');
-  const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
-  toast.className = `toast ${type}`;
-  toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
-  container.appendChild(toast);
-  setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
-};
+    window.showToast = (message, type = 'success') => {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
+      container.appendChild(toast);
+      setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
+    };
 
-// অথ মডাল (setLoading সহ)
-let currentAuthMode = 'signin';
-window.openAuthModal = (mode) => {
-  currentAuthMode = mode;
-  document.getElementById('authModalTitle').textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
-  document.getElementById('authToggleText').textContent = mode === 'signin' ? "Don't have an account?" : "Already have an account?";
-  document.getElementById('authToggleLink').textContent = mode === 'signin' ? 'Sign Up' : 'Sign In';
-  document.getElementById('authError').classList.add('hidden');
-  document.getElementById('authModal').classList.remove('hidden');
-};
-window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
-document.getElementById('authToggleLink').addEventListener('click', (e) => {
-  e.preventDefault();
-  currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
-  window.openAuthModal(currentAuthMode);
-});
+    // ===== অথ মডাল =====
+    let currentAuthMode = 'signin';
+    window.openAuthModal = (mode) => {
+      currentAuthMode = mode;
+      document.getElementById('authModalTitle').textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
+      document.getElementById('authToggleText').textContent = mode === 'signin' ? "Don't have an account?" : "Already have an account?";
+      document.getElementById('authToggleLink').textContent = mode === 'signin' ? 'Sign Up' : 'Sign In';
+      document.getElementById('authError').classList.add('hidden');
+      document.getElementById('authModal').classList.remove('hidden');
+    };
+    window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
 
-const authForm = document.getElementById('authForm');
-const authSubmitBtn = authForm.querySelector('button[type="submit"]');
-authForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = document.getElementById('authEmail').value.trim();
-  const password = document.getElementById('authPassword').value.trim();
-  const errorDiv = document.getElementById('authError');
-  errorDiv.classList.add('hidden');
-  setLoading(authSubmitBtn, true, 'Continue');
-  try {
-    let userCred;
-    if (currentAuthMode === 'signin') {
-      userCred = await signInWithEmailAndPassword(auth, email, password);
-      showToast('✅ সাইন ইন সফল!', 'success');
-    } else {
-      userCred = await createUserWithEmailAndPassword(auth, email, password);
-      await setDoc(doc(db, 'users', userCred.user.uid), {
-        email, displayName: email.split('@')[0], role: 'user', createdAt: new Date().toISOString()
-      });
-      showToast('✅ অ্যাকাউন্ট তৈরি হয়েছে!', 'success');
-    }
-    closeAuthModal();
-    authForm.reset();
-  } catch (error) {
-    errorDiv.textContent = error.message;
-    errorDiv.classList.remove('hidden');
-    showToast('⚠️ ' + error.message, 'error');
-  } finally {
-    setLoading(authSubmitBtn, false);
-  }
-});
-
-const orderList = document.getElementById('orderList');
-
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = 'index.html';
-    return;
-  }
-  const userDoc = await getDoc(doc(db, 'users', user.uid));
-  updateNavbarAuth(user, userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0]);
-
-  const q = query(collection(db, 'orders'), where('userId', '==', user.uid));
-  onSnapshot(q, (snapshot) => {
-    if (snapshot.empty) {
-      orderList.innerHTML = '<p class="text-gray-500">আপনার কোনো অর্ডার নেই।</p>';
-      return;
-    }
-    let html = '';
-    snapshot.forEach(doc => {
-      const o = doc.data();
-      const statusClass = o.status === 'pending' ? 'badge-pending' : o.status === 'processing' ? 'badge-processing' : 'badge-completed';
-      html += `
-        <div class="glass-card">
-          <div class="flex flex-wrap justify-between items-start gap-2">
-            <div>
-              <p class="font-bold">Order #${doc.id.slice(0,8)}</p>
-              <p class="text-sm">Total: $${o.total}</p>
-              <p class="text-xs text-gray-500">Items: ${o.items ? o.items.length : 0}</p>
-              ${o.transactionId ? `<p class="text-xs text-gray-500">Txn ID: ${o.transactionId}</p>` : ''}
-            </div>
-            <span class="${statusClass} px-2 py-1 rounded-full text-xs">${o.status}</span>
-          </div>
-        </div>
-      `;
+    document.getElementById('authToggleLink').addEventListener('click', (e) => {
+      e.preventDefault();
+      currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
+      window.openAuthModal(currentAuthMode);
     });
-    orderList.innerHTML = html;
-  });
-});
 
-window.handleLogout = async () => {
-  await signOut(auth);
-  window.location.href = 'index.html';
-};
+    const authForm = document.getElementById('authForm');
+    const authSubmitBtn = authForm.querySelector('button[type="submit"]');
+    authForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value.trim();
+      const errorDiv = document.getElementById('authError');
+      errorDiv.classList.add('hidden');
+      setLoading(authSubmitBtn, true, 'Continue');
+      try {
+        let userCred;
+        if (currentAuthMode === 'signin') {
+          userCred = await signInWithEmailAndPassword(auth, email, password);
+          if (!userCred.user.emailVerified) {
+            await signOut(auth);
+            throw new Error('Please verify your email first.');
+          }
+          showToast('✅ Signed in!', 'success');
+        } else {
+          userCred = await createUserWithEmailAndPassword(auth, email, password);
+          await sendEmailVerification(userCred.user);
+          showToast('✅ Verification email sent!', 'warning');
+          await setDoc(doc(db, 'users', userCred.user.uid), {
+            email, displayName: email.split('@')[0], role: 'user', createdAt: new Date().toISOString()
+          });
+          await signOut(auth);
+          alert('Please verify your email before signing in.');
+        }
+        closeAuthModal();
+        authForm.reset();
+      } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.classList.remove('hidden');
+        showToast('⚠️ ' + error.message, 'error');
+      } finally {
+        setLoading(authSubmitBtn, false);
+      }
+    });
+
+    const orderList = document.getElementById('orderList');
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = 'index.html';
+        return;
+      }
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      updateNavbarAuth(user, userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0]);
+
+      const q = query(collection(db, 'orders'), where('userId', '==', user.uid));
+      onSnapshot(q, (snapshot) => {
+        if (snapshot.empty) {
+          orderList.innerHTML = '<p class="text-gray-500">You have no orders.</p>';
+          return;
+        }
+        let html = '';
+        snapshot.forEach(doc => {
+          const o = doc.data();
+          const statusClass = o.status === 'pending' ? 'badge-pending' : o.status === 'processing' ? 'badge-processing' : 'badge-completed';
+          html += `
+            <div class="glass-card">
+              <div class="flex flex-wrap justify-between items-start gap-2">
+                <div>
+                  <p class="font-bold">Order #${doc.id.slice(0,8)}</p>
+                  <p class="text-sm">Total: $${o.total}</p>
+                  <p class="text-xs text-gray-500">Items: ${o.items ? o.items.length : 0}</p>
+                  ${o.transactionId ? `<p class="text-xs text-gray-500">Txn ID: ${o.transactionId}</p>` : ''}
+                </div>
+                <span class="${statusClass} px-2 py-1 rounded-full text-xs">${o.status}</span>
+              </div>
+            </div>
+          `;
+        });
+        orderList.innerHTML = html;
+      });
+    });
+
+    window.handleLogout = async () => {
+      await signOut(auth);
+      window.location.href = 'index.html';
+    };
   </script>
 </body>
 </html>

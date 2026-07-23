@@ -26,7 +26,7 @@
     <div id="footer-placeholder"></div>
   </div>
 
-  <!-- অথ মডাল -->
+  <!-- অথ মডাল (ফরগট পাসওয়ার্ড সহ) -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
       <div class="flex justify-between items-center mb-4">
@@ -38,6 +38,11 @@
         <input type="password" id="authPassword" placeholder="Password" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
         <button type="submit" class="btn-primary w-full justify-center">Continue</button>
       </form>
+      <p class="mt-2 text-sm text-center">
+        <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline">
+          <i class="fas fa-key"></i> Forgot Password?
+        </a>
+      </p>
       <p class="mt-4 text-sm text-gray-500 text-center">
         <span id="authToggleText">Don't have an account?</span>
         <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
@@ -73,7 +78,7 @@
   <div id="toast-container"></div>
 
   <script type="module">
-    import { auth, db, collection, doc, getDoc, onSnapshot, addDoc, updateDoc, serverTimestamp, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setDoc } from './firebase-config.js';
+    import { auth, db, collection, doc, getDoc, onSnapshot, addDoc, updateDoc, serverTimestamp, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setDoc, sendEmailVerification } from './firebase-config.js';
     import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar, setLoading } from './components.js';
 
     renderNavbar();
@@ -92,6 +97,7 @@
       setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
     };
 
+    // ===== অথ মডাল =====
     let currentAuthMode = 'signin';
     window.openAuthModal = (mode) => {
       currentAuthMode = mode;
@@ -117,19 +123,25 @@
       const password = document.getElementById('authPassword').value.trim();
       const errorDiv = document.getElementById('authError');
       errorDiv.classList.add('hidden');
-
       setLoading(authSubmitBtn, true, 'Continue');
       try {
         let userCred;
         if (currentAuthMode === 'signin') {
           userCred = await signInWithEmailAndPassword(auth, email, password);
-          showToast('✅ সাইন ইন সফল!', 'success');
+          if (!userCred.user.emailVerified) {
+            await signOut(auth);
+            throw new Error('Please verify your email first.');
+          }
+          showToast('✅ Signed in!', 'success');
         } else {
           userCred = await createUserWithEmailAndPassword(auth, email, password);
+          await sendEmailVerification(userCred.user);
+          showToast('✅ Verification email sent!', 'warning');
           await setDoc(doc(db, 'users', userCred.user.uid), {
             email, displayName: email.split('@')[0], role: 'user', createdAt: new Date().toISOString()
           });
-          showToast('✅ অ্যাকাউন্ট তৈরি হয়েছে!', 'success');
+          await signOut(auth);
+          alert('Please verify your email before signing in.');
         }
         closeAuthModal();
         authForm.reset();
@@ -153,9 +165,10 @@
 
     window.handleLogout = async () => {
       await signOut(auth);
-      showToast('✅ লগআউট সফল', 'success');
+      showToast('✅ Logged out', 'success');
     };
 
+    // ===== প্রোডাক্ট =====
     const productGrid = document.getElementById('productGrid');
     let products = [];
     onSnapshot(collection(db, 'products'), (snapshot) => {
@@ -189,18 +202,18 @@
       });
       localStorage.setItem('cart', JSON.stringify(cart));
       if (typeof window.updateCartUI === 'function') window.updateCartUI();
-      showToast(`✅ "${product.name}" কার্টে যোগ হয়েছে`, 'success');
+      showToast(`✅ "${product.name}" added to cart`, 'success');
     };
 
     window.checkout = async () => {
       const cart = JSON.parse(localStorage.getItem('cart')) || [];
       if (cart.length === 0) {
-        showToast('🛒 আপনার কার্ট খালি', 'warning');
+        showToast('🛒 Your cart is empty', 'warning');
         return;
       }
       const user = auth.currentUser;
       if (!user) {
-        showToast('⚠️ চেকআউট করতে দয়া করে সাইন ইন করুন', 'error');
+        showToast('⚠️ Please sign in to checkout', 'error');
         openAuthModal('signin');
         return;
       }
@@ -214,7 +227,7 @@
         if (docSnap.exists()) paymentSettings = docSnap.data();
 
         if (!paymentSettings.bkash && !paymentSettings.nagad && !paymentSettings.usdt) {
-          showToast('⚠️ পেমেন্ট পদ্ধতি সেট করা হয়নি। অ্যাডমিনের সাথে যোগাযোগ করুন।', 'error');
+          showToast('⚠️ Payment methods not set. Contact admin.', 'error');
           if (checkoutBtn) setLoading(checkoutBtn, false);
           return;
         }
@@ -244,7 +257,7 @@
       if (settings.bkash) html += `<p><i class="fas fa-mobile-alt text-blue-500"></i> BKash: <strong>${settings.bkash}</strong></p>`;
       if (settings.nagad) html += `<p><i class="fas fa-mobile-alt text-orange-500"></i> Nagad: <strong>${settings.nagad}</strong></p>`;
       if (settings.usdt) html += `<p><i class="fab fa-bitcoin text-yellow-500"></i> USDT (BEP20): <strong>${settings.usdt}</strong></p>`;
-      if (!html) html = '<p class="text-gray-500">পেমেন্ট পদ্ধতি সেট করা হয়নি। অ্যাডমিনের সাথে যোগাযোগ করুন।</p>';
+      if (!html) html = '<p class="text-gray-500">Payment methods not set. Contact admin.</p>';
       numbersDiv.innerHTML = html;
       document.getElementById('paymentModal').classList.remove('hidden');
       document.getElementById('paymentError').classList.add('hidden');
@@ -265,12 +278,12 @@
       errorDiv.classList.add('hidden');
 
       if (!txnId) {
-        errorDiv.textContent = 'দয়া করে ট্রানজেকশন ID দিন।';
+        errorDiv.textContent = 'Please enter transaction ID.';
         errorDiv.classList.remove('hidden');
         return;
       }
       if (!orderId) {
-        errorDiv.textContent = 'অর্ডার পাওয়া যায়নি।';
+        errorDiv.textContent = 'Order not found.';
         errorDiv.classList.remove('hidden');
         return;
       }
@@ -282,7 +295,7 @@
           paymentMethod: 'Manual',
           status: 'processing'
         });
-        showToast('✅ পেমেন্ট কনফর্ম! অ্যাডমিন শীঘ্রই ভেরিফাই করবেন।', 'success');
+        showToast('✅ Payment confirmed! Admin will verify soon.', 'success');
         closePaymentModal();
         localStorage.removeItem('cart');
         if (typeof window.updateCartUI === 'function') window.updateCartUI();
