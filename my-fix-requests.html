@@ -36,6 +36,11 @@
         <input type="password" id="authPassword" placeholder="Password" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
         <button type="submit" class="btn-primary w-full justify-center">Continue</button>
       </form>
+      <p class="mt-2 text-sm text-center">
+        <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline">
+          <i class="fas fa-key"></i> Forgot Password?
+        </a>
+      </p>
       <p class="mt-4 text-sm text-gray-500 text-center">
         <span id="authToggleText">Don't have an account?</span>
         <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
@@ -66,7 +71,7 @@
       setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
     };
 
-    // ===== অথ মডাল (setLoading সহ) =====
+    // ===== অথ মডাল =====
     let currentAuthMode = 'signin';
     window.openAuthModal = (mode) => {
       currentAuthMode = mode;
@@ -77,6 +82,7 @@
       document.getElementById('authModal').classList.remove('hidden');
     };
     window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
+
     document.getElementById('authToggleLink').addEventListener('click', (e) => {
       e.preventDefault();
       currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
@@ -96,13 +102,13 @@
         let userCred;
         if (currentAuthMode === 'signin') {
           userCred = await signInWithEmailAndPassword(auth, email, password);
-          showToast('✅ সাইন ইন সফল!', 'success');
+          showToast('✅ Signed in!', 'success');
         } else {
           userCred = await createUserWithEmailAndPassword(auth, email, password);
           await setDoc(doc(db, 'users', userCred.user.uid), {
             email, displayName: email.split('@')[0], role: 'user', createdAt: new Date().toISOString()
           });
-          showToast('✅ অ্যাকাউন্ট তৈরি হয়েছে!', 'success');
+          showToast('✅ Account created!', 'success');
         }
         closeAuthModal();
         authForm.reset();
@@ -115,7 +121,6 @@
       }
     });
 
-    // ===== চেক করুন ইউজার লগইন আছে কিনা =====
     const requestList = document.getElementById('requestList');
 
     onAuthStateChanged(auth, async (user) => {
@@ -126,11 +131,10 @@
       const userDoc = await getDoc(doc(db, 'users', user.uid));
       updateNavbarAuth(user, userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0]);
 
-      // ইউজারের রিকোয়েস্ট লোড করুন
       const q = query(collection(db, 'fixRequests'), where('userId', '==', user.uid));
       onSnapshot(q, (snapshot) => {
         if (snapshot.empty) {
-          requestList.innerHTML = '<p class="text-gray-500">আপনার কোনো ফিক্স রিকোয়েস্ট নেই।</p>';
+          requestList.innerHTML = '<p class="text-gray-500">You have no fix requests.</p>';
           return;
         }
         let html = '';

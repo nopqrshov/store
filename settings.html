@@ -17,7 +17,17 @@
     <main class="main-content">
       <section class="pt-28 pb-16 px-6 max-w-2xl mx-auto">
         <h1 class="text-3xl font-bold text-gray-900">Settings</h1>
+        
         <div class="glass-card mt-6">
+          <h2 class="text-xl font-bold">Email Verification</h2>
+          <div id="emailVerificationStatus" class="mt-2 text-sm">
+            <span id="verifyStatusText">Loading...</span>
+          </div>
+          <button id="verifyEmailBtn" class="btn-primary mt-3 text-sm py-2 px-4">
+            <i class="fas fa-envelope"></i> Send Verification Email
+          </button>
+          <hr class="my-6" />
+          
           <h2 class="text-xl font-bold">Change Password</h2>
           <form id="changePasswordForm" class="mt-4 space-y-3">
             <input type="password" id="currentPassword" placeholder="Current Password" class="form-input" required />
@@ -111,20 +121,15 @@
         let userCred;
         if (currentAuthMode === 'signin') {
           userCred = await signInWithEmailAndPassword(auth, email, password);
-          if (!userCred.user.emailVerified) {
-            await signOut(auth);
-            throw new Error('Please verify your email first.');
-          }
+          // ✅ ভেরিফিকেশন চেক সরানো হয়েছে
           showToast('✅ Signed in!', 'success');
         } else {
           userCred = await createUserWithEmailAndPassword(auth, email, password);
-          await sendEmailVerification(userCred.user);
-          showToast('✅ Verification email sent!', 'warning');
+          // ✅ সাইন আপের সময় ইমেইল ভেরিফিকেশন পাঠানো হচ্ছে না (শুধু সেটিংসে অপশন থাকবে)
           await setDoc(doc(db, 'users', userCred.user.uid), {
             email, displayName: email.split('@')[0], role: 'user', createdAt: new Date().toISOString()
           });
-          await signOut(auth);
-          alert('Please verify your email before signing in.');
+          showToast('✅ Account created! You can now sign in.', 'success');
         }
         closeAuthModal();
         authForm.reset();
@@ -144,8 +149,39 @@
       }
       const userDoc = await getDoc(doc(db, 'users', user.uid));
       updateNavbarAuth(user, userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0]);
+      
+      // ===== ইমেইল ভেরিফিকেশন স্ট্যাটাস আপডেট =====
+      const statusText = document.getElementById('verifyStatusText');
+      const verifyBtn = document.getElementById('verifyEmailBtn');
+      if (user.emailVerified) {
+        statusText.innerHTML = '<span class="text-green-600"><i class="fas fa-check-circle"></i> Your email is verified.</span>';
+        verifyBtn.style.display = 'none';
+      } else {
+        statusText.innerHTML = '<span class="text-orange-500"><i class="fas fa-exclamation-triangle"></i> Your email is not verified. Click below to send verification link.</span>';
+        verifyBtn.style.display = 'inline-flex';
+      }
     });
 
+    // ===== ভেরিফিকেশন ইমেইল পাঠান =====
+    document.getElementById('verifyEmailBtn').addEventListener('click', async () => {
+      const user = auth.currentUser;
+      if (!user) return showToast('You are not logged in.', 'error');
+      if (user.emailVerified) {
+        showToast('Your email is already verified.', 'warning');
+        return;
+      }
+      setLoading(document.getElementById('verifyEmailBtn'), true);
+      try {
+        await sendEmailVerification(user);
+        showToast('✅ Verification email sent! Check your inbox.', 'success');
+      } catch (err) {
+        showToast('⚠️ ' + err.message, 'error');
+      } finally {
+        setLoading(document.getElementById('verifyEmailBtn'), false);
+      }
+    });
+
+    // ===== পাসওয়ার্ড পরিবর্তন =====
     const changePasswordForm = document.getElementById('changePasswordForm');
     const passBtn = changePasswordForm.querySelector('button[type="submit"]');
     changePasswordForm.addEventListener('submit', async (e) => {
@@ -169,6 +205,7 @@
       }
     });
 
+    // ===== অ্যাকাউন্ট ডিলিট =====
     window.deleteAccount = async () => {
       if (!confirm('Are you sure you want to delete your account? This action is irreversible.')) return;
       const user = auth.currentUser;

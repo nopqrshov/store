@@ -54,7 +54,7 @@
     <div id="footer-placeholder"></div>
   </div>
 
-  <!-- ===== অথ মডাল (ফরগট পাসওয়ার্ড সহ) ===== -->
+  <!-- অথ মডাল -->
   <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
       <div class="flex justify-between items-center mb-4">
@@ -66,7 +66,6 @@
         <input type="password" id="authPassword" placeholder="Password" required class="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500" />
         <button type="submit" class="btn-primary w-full justify-center">Continue</button>
       </form>
-      <!-- ✅ ফরগট পাসওয়ার্ড লিংক -->
       <p class="mt-2 text-sm text-center">
         <a href="#" onclick="window.showResetPasswordModal()" class="text-blue-600 hover:underline">
           <i class="fas fa-key"></i> Forgot Password?
@@ -83,7 +82,7 @@
   <div id="toast-container"></div>
 
   <script type="module">
-    import { auth, db, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, doc, setDoc, getDoc, sendEmailVerification } from './firebase-config.js';
+    import { auth, db, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, doc, setDoc, getDoc } from './firebase-config.js';
     import { renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, renderCartSidebar, setLoading } from './components.js';
 
     renderNavbar();
@@ -139,23 +138,15 @@
         let userCred;
         if (currentAuthMode === 'signin') {
           userCred = await signInWithEmailAndPassword(auth, email, password);
-          // চেক করি ইমেইল ভেরিফাইড কিনা
-          if (!userCred.user.emailVerified) {
-            await signOut(auth);
-            throw new Error('Please verify your email first. Check your inbox.');
-          }
+          // ✅ ভেরিফিকেশন চেক নেই
           showToast('✅ Signed in!', 'success');
         } else {
           userCred = await createUserWithEmailAndPassword(auth, email, password);
-          // ✅ ইমেইল ভেরিফিকেশন পাঠান
-          await sendEmailVerification(userCred.user);
-          showToast('✅ Verification email sent! Please verify your email.', 'warning');
+          // ✅ সাইনআপে ভেরিফিকেশন ইমেইল পাঠানো হচ্ছে না
           await setDoc(doc(db, 'users', userCred.user.uid), {
             email, displayName: email.split('@')[0], role: 'user', createdAt: new Date().toISOString()
           });
-          // সাইন আউট করে দেই যাতে ভেরিফিকেশন শেষে লগইন করে
-          await signOut(auth);
-          alert('Please verify your email before signing in. We sent a link to your inbox.');
+          showToast('✅ Account created! You can now sign in.', 'success');
         }
         closeAuthModal();
         authForm.reset();
