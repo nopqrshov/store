@@ -1,384 +1,957 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SWD Store – Landing</title>
+  <title>SWD স্টোর – নতুন ওয়েবসাইট ও ফিক্স সার্ভিস</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+
   <style>
-    /* ===== Scroll Animation ===== */
-    .fade-up {
+    /* ===== রিসেট ও বেস ===== */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f2f4f7;
+      color: #1c1c1e;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== ভেরিয়েবল ===== */
+    :root {
+      --bg-body: #f2f4f7;
+      --bg-card: rgba(255,255,255,0.72);
+      --bg-glass: rgba(255,255,255,0.60);
+      --text-primary: #1c1c1e;
+      --text-secondary: #3a3a3c;
+      --text-muted: #8e8e93;
+      --border-color: rgba(60,60,67,0.08);
+      --shadow-sm: 0 4px 20px rgba(0,0,0,0.02);
+      --shadow-md: 0 8px 40px rgba(0,0,0,0.04);
+      --shadow-lg: 0 20px 60px rgba(0,0,0,0.06);
+      --accent-start: #007AFF;
+      --accent-end: #5856D6;
+      --gradient-main: linear-gradient(135deg, #007AFF, #5856D6);
+      --gradient-text: linear-gradient(135deg, #007AFF, #AF52DE);
+    }
+
+    /* ===== গ্লাস ইউটিলিটি ===== */
+    .glass {
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.6);
+      box-shadow: var(--shadow-md);
+    }
+    .glass-card {
+      background: var(--bg-card);
+      backdrop-filter: blur(12px) saturate(180%);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
+      border: 1px solid rgba(255,255,255,0.7);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
+      border-radius: 20px;
+      padding: 1.5rem;
+    }
+    .glass-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(0,122,255,0.15);
+    }
+
+    .gradient-text {
+      background: var(--gradient-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .gradient-bg {
+      background: var(--gradient-main);
+    }
+
+    /* ===== বাটন ===== */
+    .btn-primary {
+      background: var(--gradient-main);
+      color: #fff;
+      padding: 12px 28px;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 16px rgba(0,122,255,0.25);
+      text-decoration: none;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 8px 30px rgba(0,122,255,0.35);
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--text-primary);
+      padding: 12px 28px;
+      border-radius: 60px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: 1.5px solid var(--border-color);
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .btn-outline:hover {
+      background: rgba(0,122,255,0.04);
+      border-color: var(--accent-start);
+      color: var(--accent-start);
+      transform: translateY(-2px);
+    }
+
+    /* ===== নেভবার ===== */
+    .nav-glass {
+      background: rgba(255,255,255,0.72);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-bottom: 1px solid rgba(255,255,255,0.6);
+      box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+      transition: box-shadow 0.3s ease;
+    }
+    .nav-glass.scrolled {
+      box-shadow: 0 4px 30px rgba(0,0,0,0.06);
+    }
+    .nav-link {
+      position: relative;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: color 0.2s ease;
+      padding: 0.5rem 0;
+      text-decoration: none;
+    }
+    .nav-link:hover { color: var(--accent-start); }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--gradient-main);
+      border-radius: 4px;
+      transition: width 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    .nav-link:hover::after { width: 100%; }
+
+    /* ===== মোবাইল মেনু ===== */
+    #mobile-menu {
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(-8px);
+      transition: max-height 0.45s cubic-bezier(0.25,0.46,0.45,0.94),
+                  opacity 0.4s cubic-bezier(0.25,0.46,0.45,0.94),
+                  transform 0.4s cubic-bezier(0.25,0.46,0.45,0.94);
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 1.5rem;
+    }
+    #mobile-menu.open {
+      max-height: 500px;
+      opacity: 1;
+      transform: translateY(0);
+      padding: 1.25rem 1.5rem;
+    }
+    #mobile-menu .nav-link {
+      display: block;
+      padding: 0.6rem 0;
+      opacity: 0;
+      transform: translateX(-12px);
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+    #mobile-menu.open .nav-link {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    #mobile-menu.open .nav-link:nth-child(1) { transition-delay: 0.04s; }
+    #mobile-menu.open .nav-link:nth-child(2) { transition-delay: 0.08s; }
+    #mobile-menu.open .nav-link:nth-child(3) { transition-delay: 0.12s; }
+    #mobile-menu.open .nav-link:nth-child(4) { transition-delay: 0.16s; }
+    #mobile-menu.open .btn-primary {
+      opacity: 1;
+      transform: translateX(0);
+      transition-delay: 0.20s;
+    }
+    #mobile-menu .btn-primary {
+      opacity: 0;
+      transform: translateX(-12px);
+      transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94);
+      margin-top: 0.25rem;
+    }
+
+    /* ===== হিরো ব্যাজ ===== */
+    .hero-badge {
+      background: rgba(0,122,255,0.08);
+      color: var(--accent-start);
+      border: 1px solid rgba(0,122,255,0.12);
+      padding: 0.25rem 1rem;
+      border-radius: 60px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* ===== স্ট্যাটস ===== */
+    .stat-number {
+      font-size: 2.4rem;
+      font-weight: 800;
+      line-height: 1;
+      background: var(--gradient-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ===== টেক পিল ===== */
+    .tech-pill {
+      background: var(--bg-card);
+      backdrop-filter: blur(4px);
+      border: 1px solid var(--border-color);
+      padding: 0.4rem 1rem;
+      border-radius: 60px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .tech-pill:hover {
+      border-color: var(--accent-start);
+      color: var(--accent-start);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ===== প্রক্রিয়া স্টেপ ===== */
+    .step-number {
+      width: 48px;
+      height: 48px;
+      border-radius: 60px;
+      background: var(--gradient-main);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(0,122,255,0.2);
+    }
+
+    /* ===== স্কিল বার ===== */
+    .skill-bar-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(60,60,67,0.08);
+      border-radius: 60px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .skill-bar-fill {
+      height: 100%;
+      border-radius: 60px;
+      background: var(--gradient-main);
+      transition: width 0.8s cubic-bezier(0.25,0.46,0.45,0.94);
+      width: 0;
+    }
+    .skill-bar-fill.animated {
+      width: var(--fill-width);
+    }
+
+    /* ===== ফর্ম ইনপুট ===== */
+    .form-input {
+      width: 100%;
+      padding: 14px 18px;
+      border: 1.5px solid var(--border-color);
+      border-radius: 14px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(4px);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent-start);
+      box-shadow: 0 0 0 4px rgba(0,122,255,0.08);
+      background: #ffffff;
+    }
+    .form-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* ===== সোশ্যাল আইকন ===== */
+    .social-icon {
+      transition: all 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 60px;
+      background: rgba(255,255,255,0.8);
+      backdrop-filter: blur(4px);
+      color: var(--text-secondary);
+      text-decoration: none;
+      border: 1px solid var(--border-color);
+    }
+    .social-icon:hover {
+      background: var(--accent-start);
+      color: #fff;
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 8px 20px rgba(0,122,255,0.2);
+      border-color: var(--accent-start);
+    }
+
+    /* ===== রিভিল অ্যানিমেশন ===== */
+    .reveal {
       opacity: 0;
       transform: translateY(30px);
-      transition: opacity 0.6s ease, transform 0.6s ease;
+      transition: opacity 0.8s cubic-bezier(0.25,0.46,0.45,0.94),
+                  transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94);
     }
-    .fade-up.visible {
+    .reveal.visible {
       opacity: 1;
       transform: translateY(0);
     }
+    .reveal-delay-1 { transition-delay: 0.05s; }
+    .reveal-delay-2 { transition-delay: 0.10s; }
+    .reveal-delay-3 { transition-delay: 0.15s; }
+    .reveal-delay-4 { transition-delay: 0.20s; }
 
-    /* ===== Back to Top Button ===== */
-    .scroll-top-btn {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #007AFF, #5856D6);
-      color: #fff;
-      border: none;
-      font-size: 1.2rem;
-      cursor: pointer;
-      box-shadow: 0 8px 30px rgba(0,122,255,0.35);
-      z-index: 999;
-      opacity: 0;
-      transform: scale(0.8);
-      transition: opacity 0.3s ease, transform 0.3s ease;
-      pointer-events: none;
-    }
-    .scroll-top-btn.show {
-      opacity: 1;
-      transform: scale(1);
-      pointer-events: auto;
-    }
-    .scroll-top-btn:hover {
-      transform: scale(1.05);
-    }
+    /* ===== স্ক্রলবার ===== */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #c4c4c6; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #a8a8aa; }
 
-    /* ===== Hero Gradient ===== */
-    .hero-gradient {
-      background: radial-gradient(ellipse at top, rgba(0,122,255,0.06), transparent 70%);
+    /* ===== রেস্পন্সিভ ===== */
+    @media (max-width: 640px) {
+      .stat-number { font-size: 1.8rem; }
     }
   </style>
 </head>
 <body>
-  <div class="page-wrapper">
-    <div id="navbar-placeholder"></div>
 
-    <main class="main-content">
-      <!-- ===== হিরো ===== -->
-      <section class="hero-gradient pt-32 pb-16 px-6 min-h-screen flex items-center">
-        <div class="max-w-7xl mx-auto text-center">
-          <h1 class="text-5xl md:text-7xl font-bold text-gray-900 leading-tight fade-up">
-            Build Your <span class="gradient-text">Dream Website</span> Today
-          </h1>
-          <p class="text-xl text-gray-500 mt-4 max-w-2xl mx-auto fade-up" style="transition-delay:0.1s;">
-            Choose from ready-made packages or get a fully custom solution. Fast, reliable, and modern.
-          </p>
-          <div class="mt-10 flex flex-wrap justify-center gap-4 fade-up" style="transition-delay:0.2s;">
-            <a href="get-new-website.html" class="btn-primary"><i class="fas fa-shopping-cart"></i> Explore Store</a>
-            <a href="fix-website.html" class="btn-outline"><i class="fas fa-wrench"></i> Fix My Site</a>
-          </div>
-
-          <!-- ===== ডাইনামিক প্যাকেজ ===== -->
-          <div id="featuredPackages" class="mt-16 grid md:grid-cols-3 gap-6 text-left">
-            <!-- Skeleton Loading -->
-            <div class="glass-card fade-up"><div class="h-8 w-20 bg-gray-200 rounded animate-pulse"></div><div class="h-6 w-3/4 bg-gray-200 rounded mt-3 animate-pulse"></div><div class="h-4 w-1/2 bg-gray-200 rounded mt-2 animate-pulse"></div><div class="h-8 w-16 bg-gray-200 rounded mt-3 animate-pulse"></div></div>
-            <div class="glass-card fade-up"><div class="h-8 w-20 bg-gray-200 rounded animate-pulse"></div><div class="h-6 w-3/4 bg-gray-200 rounded mt-3 animate-pulse"></div><div class="h-4 w-1/2 bg-gray-200 rounded mt-2 animate-pulse"></div><div class="h-8 w-16 bg-gray-200 rounded mt-3 animate-pulse"></div></div>
-            <div class="glass-card fade-up"><div class="h-8 w-20 bg-gray-200 rounded animate-pulse"></div><div class="h-6 w-3/4 bg-gray-200 rounded mt-3 animate-pulse"></div><div class="h-4 w-1/2 bg-gray-200 rounded mt-2 animate-pulse"></div><div class="h-8 w-16 bg-gray-200 rounded mt-3 animate-pulse"></div></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ===== টেস্টিমোনিয়াল ===== -->
-      <section id="testimonials" class="py-16 px-6 bg-gray-50">
-        <div class="max-w-6xl mx-auto">
-          <h2 class="text-3xl font-bold text-center fade-up">What Our Clients Say</h2>
-          <div id="testimonialList" class="mt-8 grid md:grid-cols-3 gap-6">
-            <div class="glass-card text-center fade-up"><div class="h-16 bg-gray-200 rounded animate-pulse"></div><div class="h-6 w-1/2 bg-gray-200 rounded mx-auto mt-3 animate-pulse"></div></div>
-            <div class="glass-card text-center fade-up"><div class="h-16 bg-gray-200 rounded animate-pulse"></div><div class="h-6 w-1/2 bg-gray-200 rounded mx-auto mt-3 animate-pulse"></div></div>
-            <div class="glass-card text-center fade-up"><div class="h-16 bg-gray-200 rounded animate-pulse"></div><div class="h-6 w-1/2 bg-gray-200 rounded mx-auto mt-3 animate-pulse"></div></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ===== FAQ ===== -->
-      <section id="faq" class="py-16 px-6">
-        <div class="max-w-3xl mx-auto">
-          <h2 class="text-3xl font-bold text-center fade-up">Frequently Asked Questions</h2>
-          <div id="faqList" class="mt-8 space-y-4">
-            <div class="glass-card fade-up"><div class="h-6 bg-gray-200 rounded animate-pulse"></div></div>
-            <div class="glass-card fade-up"><div class="h-6 bg-gray-200 rounded animate-pulse"></div></div>
-            <div class="glass-card fade-up"><div class="h-6 bg-gray-200 rounded animate-pulse"></div></div>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <div id="footer-placeholder"></div>
-  </div>
-
-  <!-- ===== Back to Top Button ===== -->
-  <button class="scroll-top-btn" id="scrollTopBtn" aria-label="Back to top">
-    <i class="fas fa-arrow-up"></i>
-  </button>
-
-  <!-- ===== অথ মডাল (Forgot Password লিংক সরানো হয়েছে) ===== -->
-  <div id="authModal" class="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-    <div class="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl">
-      <div class="flex justify-between items-center mb-4">
-        <h3 id="authModalTitle" class="text-2xl font-bold">Sign In</h3>
-        <button onclick="closeAuthModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+  <!-- ============================================================
+  NAVIGATION
+  ============================================================ -->
+  <nav id="navbar" class="fixed top-0 left-0 w-full nav-glass z-50 transition-shadow duration-300">
+    <div class="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 flex items-center justify-between h-16 md:h-20">
+      <a href="#" class="text-xl md:text-2xl font-bold tracking-tight text-gray-900">
+        SWD <span class="gradient-text">স্টোর</span>
+      </a>
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#services" class="nav-link text-sm">সার্ভিস</a>
+        <a href="#skills" class="nav-link text-sm">দক্ষতা</a>
+        <a href="#process" class="nav-link text-sm">প্রক্রিয়া</a>
+        <a href="#testimonials" class="nav-link text-sm">ক্লায়েন্ট</a>
+        <a href="#contact" class="nav-link text-sm">যোগাযোগ</a>
+        <a href="get-new-website.html" class="btn-primary text-sm py-2 px-5">
+          <i class="fas fa-rocket"></i> নতুন সাইট
+        </a>
+        <a href="fix-website.html" class="btn-outline text-sm py-2 px-5">
+          <i class="fas fa-wrench"></i> ফিক্স
+        </a>
       </div>
-      <form id="authForm" class="space-y-4">
-        <input type="email" id="authEmail" placeholder="Email" required class="form-input" />
-        <div class="relative">
-          <input type="password" id="authPassword" placeholder="Password" required class="form-input pr-10" />
-          <button type="button" onclick="togglePasswordVisibility('authPassword')" class="absolute right-3 top-3 text-gray-400"><i class="fas fa-eye"></i></button>
-        </div>
-        <button type="submit" class="btn-primary w-full justify-center">Continue</button>
-      </form>
-      <div class="mt-4 flex flex-col gap-2">
-        <button onclick="window.socialLogin('google')" class="btn-outline w-full justify-center"><i class="fab fa-google"></i> Sign in with Google</button>
-        <button onclick="window.socialLogin('github')" class="btn-outline w-full justify-center"><i class="fab fa-github"></i> Sign in with GitHub</button>
-      </div>
-      <!-- Forgot Password লিংক সম্পূর্ণ সরানো হয়েছে -->
-      <p class="mt-4 text-sm text-gray-500 text-center">
-        <span id="authToggleText">Don't have an account?</span>
-        <a href="#" id="authToggleLink" class="text-blue-600 font-medium">Sign Up</a>
-      </p>
-      <div id="authError" class="text-red-500 text-sm mt-2 hidden"></div>
+      <button id="menu-toggle" class="md:hidden text-2xl focus:outline-none" style="color: var(--text-secondary);" aria-label="মেনু টগল">
+        <i class="fas fa-bars"></i>
+        <i class="fas fa-times"></i>
+      </button>
     </div>
-  </div>
+    <div id="mobile-menu">
+      <a href="#services" class="nav-link text-base">সার্ভিস</a>
+      <a href="#skills" class="nav-link text-base">দক্ষতা</a>
+      <a href="#process" class="nav-link text-base">প্রক্রিয়া</a>
+      <a href="#testimonials" class="nav-link text-base">ক্লায়েন্ট</a>
+      <a href="#contact" class="nav-link text-base">যোগাযোগ</a>
+      <a href="get-new-website.html" class="btn-primary text-center text-sm py-3"><i class="fas fa-rocket"></i> নতুন সাইট</a>
+      <a href="fix-website.html" class="btn-outline text-center text-sm py-3"><i class="fas fa-wrench"></i> ফিক্স</a>
+    </div>
+  </nav>
 
-  <div id="toast-container"></div>
-
-  <script type="module">
-    // ===== ইমপোর্ট =====
-    import { 
-      auth, db, collection, doc, getDoc, getDocs, onSnapshot, 
-      signInWithEmailAndPassword, createUserWithEmailAndPassword, 
-      onAuthStateChanged, signOut, setDoc, 
-      signInWithPopup, googleProvider, githubProvider 
-    } from './firebase-config.js';
-    import { 
-      renderNavbar, renderFooter, updateNavbarAuth, updateCartBadge, 
-      renderCartSidebar, setLoading, renderPaymentModal
-    } from './components.js';
-
-    // ===== রেন্ডার =====
-    renderNavbar();
-    renderFooter();
-    renderCartSidebar();
-    renderPaymentModal();
-    updateCartBadge();
-
-    // ===== টোস্ট =====
-    window.showToast = (message, type = 'success') => {
-      const container = document.getElementById('toast-container');
-      if (!container) return;
-      const toast = document.createElement('div');
-      const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle' };
-      toast.className = `toast ${type}`;
-      toast.innerHTML = `<i class="fas ${icons[type] || icons.success}"></i> ${message}`;
-      container.appendChild(toast);
-      setTimeout(() => { toast.classList.add('hide'); setTimeout(() => toast.remove(), 400); }, 4500);
-    };
-
-    // ===== Scroll Animation (Intersection Observer) =====
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
-    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
-    });
-
-    // ===== Back to Top Button =====
-    const scrollBtn = document.getElementById('scrollTopBtn');
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 400) {
-        scrollBtn.classList.add('show');
-      } else {
-        scrollBtn.classList.remove('show');
-      }
-    });
-    scrollBtn.addEventListener('click', () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-
-    // ===== অথ মডাল =====
-    let currentAuthMode = 'signin';
-    window.openAuthModal = (mode) => {
-      currentAuthMode = mode;
-      document.getElementById('authModalTitle').textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
-      document.getElementById('authToggleText').textContent = mode === 'signin' ? "Don't have an account?" : "Already have an account?";
-      document.getElementById('authToggleLink').textContent = mode === 'signin' ? 'Sign Up' : 'Sign In';
-      document.getElementById('authError').classList.add('hidden');
-      document.getElementById('authModal').classList.remove('hidden');
-    };
-    window.closeAuthModal = () => document.getElementById('authModal').classList.add('hidden');
-
-    document.getElementById('authToggleLink').addEventListener('click', (e) => {
-      e.preventDefault();
-      currentAuthMode = currentAuthMode === 'signin' ? 'signup' : 'signin';
-      window.openAuthModal(currentAuthMode);
-    });
-
-    window.togglePasswordVisibility = (id) => {
-      const input = document.getElementById(id);
-      input.type = input.type === 'password' ? 'text' : 'password';
-    };
-
-    const authForm = document.getElementById('authForm');
-    const authSubmitBtn = authForm.querySelector('button[type="submit"]');
-    authForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('authEmail').value.trim();
-      const password = document.getElementById('authPassword').value.trim();
-      const errorDiv = document.getElementById('authError');
-      errorDiv.classList.add('hidden');
-      setLoading(authSubmitBtn, true, 'Continue');
-      try {
-        let userCred;
-        if (currentAuthMode === 'signin') {
-          userCred = await signInWithEmailAndPassword(auth, email, password);
-          showToast('✅ Signed in!', 'success');
-        } else {
-          userCred = await createUserWithEmailAndPassword(auth, email, password);
-          await setDoc(doc(db, 'users', userCred.user.uid), {
-            email, displayName: email.split('@')[0], role: 'user', createdAt: new Date().toISOString()
-          });
-          showToast('✅ Account created!', 'success');
-        }
-        closeAuthModal();
-        authForm.reset();
-      } catch (error) {
-        errorDiv.textContent = error.message;
-        errorDiv.classList.remove('hidden');
-        showToast('⚠️ ' + error.message, 'error');
-      } finally {
-        setLoading(authSubmitBtn, false);
-      }
-    });
-
-    window.socialLogin = async (provider) => {
-      try {
-        let result;
-        if (provider === 'google') result = await signInWithPopup(auth, googleProvider);
-        else if (provider === 'github') result = await signInWithPopup(auth, githubProvider);
-        const user = result.user;
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (!userDoc.exists()) {
-          await setDoc(doc(db, 'users', user.uid), {
-            email: user.email,
-            displayName: user.displayName || user.email.split('@')[0],
-            role: 'user',
-            createdAt: new Date().toISOString()
-          });
-        }
-        showToast('✅ Signed in with ' + provider, 'success');
-        closeAuthModal();
-      } catch (err) {
-        showToast('⚠️ ' + err.message, 'error');
-      }
-    };
-
-    // showResetPasswordModal সম্পূর্ণ সরানো হয়েছে
-
-    onAuthStateChanged(auth, async (user) => {
-      let name = null;
-      if (user) {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        name = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
-      }
-      updateNavbarAuth(user, name);
-    });
-
-    window.handleLogout = async () => {
-      await signOut(auth);
-      showToast('✅ Logged out', 'success');
-    };
-
-    // ===== ডাইনামিক প্যাকেজ =====
-    const packagesContainer = document.getElementById('featuredPackages');
-    onSnapshot(collection(db, 'products'), (snapshot) => {
-      if (snapshot.empty) {
-        packagesContainer.innerHTML = `<p class="text-gray-500 col-span-3 text-center">No packages available.</p>`;
-        return;
-      }
-      let html = '';
-      snapshot.forEach(doc => {
-        const p = doc.data();
-        html += `
-          <div class="glass-card fade-up">
-            <i class="fas fa-file-code text-3xl text-blue-500"></i>
-            <h3 class="font-bold mt-2">${p.name}</h3>
-            <p class="text-sm text-gray-500">${p.desc || p.description || ''}</p>
-            <span class="block mt-2 font-bold text-gray-800">$${p.price}</span>
-            <a href="get-new-website.html" class="btn-primary text-sm py-2 px-4 mt-3 inline-block">View</a>
+  <!-- ============================================================
+  HERO
+  ============================================================ -->
+  <section id="hero" class="relative pt-28 md:pt-36 pb-12 md:pb-20 px-6 sm:px-8 lg:px-12 min-h-screen flex items-center overflow-hidden">
+    <div class="max-w-7xl mx-auto w-full relative z-10">
+      <div class="grid lg:grid-cols-5 gap-12 lg:gap-16 items-center">
+        <div class="lg:col-span-3 reveal visible">
+          <div class="hero-badge mb-6">
+            <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+            প্রজেক্টের জন্য উপলব্ধ
           </div>
-        `;
-      });
-      packagesContainer.innerHTML = html;
-      // নতুন এলিমেন্টগুলোর জন্য Observer পুনরায় চালু
-      document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
-    });
-
-    // ===== টেস্টিমোনিয়াল =====
-    const testimonialContainer = document.getElementById('testimonialList');
-    onSnapshot(collection(db, 'testimonials'), (snapshot) => {
-      if (snapshot.empty) {
-        testimonialContainer.innerHTML = `<p class="text-gray-500 col-span-3 text-center">No testimonials yet.</p>`;
-        return;
-      }
-      let html = '';
-      snapshot.forEach(doc => {
-        const t = doc.data();
-        html += `
-          <div class="glass-card text-center fade-up">
-            <p class="text-gray-600 italic">“${t.text}”</p>
-            <p class="font-bold mt-2">- ${t.name}</p>
-            <p class="text-sm text-gray-400">${t.role || ''}</p>
+          <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 leading-[1.1] tracking-tight">
+            <span class="gradient-text">SWD স্টোর</span>
+          </h1>
+          <p class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mt-3 leading-[1.2]">
+            <span class="gradient-text">নতুন ওয়েবসাইট</span><br class="hidden sm:block" />
+            <span class="text-gray-700">এবং দ্রুত <span class="gradient-text">ফিক্স</span></span>
+            <span class="text-gray-500 font-normal text-lg sm:text-xl block mt-2">আপনার ব্যবসার জন্য</span>
+          </p>
+          <p class="text-gray-500 text-base sm:text-lg max-w-xl mt-4 leading-relaxed">
+            আমরা <strong class="text-gray-800">কাস্টম ওয়েবসাইট বানাই</strong> এবং
+            <strong class="text-gray-800">ভাঙা, ধীর বা পুরনো সাইট ঠিক করি</strong> —
+            আপনার অনলাইন উপস্থিতি শক্তিশালী করতে সাহায্য করি।
+          </p>
+          <div class="flex flex-wrap gap-4 mt-8">
+            <a href="get-new-website.html" class="btn-primary" target="_blank">
+              <i class="fas fa-rocket"></i> নতুন ওয়েবসাইট নিন
+            </a>
+            <a href="fix-website.html" class="btn-outline" target="_blank">
+              <i class="fas fa-wrench"></i> সাইট ফিক্স করুন
+            </a>
           </div>
-        `;
-      });
-      testimonialContainer.innerHTML = html;
-      document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
-    });
-
-    // ===== FAQ =====
-    const faqContainer = document.getElementById('faqList');
-    onSnapshot(collection(db, 'faqs'), (snapshot) => {
-      if (snapshot.empty) {
-        faqContainer.innerHTML = `<p class="text-gray-500 text-center">No FAQs yet.</p>`;
-        return;
-      }
-      let html = '';
-      let index = 0;
-      snapshot.forEach(doc => {
-        const f = doc.data();
-        const idx = index++;
-        html += `
-          <div class="glass-card cursor-pointer fade-up" onclick="toggleFaq(${idx})">
-            <div class="flex justify-between items-center">
-              <h3 class="font-semibold">${f.question}</h3>
-              <i class="fas fa-chevron-down text-gray-400 transition-transform" id="faqIcon${idx}"></i>
+          <div class="flex items-center gap-8 mt-8 text-sm text-gray-500">
+            <div class="flex items-center gap-3">
+              <i class="fas fa-check-circle text-blue-500 text-lg"></i>
+              <span class="font-medium text-gray-700">১০০+ প্রজেক্ট</span>
             </div>
-            <div id="faqAnswer${idx}" class="mt-2 text-gray-600 hidden">${f.answer}</div>
+            <div class="flex items-center gap-3">
+              <i class="fas fa-star text-yellow-400 text-lg"></i>
+              <span class="font-medium text-gray-700">৫.০ ★ গড়</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <i class="fas fa-bolt text-blue-500 text-lg"></i>
+              <span class="font-medium text-gray-700">২৪/৭ সাপোর্ট</span>
+            </div>
           </div>
-        `;
-      });
-      faqContainer.innerHTML = html;
-      document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
-    });
+        </div>
+        <div class="lg:col-span-2 flex justify-center lg:justify-end reveal reveal-delay-1">
+          <div class="relative w-full max-w-sm">
+            <div class="glass rounded-2xl p-1 shadow-xl">
+              <div class="w-full h-full rounded-2xl bg-white/50 backdrop-blur-sm flex flex-col items-center justify-center p-8 text-center">
+                <div class="w-20 h-20 rounded-full gradient-bg flex items-center justify-center text-white text-3xl mb-4 shadow-lg shadow-blue-500/20">
+                  <i class="fas fa-code"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800">SWD স্টোর</h3>
+                <p class="text-sm text-gray-500 mt-1">ওয়েবসাইট বানাই &amp; ফিক্স করি</p>
+                <div class="flex gap-3 mt-4 text-blue-500 text-lg">
+                  <i class="fab fa-html5"></i>
+                  <i class="fab fa-css3-alt"></i>
+                  <i class="fab fa-js"></i>
+                  <i class="fab fa-react"></i>
+                  <i class="fab fa-wordpress"></i>
+                </div>
+                <div class="w-full h-1.5 bg-gray-200 rounded-full mt-4 overflow-hidden">
+                  <div class="w-3/4 h-full gradient-bg rounded-full"></div>
+                </div>
+                <p class="text-xs text-gray-400 mt-2">শিখছি · তৈরি করছি</p>
+              </div>
+            </div>
+            <div class="absolute -bottom-4 -right-4 glass rounded-2xl shadow-lg px-5 py-3 flex items-center gap-3 border border-white/50">
+              <span class="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></span>
+              <span class="text-sm font-medium text-gray-700">এখনই উপলব্ধ</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    window.toggleFaq = (index) => {
-      const ans = document.getElementById(`faqAnswer${index}`);
-      const icon = document.getElementById(`faqIcon${index}`);
-      if (ans) {
-        ans.classList.toggle('hidden');
-        if (icon) icon.classList.toggle('rotate-180');
+  <!-- ============================================================
+  STATS
+  ============================================================ -->
+  <section class="py-12 px-6 sm:px-8 lg:px-12 border-t border-b border-gray-200/30 bg-white/40 backdrop-blur-sm">
+    <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+      <div class="reveal"><div class="stat-number">১০০+</div><div class="text-sm text-gray-500 font-medium mt-1">প্রজেক্ট ডেলিভারি</div></div>
+      <div class="reveal reveal-delay-1"><div class="stat-number">৫০+</div><div class="text-sm text-gray-500 font-medium mt-1">সন্তুষ্ট ক্লায়েন্ট</div></div>
+      <div class="reveal reveal-delay-2"><div class="stat-number">৫.০</div><div class="text-sm text-gray-500 font-medium mt-1">গড় রেটিং</div></div>
+      <div class="reveal reveal-delay-3"><div class="stat-number">২৪/৭</div><div class="text-sm text-gray-500 font-medium mt-1">সাপোর্ট</div></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+  SERVICES
+  ============================================================ -->
+  <section id="services" class="py-20 px-6 sm:px-8 lg:px-12 bg-white/50 backdrop-blur-sm border-t border-b border-gray-200/30">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center max-w-3xl mx-auto mb-16 reveal">
+        <span class="text-blue-600 text-sm font-semibold uppercase tracking-wider bg-blue-50 px-4 py-1.5 rounded-full border border-blue-100">আমাদের সার্ভিস</span>
+        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-4">দুটি মূল সার্ভিস, একটি লক্ষ্য</h2>
+        <div class="w-12 h-1 gradient-bg rounded-full mx-auto mt-4"></div>
+      </div>
+      <div class="grid md:grid-cols-2 gap-8 lg:gap-12">
+        <!-- সার্ভিস ১ -->
+        <div class="glass-card rounded-2xl p-8 lg:p-10 reveal reveal-delay-1">
+          <div class="flex items-start gap-5">
+            <div class="w-14 h-14 rounded-2xl gradient-bg flex items-center justify-center text-white text-2xl shadow-lg shadow-blue-500/20 flex-shrink-0">
+              <i class="fas fa-code"></i>
+            </div>
+            <div>
+              <span class="inline-block text-xs font-semibold uppercase tracking-wider text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">সার্ভিস</span>
+              <h3 class="text-2xl font-bold text-gray-800 mt-2">নতুন ওয়েবসাইট বানানো</h3>
+            </div>
+          </div>
+          <p class="text-gray-500 mt-4 leading-relaxed">
+            আমরা <strong class="text-gray-800">কাস্টম, ব্যবসা-কেন্দ্রিক ওয়েবসাইট</strong> তৈরি করি। কোনো টেমপ্লেট নয়, শুধু পরিষ্কার, দ্রুত এবং কার্যকরী কোড যা আপনার গল্প বলে এবং ফলাফল আনে।
+          </p>
+          <ul class="mt-6 space-y-3">
+            <li class="flex items-start gap-3">
+              <span class="w-6 h-6 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">১</span>
+              <div><span class="font-semibold text-gray-800">কাস্টম ডিজাইন</span><p class="text-sm text-gray-500">আপনার ব্র্যান্ডের সাথে মানানসই ইউনিক লেআউট।</p></div>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="w-6 h-6 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">২</span>
+              <div><span class="font-semibold text-gray-800">মোবাইল-ফার্স্ট ও রেস্পন্সিভ</span><p class="text-sm text-gray-500">সব ডিভাইসে নিখুঁতভাবে কাজ করে।</p></div>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="w-6 h-6 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">৩</span>
+              <div><span class="font-semibold text-gray-800">এসইও ও পারফরম্যান্স</span><p class="text-sm text-gray-500">সার্চ ইঞ্জিনের জন্য অপটিমাইজড এবং দ্রুত লোড।</p></div>
+            </li>
+          </ul>
+          <div class="mt-6 pt-6 border-t border-gray-200/50">
+            <span class="text-sm text-gray-500">শুরু মূল্য</span>
+            <span class="text-2xl font-bold text-gray-900">$৬০</span>
+            <span class="text-sm text-gray-500"> · ২–৩ সপ্তাহ ডেলিভারি</span>
+          </div>
+        </div>
+        <!-- সার্ভিস ২ -->
+        <div class="glass-card rounded-2xl p-8 lg:p-10 reveal reveal-delay-2">
+          <div class="flex items-start gap-5">
+            <div class="w-14 h-14 rounded-2xl bg-orange-500 flex items-center justify-center text-white text-2xl shadow-lg shadow-orange-500/20 flex-shrink-0">
+              <i class="fas fa-tools"></i>
+            </div>
+            <div>
+              <span class="inline-block text-xs font-semibold uppercase tracking-wider text-orange-600 bg-orange-50 px-3 py-1 rounded-full border border-orange-100">সার্ভিস</span>
+              <h3 class="text-2xl font-bold text-gray-800 mt-2">ট্রাবলশুটিং ও মেইনটেন্যান্স</h3>
+            </div>
+          </div>
+          <p class="text-gray-500 mt-4 leading-relaxed">
+            <strong class="text-gray-800">ধীর, ভাঙা বা পুরনো সাইট</strong> আছে? আমরা মূল কারণ খুঁজে বের করি, বাগ ফিক্স করি, পারফরম্যান্স অপটিমাইজ করি এবং সাইটকে সেরা অবস্থায় রাখতে চলমান রক্ষণাবেক্ষণ দিই।
+          </p>
+          <ul class="mt-6 space-y-3">
+            <li class="flex items-start gap-3">
+              <span class="w-6 h-6 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">১</span>
+              <div><span class="font-semibold text-gray-800">বাগ ফিক্স ও ত্রুটি সমাধান</span><p class="text-sm text-gray-500">৪০৪, লেআউট ভাঙা, স্ক্রিপ্ট এরর দূর করা।</p></div>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="w-6 h-6 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">২</span>
+              <div><span class="font-semibold text-gray-800">গতি অপটিমাইজেশন</span><p class="text-sm text-gray-500">ছবি কম্প্রেস, কোড মিনিফাই, লোড টাইম উন্নত করা।</p></div>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="w-6 h-6 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">৩</span>
+              <div><span class="font-semibold text-gray-800">চলমান মেইনটেন্যান্স</span><p class="text-sm text-gray-500">নিয়মিত আপডেট, ব্যাকআপ ও নিরাপত্তা চেক।</p></div>
+            </li>
+          </ul>
+          <div class="mt-6 pt-6 border-t border-gray-200/50">
+            <span class="text-sm text-gray-500">শুরু মূল্য</span>
+            <span class="text-2xl font-bold text-gray-900">$৫</span>
+            <span class="text-sm text-gray-500"> · প্রতি প্রজেক্ট / রিটেইনার</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+  SKILLS (টেক স্ট্যাক)
+  ============================================================ -->
+  <section id="skills" class="py-20 px-6 sm:px-8 lg:px-12">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center max-w-3xl mx-auto mb-16 reveal">
+        <span class="text-blue-600 text-sm font-semibold uppercase tracking-wider bg-blue-50 px-4 py-1.5 rounded-full border border-blue-100">দক্ষতা</span>
+        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-4">টেকনোলজি ও টুলস</h2>
+        <div class="w-12 h-1 gradient-bg rounded-full mx-auto mt-4"></div>
+        <p class="text-gray-500 mt-4 max-w-2xl mx-auto">ফ্রন্টএন্ড থেকে ব্যাকএন্ড পর্যন্ত আধুনিক টুলসে দক্ষতা।</p>
+      </div>
+      <div class="grid md:grid-cols-2 gap-6 lg:gap-8">
+        <!-- ফ্রন্টএন্ড -->
+        <div class="glass-card rounded-2xl p-6 lg:p-8 reveal reveal-delay-1">
+          <div class="flex items-center gap-3 mb-5">
+            <div class="w-10 h-10 rounded-full gradient-bg flex items-center justify-center text-white text-sm shadow-md shadow-blue-500/20">
+              <i class="fas fa-laptop"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800">ফ্রন্টএন্ড</h3>
+          </div>
+          <div class="space-y-4">
+            <div><div class="flex justify-between text-sm"><span class="font-medium text-gray-700">React / Next.js</span><span class="text-gray-500">৯৫%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" style="--fill-width:95%; width:95%;"></div></div></div>
+            <div><div class="flex justify-between text-sm"><span class="font-medium text-gray-700">Vue.js / Nuxt</span><span class="text-gray-500">৮৫%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" style="--fill-width:85%; width:85%;"></div></div></div>
+            <div><div class="flex justify-between text-sm"><span class="font-medium text-gray-700">Tailwind / SCSS</span><span class="text-gray-500">৯০%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" style="--fill-width:90%; width:90%;"></div></div></div>
+            <div><div class="flex justify-between text-sm"><span class="font-medium text-gray-700">TypeScript / JS</span><span class="text-gray-500">৯২%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" style="--fill-width:92%; width:92%;"></div></div></div>
+          </div>
+        </div>
+        <!-- ব্যাকএন্ড ও সিএমএস -->
+        <div class="glass-card rounded-2xl p-6 lg:p-8 reveal reveal-delay-2">
+          <div class="flex items-center gap-3 mb-5">
+            <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center text-white text-sm shadow-md shadow-orange-500/20">
+              <i class="fas fa-server"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800">ব্যাকএন্ড ও সিএমএস</h3>
+          </div>
+          <div class="space-y-4">
+            <div><div class="flex justify-between text-sm"><span class="font-medium text-gray-700">WordPress / WooCommerce</span><span class="text-gray-500">৯০%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" style="--fill-width:90%; width:90%;"></div></div></div>
+            <div><div class="flex justify-between text-sm"><span class="font-medium text-gray-700">Node.js / Express</span><span class="text-gray-500">৮৫%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" style="--fill-width:85%; width:85%;"></div></div></div>
+            <div><div class="flex justify-between text-sm"><span class="font-medium text-gray-700">Python / Django</span><span class="text-gray-500">৭৫%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" style="--fill-width:75%; width:75%;"></div></div></div>
+            <div><div class="flex justify-between text-sm"><span class="font-medium text-gray-700">MySQL / PostgreSQL</span><span class="text-gray-500">৮০%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" style="--fill-width:80%; width:80%;"></div></div></div>
+          </div>
+        </div>
+        <!-- ডেভঅপস ও ক্লাউড -->
+        <div class="glass-card rounded-2xl p-6 lg:p-8 reveal reveal-delay-3">
+          <div class="flex items-center gap-3 mb-5">
+            <div class="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white text-sm shadow-md shadow-emerald-500/20">
+              <i class="fas fa-cloud"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800">ডেভঅপস ও ক্লাউড</h3>
+          </div>
+          <div class="space-y-4">
+            <div><div class="flex justify-between text-sm"><span class="font-medium text-gray-700">AWS / EC2 / S3</span><span class="text-gray-500">৮০%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" style="--fill-width:80%; width:80%;"></div></div></div>
+            <div><div class="flex justify-between text-sm"><span class="font-medium text-gray-700">Docker / Container</span><span class="text-gray-500">৭০%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" style="--fill-width:70%; width:70%;"></div></div></div>
+            <div><div class="flex justify-between text-sm"><span class="font-medium text-gray-700">Git / CI/CD</span><span class="text-gray-500">৮৫%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" style="--fill-width:85%; width:85%;"></div></div></div>
+            <div><div class="flex justify-between text-sm"><span class="font-medium text-gray-700">Linux / Nginx</span><span class="text-gray-500">৭৫%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" style="--fill-width:75%; width:75%;"></div></div></div>
+          </div>
+        </div>
+        <!-- ডিজাইন ও টুলস -->
+        <div class="glass-card rounded-2xl p-6 lg:p-8 reveal reveal-delay-4">
+          <div class="flex items-center gap-3 mb-5">
+            <div class="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center text-white text-sm shadow-md shadow-purple-500/20">
+              <i class="fas fa-paint-brush"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-800">ডিজাইন ও টুলস</h3>
+          </div>
+          <div class="space-y-4">
+            <div><div class="flex justify-between text-sm"><span class="font-medium text-gray-700">Figma / Adobe XD</span><span class="text-gray-500">৮৫%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" style="--fill-width:85%; width:85%;"></div></div></div>
+            <div><div class="flex justify-between text-sm"><span class="font-medium text-gray-700">Photoshop / Illustrator</span><span class="text-gray-500">৭০%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" style="--fill-width:70%; width:70%;"></div></div></div>
+            <div><div class="flex justify-between text-sm"><span class="font-medium text-gray-700">Web Analytics / SEO</span><span class="text-gray-500">৮০%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" style="--fill-width:80%; width:80%;"></div></div></div>
+            <div><div class="flex justify-between text-sm"><span class="font-medium text-gray-700">Performance (Lighthouse)</span><span class="text-gray-500">৮৮%</span></div><div class="skill-bar-track"><div class="skill-bar-fill" style="--fill-width:88%; width:88%;"></div></div></div>
+          </div>
+        </div>
+      </div>
+      <!-- এক্সট্রা ট্যাগ -->
+      <div class="mt-10 flex flex-wrap justify-center gap-2 reveal">
+        <span class="tech-pill"><i class="fas fa-check text-emerald-500"></i> REST APIs</span>
+        <span class="tech-pill"><i class="fas fa-check text-emerald-500"></i> GraphQL</span>
+        <span class="tech-pill"><i class="fas fa-check text-emerald-500"></i> Webpack</span>
+        <span class="tech-pill"><i class="fas fa-check text-emerald-500"></i> Vite</span>
+        <span class="tech-pill"><i class="fas fa-check text-emerald-500"></i> Firebase</span>
+        <span class="tech-pill"><i class="fas fa-check text-emerald-500"></i> Stripe</span>
+        <span class="tech-pill"><i class="fas fa-check text-emerald-500"></i> OAuth</span>
+        <span class="tech-pill"><i class="fas fa-check text-emerald-500"></i> JWT</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+  PROCESS
+  ============================================================ -->
+  <section id="process" class="py-20 px-6 sm:px-8 lg:px-12 bg-white/50 backdrop-blur-sm border-t border-b border-gray-200/30">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center max-w-3xl mx-auto mb-16 reveal">
+        <span class="text-blue-600 text-sm font-semibold uppercase tracking-wider bg-blue-50 px-4 py-1.5 rounded-full border border-blue-100">আমাদের প্রক্রিয়া</span>
+        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-4">কীভাবে আমরা আইডিয়াকে বাস্তব করি</h2>
+        <div class="w-12 h-1 gradient-bg rounded-full mx-auto mt-4"></div>
+      </div>
+      <div class="grid md:grid-cols-4 gap-6 lg:gap-8">
+        <div class="glass-card rounded-2xl p-6 text-center reveal reveal-delay-1">
+          <div class="step-number mx-auto mb-4">১</div>
+          <h4 class="font-bold text-gray-800">বুঝে নেওয়া</h4>
+          <p class="text-sm text-gray-500 mt-2">আমরা আপনার লক্ষ্য, দর্শক ও প্রয়োজনীয়তা নিয়ে আলোচনা করি।</p>
+        </div>
+        <div class="glass-card rounded-2xl p-6 text-center reveal reveal-delay-2">
+          <div class="step-number mx-auto mb-4">২</div>
+          <h4 class="font-bold text-gray-800">ডিজাইন</h4>
+          <p class="text-sm text-gray-500 mt-2">ওয়্যারফ্রেম ও হাই-ফাই মকআপ তৈরি করি যা আপনার ব্র্যান্ডের সাথে মানানসই।</p>
+        </div>
+        <div class="glass-card rounded-2xl p-6 text-center reveal reveal-delay-3">
+          <div class="step-number mx-auto mb-4">৩</div>
+          <h4 class="font-bold text-gray-800">ডেভেলপ</h4>
+          <p class="text-sm text-gray-500 mt-2">পরিষ্কার, মডুলার কোড লিখি যা দ্রুত, রেস্পন্সিভ এবং নিরাপদ।</p>
+        </div>
+        <div class="glass-card rounded-2xl p-6 text-center reveal reveal-delay-4">
+          <div class="step-number mx-auto mb-4">৪</div>
+          <h4 class="font-bold text-gray-800">ডিপ্লয় ও সাপোর্ট</h4>
+          <p class="text-sm text-gray-500 mt-2">লঞ্চের পর পারফরম্যান্স ঠিক রাখতে চলমান মেইনটেন্যান্স দিই।</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+  TESTIMONIALS
+  ============================================================ -->
+  <section id="testimonials" class="py-20 px-6 sm:px-8 lg:px-12">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center max-w-3xl mx-auto mb-16 reveal">
+        <span class="text-blue-600 text-sm font-semibold uppercase tracking-wider bg-blue-50 px-4 py-1.5 rounded-full border border-blue-100">ক্লায়েন্ট পর্যালোচনা</span>
+        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-4">আমাদের ক্লায়েন্টরা যা বলেন</h2>
+        <div class="w-12 h-1 gradient-bg rounded-full mx-auto mt-4"></div>
+      </div>
+      <div class="grid md:grid-cols-3 gap-6 lg:gap-8">
+        <div class="glass-card rounded-2xl p-6 reveal reveal-delay-1">
+          <div class="flex text-yellow-400 mb-3"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+          <p class="text-gray-600 text-sm leading-relaxed">"Shovon আমাদের ওয়েবসাইট পুরোপুরি বদলে দিয়েছে। এখন সাইট দ্রুত এবং আমাদের বিক্রি অনেক বেড়েছে!"</p>
+          <div class="mt-4 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">রআ</div>
+            <div><p class="font-semibold text-gray-800 text-sm">রহিম আহমেদ</p></div>
+          </div>
+        </div>
+        <div class="glass-card rounded-2xl p-6 reveal reveal-delay-2">
+          <div class="flex text-yellow-400 mb-3"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+          <p class="text-gray-600 text-sm leading-relaxed">"সাইট ধীর ও বাগি ছিল। Shovon খুব দ্রুত সব ঠিক করে দিয়েছে। অসাধারণ কাজ!"</p>
+          <div class="mt-4 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-sm">সআ</div>
+            <div><p class="font-semibold text-gray-800 text-sm">সুমাইয়া আক্তার</p></div>
+          </div>
+        </div>
+        <div class="glass-card rounded-2xl p-6 reveal reveal-delay-3">
+          <div class="flex text-yellow-400 mb-3"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+          <p class="text-gray-600 text-sm leading-relaxed">"পেশাদার, দ্রুত এবং অত্যন্ত জ্ঞানী। Shovon আমার প্রথম পছন্দের ডেভেলপার।"</p>
+          <div class="mt-4 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold text-sm">মহ</div>
+            <div><p class="font-semibold text-gray-800 text-sm">মোহাম্মদ হোসেন</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+  CTA
+  ============================================================ -->
+  <section class="py-16 px-6 sm:px-8 lg:px-12 bg-gradient-to-r from-blue-50 to-indigo-50/50 border-t border-b border-gray-200/30">
+    <div class="max-w-4xl mx-auto text-center reveal">
+      <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">নতুন সাইট বানাবেন নাকি ফিক্স করাবেন?</h2>
+      <p class="text-gray-500 mt-3 max-w-2xl mx-auto">আপনার প্রজেক্ট নিয়ে আলোচনা করতে আজই যোগাযোগ করুন।</p>
+      <div class="mt-8 flex flex-wrap justify-center gap-4">
+        <a href="#contact" class="btn-primary"><i class="fas fa-paper-plane"></i> প্রজেক্ট শুরু করুন</a>
+        <a href="#contact" class="btn-outline"><i class="fas fa-wrench"></i> কোট পান</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+  CONTACT (Formspree)
+  ============================================================ -->
+  <section id="contact" class="py-20 px-6 sm:px-8 lg:px-12">
+    <div class="max-w-4xl mx-auto">
+      <div class="text-center max-w-3xl mx-auto mb-16 reveal">
+        <span class="text-blue-600 text-sm font-semibold uppercase tracking-wider bg-blue-50 px-4 py-1.5 rounded-full border border-blue-100">যোগাযোগ</span>
+        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mt-4">আমাদের সাথে কথা বলুন</h2>
+        <div class="w-12 h-1 gradient-bg rounded-full mx-auto mt-4"></div>
+        <p class="text-gray-500 mt-4">আপনার কী প্রয়োজন — জানান, আমরা ২৪ ঘণ্টার মধ্যে উত্তর দেব।</p>
+      </div>
+
+      <div class="glass rounded-2xl shadow-xl p-8 md:p-12 reveal">
+        <form id="contact-form" action="https://formspree.io/f/meeyglav" method="POST" class="space-y-6">
+          <input type="hidden" name="_subject" value="SWD স্টোর থেকে নতুন বার্তা" />
+
+          <div class="grid sm:grid-cols-2 gap-5">
+            <div>
+              <label for="name" class="block text-sm font-semibold text-gray-700 mb-1.5">আপনার নাম <span class="text-red-500">*</span></label>
+              <input type="text" id="name" name="name" placeholder="জন দো" required class="form-input" />
+            </div>
+            <div>
+              <label for="email" class="block text-sm font-semibold text-gray-700 mb-1.5">ইমেইল <span class="text-red-500">*</span></label>
+              <input type="email" id="email" name="email" placeholder="john@example.com" required class="form-input" />
+            </div>
+          </div>
+
+          <div>
+            <label for="need" class="block text-sm font-semibold text-gray-700 mb-1.5">আপনার কী দরকার? <span class="text-red-500">*</span></label>
+            <select id="need" name="need" required class="form-input appearance-none">
+              <option value="" disabled selected>একটি অপশন নির্বাচন করুন</option>
+              <option value="New Website">🚀 নতুন ওয়েবসাইট — সম্পূর্ণ নতুন সাইট চাই</option>
+              <option value="Fix Existing Site">🔧 বিদ্যমান সাইট ফিক্স — সাইট ভাঙা/ধীর</option>
+              <option value="Both">⚡ উভয় — নতুন সাইট ও পুরাতন সাইটের সাহায্য</option>
+              <option value="Other">💬 অন্যান্য — ভিন্ন অনুরোধ</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="message" class="block text-sm font-semibold text-gray-700 mb-1.5">প্রজেক্ট সম্পর্কে বিস্তারিত <span class="text-red-500">*</span></label>
+            <textarea id="message" name="message" rows="5" placeholder="আপনার লক্ষ্য, বর্তমান সমস্যা বা কী খুঁজছেন তা লিখুন..." required class="form-input resize-y"></textarea>
+          </div>
+
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
+            <button type="submit" id="submit-btn" class="btn-primary w-full sm:w-auto justify-center">
+              <i class="fas fa-paper-plane"></i> বার্তা পাঠান
+            </button>
+            <p class="text-xs text-gray-500 text-center sm:text-left"><i class="fas fa-lock text-gray-400 mr-1"></i> আপনার তথ্য নিরাপদ।</p>
+          </div>
+
+          <div id="form-feedback" class="hidden text-sm font-medium p-4 rounded-xl"></div>
+        </form>
+      </div>
+
+      <div class="mt-12 grid sm:grid-cols-3 gap-6 text-center text-sm reveal">
+        <div class="glass-card"><i class="fas fa-envelope text-blue-500 text-xl mb-2 block"></i><span class="font-medium text-gray-800">shovonsmind337@gmail.com</span></div>
+        <div class="glass-card"><i class="fas fa-phone-alt text-blue-500 text-xl mb-2 block"></i><span class="font-medium text-gray-800">+৮৮০ ১৩৫০-১৪১৭৬২</span></div>
+        <div class="glass-card"><i class="fas fa-clock text-blue-500 text-xl mb-2 block"></i><span class="font-medium text-gray-800">রবি–শুক্র, ২৪ ঘণ্টা</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+  FOOTER
+  ============================================================ -->
+  <footer class="glass border-t border-gray-200/30 py-8 px-6 sm:px-8 lg:px-12">
+    <div class="max-w-7xl mx-auto flex flex-col items-center gap-4 text-sm text-gray-500">
+      <div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+        <a href="mailto:shovonsmind337@gmail.com" class="hover:text-blue-500 transition-colors"><i class="fas fa-envelope mr-1"></i> shovonsmind337@gmail.com</a>
+        <a href="tel:+8801350141762" class="hover:text-blue-500 transition-colors"><i class="fas fa-phone-alt mr-1"></i> +৮৮০ ১৩৫০-১৪১৭৬২</a>
+        <a href="https://nopqrshov.github.io/portfolio/" target="_blank" class="hover:text-blue-500 transition-colors font-medium"><i class="fas fa-briefcase mr-1"></i> পোর্টফোলিও</a>
+      </div>
+      <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 w-full">
+        <span class="font-medium text-gray-700">২০২৬ SWD স্টোর · সকল অধিকার সংরক্ষিত</span>
+        <div class="flex items-center gap-3">
+          <a href="https://github.com/shovon337" target="_blank" class="social-icon" aria-label="GitHub"><i class="fab fa-github"></i></a>
+          <a href="https://www.linkedin.com/in/shovon-s-mind-67aa4b260/" target="_blank" class="social-icon" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+  JAVASCRIPT
+  ============================================================ -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+
+      // ---- মোবাইল মেনু ----
+      const menuToggle = document.getElementById('menu-toggle');
+      const mobileMenu = document.getElementById('mobile-menu');
+      if (menuToggle && mobileMenu) {
+        menuToggle.addEventListener('click', function() {
+          const isOpen = mobileMenu.classList.contains('open');
+          if (isOpen) {
+            mobileMenu.classList.remove('open');
+            menuToggle.classList.remove('active');
+          } else {
+            mobileMenu.classList.add('open');
+            menuToggle.classList.add('active');
+          }
+        });
+        mobileMenu.querySelectorAll('a').forEach(function(link) {
+          link.addEventListener('click', function() {
+            mobileMenu.classList.remove('open');
+            menuToggle.classList.remove('active');
+          });
+        });
       }
-    };
+
+      // ---- স্মুথ স্ক্রল ----
+      document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
+        anchor.addEventListener('click', function(e) {
+          const targetId = this.getAttribute('href');
+          if (targetId === '#') return;
+          const targetEl = document.querySelector(targetId);
+          if (targetEl) {
+            e.preventDefault();
+            const offset = 80;
+            const top = targetEl.getBoundingClientRect().top + window.pageYOffset - offset;
+            window.scrollTo({ top: top, behavior: 'smooth' });
+          }
+        });
+      });
+
+      // ---- নেভবার স্ক্রল শ্যাডো ----
+      const nav = document.querySelector('nav');
+      window.addEventListener('scroll', function() {
+        nav.classList.toggle('scrolled', window.scrollY > 10);
+      });
+      window.dispatchEvent(new Event('scroll'));
+
+      // ---- স্ক্রল রিভিল ----
+      const revealElements = document.querySelectorAll('.reveal');
+      const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) entry.target.classList.add('visible');
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -20px 0px' });
+      revealElements.forEach(el => revealObserver.observe(el));
+
+      // ---- ফর্ম (Formspree) ----
+      const form = document.getElementById('contact-form');
+      const feedback = document.getElementById('form-feedback');
+      const submitBtn = document.getElementById('submit-btn');
+      const FORMSPREE_ENDPOINT = 'https://formspree.io/f/meeyglav';
+
+      if (form && feedback) {
+        form.addEventListener('submit', async function(e) {
+          e.preventDefault();
+
+          const name = document.getElementById('name').value.trim();
+          const email = document.getElementById('email').value.trim();
+          const need = document.getElementById('need').value;
+          const message = document.getElementById('message').value.trim();
+
+          if (!name || !email || !need || !message) {
+            feedback.className = 'block text-sm font-medium p-4 rounded-xl bg-red-50 text-red-600 border border-red-200';
+            feedback.textContent = '⚠️ দয়া করে সব প্রয়োজনীয় ঘর পূরণ করুন।';
+            feedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+          }
+
+          const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailPattern.test(email)) {
+            feedback.className = 'block text-sm font-medium p-4 rounded-xl bg-red-50 text-red-600 border border-red-200';
+            feedback.textContent = '⚠️ সঠিক ইমেইল ঠিকানা দিন।';
+            feedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+          }
+
+          feedback.className = 'block text-sm font-medium p-4 rounded-xl bg-blue-50 text-blue-600 border border-blue-200';
+          feedback.textContent = '⏳ বার্তা পাঠানো হচ্ছে...';
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> পাঠানো হচ্ছে...';
+          feedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+          try {
+            const formData = new FormData(form);
+            const response = await fetch(FORMSPREE_ENDPOINT, {
+              method: 'POST',
+              body: formData,
+              headers: { 'Accept': 'application/json' }
+            });
+
+            if (response.ok) {
+              feedback.className = 'block text-sm font-medium p-4 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200';
+              feedback.textContent = '✅ ধন্যবাদ ' + name + '! আপনার বার্তা পাঠানো হয়েছে। আমি ২৪ ঘণ্টার মধ্যে যোগাযোগ করব।';
+              form.reset();
+              feedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              setTimeout(() => { feedback.className = 'hidden'; }, 10000);
+            } else {
+              const errorData = await response.json();
+              throw new Error(errorData.error || 'ফর্ম জমা দিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+            }
+          } catch (error) {
+            feedback.className = 'block text-sm font-medium p-4 rounded-xl bg-red-50 text-red-600 border border-red-200';
+            feedback.textContent = '⚠️ দুঃখিত! কিছু ভুল হয়েছে। পরে আবার চেষ্টা করুন বা সরাসরি shovonsmind337@gmail.com এ ইমেইল করুন।';
+            feedback.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            console.error('Formspree Error:', error);
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> বার্তা পাঠান';
+          }
+        });
+      }
+    });
   </script>
+
 </body>
 </html>
