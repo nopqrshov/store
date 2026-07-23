@@ -359,7 +359,7 @@
         }
         showToast('✅ Signed in with ' + provider, 'success');
         closeAuthModal();
-        // পেজ রিফ্রেশ না করেই চ্যাট শুরু হবে
+        // চ্যাট শুরু
         const currentUser = auth.currentUser;
         if (currentUser) {
           initializeChat(currentUser);
@@ -400,7 +400,6 @@
         }
         closeAuthModal();
         authForm.reset();
-        // চ্যাট শুরু
         initializeChat(userCred.user);
       } catch (error) {
         errorDiv.textContent = error.message;
@@ -418,7 +417,7 @@
     };
 
     // ================================================================
-    // ===== চ্যাট লজিক (ইনডেক্স-ফ্রি) =====
+    // ===== চ্যাট লজিক (ইনডেক্স-ফ্রি, শুধু conversationId) =====
     // ================================================================
 
     const chatMessages = document.getElementById('chatMessages');
@@ -429,10 +428,10 @@
     let currentUser = null;
     let conversationId = null;
     let unsubMessages = null;
-    let typingTimeout = null;
     let unsubTyping = null;
+    let typingTimeout = null;
 
-    // ইমোজি ইনসার্ট
+    // ইমোজি
     window.insertEmoji = (emoji) => {
       chatInput.value += emoji;
       chatInput.focus();
@@ -480,13 +479,13 @@
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    // মেসেজ লিসেনার (শুধু conversationId দিয়ে)
+    // মেসেজ লিসেনার (শুধু conversationId)
     function listenMessages(user) {
       if (unsubMessages) unsubMessages();
       if (unsubTyping) unsubTyping();
 
       const q = query(
-        collection(db, 'messages'), 
+        collection(db, 'messages'),
         where('conversationId', '==', conversationId)
       );
 
@@ -504,7 +503,7 @@
 
         renderMessages(msgs);
 
-        // অ্যাডমিনের পাঠানো আনরিড মেসেজ রিড মার্ক করুন
+        // অ্যাডমিনের পাঠানো মেসেজ রিড মার্ক করুন
         const unreadAdminMsgs = msgs.filter(m => 
           m.fromUserId === 'admin' && !m.read
         );
@@ -522,11 +521,10 @@
         }
       }, (error) => {
         console.error('Snapshot error:', error);
-        // এখানে conversationId কোয়েরি কোনো ইনডেক্স চায় না
         showToast('⚠️ Error loading messages: ' + error.message, 'error');
       });
 
-      // টাইপিং ইন্ডিকেটর (অ্যাডমিন টাইপ করলে দেখাবে)
+      // অ্যাডমিন টাইপিং ইন্ডিকেটর
       const typingRef = doc(db, 'typing', conversationId);
       unsubTyping = onSnapshot(typingRef, (docSnap) => {
         if (docSnap.exists() && docSnap.data().adminTyping) {
@@ -583,7 +581,7 @@
           content: content,
           timestamp: serverTimestamp(),
           read: false
-          // ⚠️ participants ফিল্ড নেই – কারণ আমরা conversationId দিয়ে কোয়েরি করি
+          // ⚠️ participants ফিল্ড নেই – যাতে কোনো ইনডেক্সের প্রয়োজন না হয়
         });
 
         chatInput.value = '';
@@ -608,7 +606,7 @@
       conversationId = `conv_${user.uid}_admin`;
       
       // ইউজারের নাম আপডেট
-      const userDoc = getDoc(doc(db, 'users', user.uid)).then(doc => {
+      getDoc(doc(db, 'users', user.uid)).then(doc => {
         if (doc.exists()) {
           const data = doc.data();
           updateNavbarAuth(user, data.displayName || user.email.split('@')[0]);
@@ -622,11 +620,7 @@
     // ===== অথ স্টেট =====
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        // ইউজার না থাকলে লগইন পেজে রিডাইরেক্ট না করে মডাল দেখান
-        // কিন্তু আমরা চাইলে রিডাইরেক্ট করতে পারি
-        // window.location.href = 'index.html';
-        // return;
-        // বরং মডাল দেখাই
+        // ইউজার না থাকলে মডাল দেখান
         setTimeout(() => {
           openAuthModal('signin');
         }, 500);
@@ -647,7 +641,7 @@
       if (unsubTyping) unsubTyping();
     });
 
-    console.log('💬 Support Chat (Fixed) loaded successfully!');
+    console.log('💬 Support Chat (User Side) – Fully compatible with Admin Panel');
   </script>
 </body>
 </html>
