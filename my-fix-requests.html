@@ -239,7 +239,7 @@
       renderCartSidebar, setLoading, renderPaymentModal
     } from './components.js';
     import { 
-      auth, db, collection, doc, getDoc, setDoc, addDoc, onSnapshot, 
+      auth, db, collection, doc, getDoc, setDoc, addDoc, getDocs,
       query, where, serverTimestamp, signOut, onAuthStateChanged,
       signInWithEmailAndPassword, createUserWithEmailAndPassword, updateDoc,
       signInWithPopup, googleProvider, githubProvider
@@ -391,7 +391,7 @@
     };
 
     // ================================================================
-    // ===== রিকোয়েস্ট লজিক =====
+    // ===== ✅ ফিক্সড: রিকোয়েস্ট লজিক (getDocs + manual sorting) =====
     // ================================================================
 
     const requestList = document.getElementById('requestList');
@@ -403,7 +403,7 @@
     let allRequests = [];
     let filteredRequests = [];
     let currentUser = null;
-    let unsubRequests = null;
+    let isLoading = true;
 
     // ===== স্ট্যাট আপডেট =====
     function updateStats(requests) {
@@ -519,7 +519,7 @@
       updateStats(requests);
     }
 
-    // ===== ফিল্টার অ্যাপ্লাই (Debounced) =====
+    // ===== ফিল্টার অ্যাপ্লাই =====
     const applyFilters = () => {
       const search = searchInput.value.toLowerCase().trim();
       const status = statusFilter.value;
@@ -549,36 +549,72 @@
       applyFilters();
     };
 
-    // ===== রিকোয়েস্ট লোড =====
-    function loadRequests(userId) {
-      if (unsubRequests) unsubRequests();
+    // ===== ✅ ফিক্সড: রিকোয়েস্ট লোড (getDocs + manual sorting) =====
+    async function loadRequests(userId) {
+      if (!userId) {
+        console.warn('No userId provided');
+        requestList.innerHTML = `
+          <div class="text-center py-12 text-yellow-500">
+            <i class="fas fa-exclamation-triangle text-3xl"></i>
+            <p class="mt-2">Please sign in to view your fix requests.</p>
+          </div>
+        `;
+        return;
+      }
 
-      const q = query(
-        collection(db, 'fixRequests'),
-        where('userId', '==', userId),
-        orderBy('timestamp', 'desc')
-      );
+      // Skeleton দেখানো শুরু
+      isLoading = true;
+      requestList.innerHTML = `
+        <div class="skeleton-card fade-up"><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line"></div></div>
+        <div class="skeleton-card fade-up"><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line"></div></div>
+        <div class="skeleton-card fade-up"><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line"></div></div>
+      `;
 
-      unsubRequests = onSnapshot(q, (snapshot) => {
+      try {
+        // ✅ শুধু where ব্যবহার করছি, orderBy বাদ (Composite Index দরকার নেই)
+        const q = query(
+          collection(db, 'fixRequests'),
+          where('userId', '==', userId)
+        );
+
+        const snapshot = await getDocs(q);
+        
         allRequests = [];
         snapshot.forEach(doc => {
           allRequests.push({ id: doc.id, ...doc.data() });
         });
+
+        // ✅ Manual sorting (timestamp অনুযায়ী descending)
+        allRequests.sort((a, b) => {
+          const ta = a.timestamp?.toDate?.()?.getTime() || new Date(a.timestamp).getTime() || 0;
+          const tb = b.timestamp?.toDate?.()?.getTime() || new Date(b.timestamp).getTime() || 0;
+          return tb - ta;
+        });
+
+        isLoading = false;
         applyFilters();
-      }, (error) => {
-        console.error('Requests load error:', error);
+
+      } catch (error) {
+        console.error('🔥 Error loading fix requests:', error);
+        isLoading = false;
         requestList.innerHTML = `
           <div class="text-center py-12 text-red-500">
             <i class="fas fa-exclamation-circle text-3xl"></i>
-            <p class="mt-2">Error loading requests: ${error.message}</p>
+            <p class="mt-2">Error loading your fix requests</p>
+            <p class="text-sm text-gray-400">${error.message}</p>
             <button onclick="window.location.reload()" class="btn-primary mt-4 inline-block">
               <i class="fas fa-sync"></i> Retry
             </button>
           </div>
         `;
-        showToast('⚠️ Error loading requests: ' + error.message, 'error');
-      });
+        showToast('⚠️ Error loading fix requests: ' + error.message, 'error');
+      }
     }
+
+    // ===== ফিল্টার ইভেন্ট (Debounced) =====
+    searchInput.addEventListener('input', debouncedApplyFilters);
+    statusFilter.addEventListener('change', applyFilters);
+    priorityFilter.addEventListener('change', applyFilters);
 
     // ================================================================
     // ===== অথ স্টেট =====
@@ -595,13 +631,9 @@
       const displayName = userDoc.exists() ? userDoc.data().displayName : user.email.split('@')[0];
       updateNavbarAuth(user, displayName);
 
-      loadRequests(user.uid);
+      // ✅ Fix Requests লোড করুন
+      await loadRequests(user.uid);
     });
-
-    // ===== ফিল্টার ইভেন্ট (Debounced) =====
-    searchInput.addEventListener('input', debouncedApplyFilters);
-    statusFilter.addEventListener('change', applyFilters);
-    priorityFilter.addEventListener('change', applyFilters);
 
     console.log('🔧 My Fix Requests page loaded successfully!');
   </script>
